@@ -111,8 +111,7 @@ public class GlideImagesPlugin extends AbstractMarkwonPlugin {
         public void load(@NonNull AsyncDrawable drawable) {
             final Target<Drawable> target = new AsyncDrawableTarget(drawable);
             cache.put(drawable, target);
-            glideStore.load(drawable)
-                    .into(target);
+            glideStore.load(drawable).into(target);
         }
 
         @Override
@@ -149,8 +148,7 @@ public class GlideImagesPlugin extends AbstractMarkwonPlugin {
 
             @Override
             public void onLoadStarted(@Nullable Drawable placeholder) {
-                if (placeholder != null
-                        && drawable.isAttached()) {
+                if (placeholder != null && drawable.isAttached()) {
                     DrawableUtils.applyIntrinsicBoundsIfEmpty(placeholder);
                     drawable.setResult(placeholder);
                 }
@@ -159,8 +157,7 @@ public class GlideImagesPlugin extends AbstractMarkwonPlugin {
             @Override
             public void onLoadFailed(@Nullable Drawable errorDrawable) {
                 if (cache.remove(drawable) != null) {
-                    if (errorDrawable != null
-                            && drawable.isAttached()) {
+                    if (errorDrawable != null && drawable.isAttached()) {
                         DrawableUtils.applyIntrinsicBoundsIfEmpty(errorDrawable);
                         drawable.setResult(errorDrawable);
                     }
