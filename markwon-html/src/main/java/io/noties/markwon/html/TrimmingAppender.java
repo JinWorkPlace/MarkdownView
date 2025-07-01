@@ -1,15 +1,12 @@
 package io.noties.markwon.html;
 
-import androidx.annotation.NonNull;
-
 import static io.noties.markwon.html.AppendableUtils.appendQuietly;
+
+import androidx.annotation.NonNull;
 
 abstract class TrimmingAppender {
 
-    abstract <T extends Appendable & CharSequence> void append(
-            @NonNull T output,
-            @NonNull String data
-    );
+    abstract <T extends Appendable & CharSequence> void append(@NonNull T output, @NonNull String data);
 
     @NonNull
     static TrimmingAppender create() {
@@ -25,10 +22,7 @@ abstract class TrimmingAppender {
         //  - if present trim to single space
 
         @Override
-        <T extends Appendable & CharSequence> void append(
-                @NonNull T output,
-                @NonNull String data
-        ) {
+        <T extends Appendable & CharSequence> void append(@NonNull T output, @NonNull String data) {
 
             final int startLength = output.length();
 
@@ -48,8 +42,7 @@ abstract class TrimmingAppender {
                 if (previousIsWhiteSpace) {
                     // validate that output has ws as last char
                     final int outputLength = output.length();
-                    if (outputLength > 0
-                            && !Character.isWhitespace(output.charAt(outputLength - 1))) {
+                    if (outputLength > 0 && !Character.isWhitespace(output.charAt(outputLength - 1))) {
                         appendQuietly(output, ' ');
                     }
                 }

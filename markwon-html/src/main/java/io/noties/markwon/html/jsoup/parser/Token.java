@@ -330,7 +330,7 @@ public abstract class Token {
 
     public final static class EOF extends Token {
         EOF() {
-            super(Token.TokenType.EOF);
+            super(TokenType.EOF);
         }
 
         @Override
