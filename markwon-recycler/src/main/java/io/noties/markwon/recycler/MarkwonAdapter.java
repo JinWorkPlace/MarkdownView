@@ -45,10 +45,7 @@ public abstract class MarkwonAdapter extends RecyclerView.Adapter<MarkwonAdapter
      * @see Builder
      */
     @NonNull
-    public static Builder builder(
-            @LayoutRes int defaultEntryLayoutResId,
-            @IdRes int defaultEntryTextViewResId
-    ) {
+    public static Builder builder(@LayoutRes int defaultEntryLayoutResId, @IdRes int defaultEntryTextViewResId) {
         return builder(SimpleEntry.create(defaultEntryLayoutResId, defaultEntryTextViewResId));
     }
 
@@ -60,8 +57,7 @@ public abstract class MarkwonAdapter extends RecyclerView.Adapter<MarkwonAdapter
 
     @NonNull
     public static MarkwonAdapter createTextViewIsRoot(@LayoutRes int defaultEntryLayoutResId) {
-        return builderTextViewIsRoot(defaultEntryLayoutResId)
-                .build();
+        return builderTextViewIsRoot(defaultEntryLayoutResId).build();
     }
 
     /**
@@ -74,10 +70,7 @@ public abstract class MarkwonAdapter extends RecyclerView.Adapter<MarkwonAdapter
      * @see SimpleEntry
      */
     @NonNull
-    public static MarkwonAdapter create(
-            @LayoutRes int defaultEntryLayoutResId,
-            @IdRes int defaultEntryTextViewResId
-    ) {
+    public static MarkwonAdapter create(@LayoutRes int defaultEntryLayoutResId, @IdRes int defaultEntryTextViewResId) {
         return builder(defaultEntryLayoutResId, defaultEntryTextViewResId).build();
     }
 
@@ -113,9 +106,7 @@ public abstract class MarkwonAdapter extends RecyclerView.Adapter<MarkwonAdapter
          * @return self
          */
         @NonNull
-        <N extends Node> Builder include(
-                @NonNull Class<N> node,
-                @NonNull Entry<? super N, ? extends Holder> entry);
+        <N extends Node> Builder include(@NonNull Class<N> node, @NonNull Entry<? super N, ? extends Holder> entry);
 
         /**
          * Specify how root Node will be <em>reduced</em> to a list of nodes. There is a default
@@ -189,14 +180,12 @@ public abstract class MarkwonAdapter extends RecyclerView.Adapter<MarkwonAdapter
             final V v = itemView.findViewById(id);
             if (v == null) {
                 final String name;
-                if (id == 0
-                        || id == View.NO_ID) {
+                if (id == 0 || id == View.NO_ID) {
                     name = String.valueOf(id);
                 } else {
                     name = "R.id." + itemView.getResources().getResourceName(id);
                 }
-                throw new NullPointerException(String.format("No view with id(R.id.%s) is found " +
-                        "in layout: %s", name, itemView));
+                throw new NullPointerException(String.format("No view with id(R.id.%s) is found " + "in layout: %s", name, itemView));
             }
             return v;
         }

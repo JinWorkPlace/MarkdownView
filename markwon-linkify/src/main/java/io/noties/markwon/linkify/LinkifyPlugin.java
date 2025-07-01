@@ -24,11 +24,7 @@ import io.noties.markwon.core.CoreProps;
 
 public class LinkifyPlugin extends AbstractMarkwonPlugin {
 
-    @IntDef(flag = true, value = {
-            Linkify.EMAIL_ADDRESSES,
-            Linkify.PHONE_NUMBERS,
-            Linkify.WEB_URLS
-    })
+    @IntDef(flag = true, value = {Linkify.EMAIL_ADDRESSES, Linkify.PHONE_NUMBERS, Linkify.WEB_URLS})
     @Retention(RetentionPolicy.SOURCE)
     @interface LinkifyMask {
     }
@@ -116,20 +112,14 @@ public class LinkifyPlugin extends AbstractMarkwonPlugin {
             if (addLinks(builder, mask)) {
                 // target URL span specifically
                 final URLSpan[] spans = builder.getSpans(0, builder.length(), URLSpan.class);
-                if (spans != null
-                        && spans.length > 0) {
+                if (spans != null && spans.length > 0) {
 
                     final RenderProps renderProps = visitor.renderProps();
                     final SpannableBuilder spannableBuilder = visitor.builder();
 
                     for (URLSpan span : spans) {
                         CoreProps.LINK_DESTINATION.set(renderProps, span.getURL());
-                        SpannableBuilder.setSpans(
-                                spannableBuilder,
-                                spanFactory.getSpans(visitor.configuration(), renderProps),
-                                start + builder.getSpanStart(span),
-                                start + builder.getSpanEnd(span)
-                        );
+                        SpannableBuilder.setSpans(spannableBuilder, spanFactory.getSpans(visitor.configuration(), renderProps), start + builder.getSpanStart(span), start + builder.getSpanEnd(span));
                     }
                 }
             }

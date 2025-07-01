@@ -34,56 +34,24 @@ public class TaskListTest {
         // NB! different markers lead to different types of lists,
         //  that's why there are 2 new lines after each type
 
-        final TestSpan.Document document = TestSpan.document(
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, false), TestSpan.text("First")),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Second")),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Third")),
-                newLine(),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, false), TestSpan.text("First star")),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Second star")),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Third star")),
-                newLine(),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, false), TestSpan.text("First plus")),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Second plus")),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Third plus")),
-                newLine(),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Number with dot")),
-                newLine(),
-                newLine(),
-                TestSpan.span(SPAN, TestSpan.args(IS_DONE, false), TestSpan.text("Number"))
-        );
+        final TestSpan.Document document = TestSpan.document(TestSpan.span(SPAN, TestSpan.args(IS_DONE, false), TestSpan.text("First")), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Second")), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Third")), newLine(), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, false), TestSpan.text("First star")), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Second star")), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Third star")), newLine(), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, false), TestSpan.text("First plus")), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Second plus")), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Third plus")), newLine(), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, true), TestSpan.text("Number with dot")), newLine(), newLine(), TestSpan.span(SPAN, TestSpan.args(IS_DONE, false), TestSpan.text("Number")));
 
-        TestSpanMatcher.matches(
-                markwon().toMarkdown(read("task-lists.md")),
-                document
-        );
+        TestSpanMatcher.matches(markwon().toMarkdown(read("task-lists.md")), document);
     }
 
     @NonNull
     private static Markwon markwon() {
-        return Markwon.builder(RuntimeEnvironment.application)
-                .usePlugin(TaskListPlugin.create(RuntimeEnvironment.application))
-                .usePlugin(new AbstractMarkwonPlugin() {
+        return Markwon.builder(RuntimeEnvironment.application).usePlugin(TaskListPlugin.create(RuntimeEnvironment.application)).usePlugin(new AbstractMarkwonPlugin() {
+            @Override
+            public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
+                builder.setFactory(TaskListItem.class, new SpanFactory() {
                     @Override
-                    public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
-                        builder.setFactory(TaskListItem.class, new SpanFactory() {
-                            @Override
-                            public Object getSpans(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps props) {
-                                return TestSpan.span(SPAN, TestSpan.args(IS_DONE, TaskListProps.DONE.require(props)));
-                            }
-                        });
+                    public Object getSpans(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps props) {
+                        return TestSpan.span(SPAN, TestSpan.args(IS_DONE, TaskListProps.DONE.require(props)));
                     }
-                })
-                .build();
+                });
+            }
+        }).build();
     }
 
     @SuppressWarnings("SameParameterValue")
