@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "io.noties.markwon"
+    namespace = "io.noties.markwon.test"
     compileSdk = 36
 
     defaultConfig {
@@ -17,7 +17,8 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
     }
@@ -31,12 +32,5 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
-    api(libs.androidx.annotations)
-    api(libs.commonmark)
-
     testImplementation(libs.junit)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.mockito)
-    testImplementation(libs.commons.io)
-    testImplementation(project(":markwon-test-span"))
 }

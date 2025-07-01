@@ -17,6 +17,7 @@ local.properties
 /.idea/appInsightsSettings.xml
 /.idea/deploymentTargetSelector.xml
 /.idea/gradle.xml
+/.idea/compiler.xml
 /.idea/misc.xml
 /.idea/runConfigurations.xml
 /.idea/vcs.xml
