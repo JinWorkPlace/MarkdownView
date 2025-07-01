@@ -1,20 +1,44 @@
 package com.apps.markdown
 
-import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.view.LayoutInflater
+import androidx.core.widget.doAfterTextChanged
+import com.apps.markdown.base.BaseActivity
+import com.apps.markdown.databinding.ActivityMainBinding
+import io.noties.markwon.Markwon
 
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+class MainActivity : BaseActivity<ActivityMainBinding>() {
+    override fun inflateViewBinding(inflater: LayoutInflater): ActivityMainBinding {
+        return ActivityMainBinding.inflate(inflater)
+    }
+
+    override fun initView() {
+        val markDown = Markwon.create(this)
+        binding.edtInput.doAfterTextChanged { editable ->
+            val input = editable.toString()
+            val result = markDown.toMarkdown(input)
+            binding.tvResult.text = result
         }
+
+//        io.noties.markwon.Markwon.create(this).apply {
+//            val markdown = """
+//                # Hello World
+//                This is a **Markdown** example.
+//
+//                - Item 1
+//                - Item 2
+//                - Item 3
+//
+//                [Click here](https://www.example.com) to visit example.com.
+//            """.trimIndent()
+//            binding.tvResult.text = this.toMarkdown(markdown)
+//        }
+    }
+
+    override fun initData() {
+
+    }
+
+    override fun initListener() {
+
     }
 }
