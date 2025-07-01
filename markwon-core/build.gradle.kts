@@ -31,8 +31,12 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
-    testImplementation(libs.junit)
+    api(libs.androidx.annotations)
+    api(libs.commonmark)
 
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.mockito)
+    testImplementation(libs.commons.io)
+    testImplementation(project(":markwon-test-span"))
 }

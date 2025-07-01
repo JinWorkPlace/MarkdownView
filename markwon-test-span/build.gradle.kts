@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "io.noties.markwon.ext.latex"
+    namespace = "io.noties.markwon.test"
     compileSdk = 36
 
     defaultConfig {
@@ -32,12 +32,5 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
-    implementation(libs.jlatexmath.android)
-
-    api(project(":markwon-core"))
-    api(project(":markwon-inline-parser"))
-
     testImplementation(libs.junit)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.mockito)
 }
