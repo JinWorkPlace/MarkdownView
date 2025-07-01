@@ -1,5 +1,6 @@
 package io.noties.markwon.image.data;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class DataUri {
@@ -28,6 +29,7 @@ public class DataUri {
         return data;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DataUri{" + "contentType='" + contentType + '\'' + ", base64=" + base64 + ", data='" + data + '\'' + '}';
