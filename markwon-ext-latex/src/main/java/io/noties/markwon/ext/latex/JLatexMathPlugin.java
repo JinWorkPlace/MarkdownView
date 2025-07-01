@@ -97,7 +97,7 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
     }
 
     @NonNull
-    public static JLatexMathPlugin.Builder builder(@Px float textSize) {
+    public static Builder builder(@Px float textSize) {
         return new Builder(JLatexMathTheme.builder(textSize));
     }
 
@@ -105,7 +105,7 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
      * @since 4.3.0
      */
     @NonNull
-    public static JLatexMathPlugin.Builder builder(@Px float inlineTextSize, @Px float blockTextSize) {
+    public static Builder builder(@Px float inlineTextSize, @Px float blockTextSize) {
         return new Builder(JLatexMathTheme.builder(inlineTextSize, blockTextSize));
     }
 

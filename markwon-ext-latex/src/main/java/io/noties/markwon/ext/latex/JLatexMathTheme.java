@@ -25,12 +25,12 @@ public abstract class JLatexMathTheme {
     }
 
     @NonNull
-    public static JLatexMathTheme.Builder builder(@Px float textSize) {
-        return new JLatexMathTheme.Builder(textSize, 0F, 0F);
+    public static Builder builder(@Px float textSize) {
+        return new Builder(textSize, 0F, 0F);
     }
 
     @NonNull
-    public static JLatexMathTheme.Builder builder(@Px float inlineTextSize, @Px float blockTextSize) {
+    public static Builder builder(@Px float inlineTextSize, @Px float blockTextSize) {
         return new Builder(0F, inlineTextSize, blockTextSize);
     }
 
