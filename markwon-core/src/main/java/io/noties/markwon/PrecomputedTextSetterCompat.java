@@ -16,7 +16,7 @@ import java.util.concurrent.Executor;
  * Please note this class requires `androidx.core:core` artifact being explicitly added to your dependencies.
  * Please do not use with `markwon-recycler` as it will lead to bad item rendering (due to async nature)
  *
- * @see io.noties.markwon.Markwon.TextSetter
+ * @see Markwon.TextSetter
  * @since 4.1.0
  */
 public class PrecomputedTextSetterCompat implements Markwon.TextSetter {

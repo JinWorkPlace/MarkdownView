@@ -9,7 +9,5 @@ import androidx.annotation.Nullable;
 public interface SpanFactory {
 
     @Nullable
-    Object getSpans(
-            @NonNull MarkwonConfiguration configuration,
-            @NonNull RenderProps props);
+    Object getSpans(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps props);
 }
