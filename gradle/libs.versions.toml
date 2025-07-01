@@ -27,6 +27,7 @@ androidx-annotations = { group = "androidx.annotation", name = "annotation", ver
 
 jlatexmath-android = { group = "ru.noties", name = "jlatexmath-android", version = "0.2.0" }
 prism4j = { group = "io.noties", name = "prism4j", version = "2.0.0" }
+ixjava = { group = "com.github.akarnokd", name = "ixjava", version = "1.0.0" }
 
 commons-io = { group = "commons-io", name = "commons-io", version = "2.19.0" }
 
