@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import coil.Coil;
 import coil.ImageLoader;
-import coil.request.ImageRequest;
 import coil.request.Disposable;
+import coil.request.ImageRequest;
 import coil.target.Target;
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.MarkwonConfiguration;
@@ -48,9 +48,7 @@ public class CoilImagesPlugin extends AbstractMarkwonPlugin {
             @NonNull
             @Override
             public ImageRequest load(@NonNull AsyncDrawable drawable) {
-                return new ImageRequest.Builder(context)
-                        .data(drawable.getDestination())
-                        .build();
+                return new ImageRequest.Builder(context).data(drawable.getDestination()).build();
             }
 
             @Override
@@ -61,15 +59,12 @@ public class CoilImagesPlugin extends AbstractMarkwonPlugin {
     }
 
     @NonNull
-    public static CoilImagesPlugin create(@NonNull final Context context,
-                                          @NonNull final ImageLoader imageLoader) {
+    public static CoilImagesPlugin create(@NonNull final Context context, @NonNull final ImageLoader imageLoader) {
         return create(new CoilStore() {
             @NonNull
             @Override
             public ImageRequest load(@NonNull AsyncDrawable drawable) {
-                return new ImageRequest.Builder(context)
-                        .data(drawable.getDestination())
-                        .build();
+                return new ImageRequest.Builder(context).data(drawable.getDestination()).build();
             }
 
             @Override
@@ -80,8 +75,7 @@ public class CoilImagesPlugin extends AbstractMarkwonPlugin {
     }
 
     @NonNull
-    public static CoilImagesPlugin create(@NonNull final CoilStore coilStore,
-                                          @NonNull final ImageLoader imageLoader) {
+    public static CoilImagesPlugin create(@NonNull final CoilStore coilStore, @NonNull final ImageLoader imageLoader) {
         return new CoilImagesPlugin(coilStore, imageLoader);
     }
 
@@ -127,9 +121,7 @@ public class CoilImagesPlugin extends AbstractMarkwonPlugin {
         public void load(@NonNull AsyncDrawable drawable) {
             final AtomicBoolean loaded = new AtomicBoolean(false);
             final Target target = new AsyncDrawableTarget(drawable, loaded);
-            final ImageRequest request = coilStore.load(drawable).newBuilder()
-                    .target(target)
-                    .build();
+            final ImageRequest request = coilStore.load(drawable).newBuilder().target(target).build();
             // @since 4.5.1 execute can return result _before_ disposable is created,
             //  thus `execute` would finish before we put disposable in cache (and thus result is
             //  not delivered)
@@ -169,8 +161,7 @@ public class CoilImagesPlugin extends AbstractMarkwonPlugin {
             @Override
             public void onSuccess(@NonNull Drawable loadedDrawable) {
                 // @since 4.5.1 check finished flag (result can be delivered _before_ disposable is created)
-                if (cache.remove(drawable) != null
-                        || !loaded.get()) {
+                if (cache.remove(drawable) != null || !loaded.get()) {
                     // mark
                     loaded.set(true);
                     if (drawable.isAttached()) {
