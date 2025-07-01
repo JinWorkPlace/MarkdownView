@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Markdown View"
 include(":app")
+include(":markwon-core")
+include(":markwon-editor")
