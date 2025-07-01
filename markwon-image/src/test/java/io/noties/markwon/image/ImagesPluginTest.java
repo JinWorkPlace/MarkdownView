@@ -1,6 +1,7 @@
 package io.noties.markwon.image;
 
 import androidx.annotation.NonNull;
+
 import android.text.Spanned;
 import android.widget.TextView;
 
@@ -146,8 +147,7 @@ public class ImagesPluginTest {
 
         final ArgumentCaptor<SpanFactory> captor = ArgumentCaptor.forClass(SpanFactory.class);
 
-        verify(builder, times(1))
-                .setFactory(eq(Image.class), captor.capture());
+        verify(builder, times(1)).setFactory(eq(Image.class), captor.capture());
 
         assertNotNull(captor.getValue());
     }
@@ -160,8 +160,7 @@ public class ImagesPluginTest {
 
         plugin.beforeSetText(textView, mock(Spanned.class));
 
-        verify(textView, times(1))
-                .getTag(ArgumentMatchers.eq(R.id.markwon_drawables_scheduler_last_text_hashcode));
+        verify(textView, times(1)).getTag(ArgumentMatchers.eq(R.id.markwon_drawables_scheduler_last_text_hashcode));
     }
 
     @Test
@@ -173,8 +172,7 @@ public class ImagesPluginTest {
 
         plugin.afterSetText(textView);
 
-        verify(textView, times(1))
-                .getTag(eq(R.id.markwon_drawables_scheduler_last_text_hashcode));
+        verify(textView, times(1)).getTag(eq(R.id.markwon_drawables_scheduler_last_text_hashcode));
     }
 
     @Test
@@ -227,8 +225,7 @@ public class ImagesPluginTest {
 
         // placeholder provider
         {
-            final ImagesPlugin.PlaceholderProvider placeholderProvider =
-                    mock(ImagesPlugin.PlaceholderProvider.class);
+            final ImagesPlugin.PlaceholderProvider placeholderProvider = mock(ImagesPlugin.PlaceholderProvider.class);
             plugin.placeholderProvider(placeholderProvider);
             verify(builder, times(1)).placeholderProvider(eq(placeholderProvider));
         }

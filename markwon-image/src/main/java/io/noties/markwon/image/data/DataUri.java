@@ -30,11 +30,7 @@ public class DataUri {
 
     @Override
     public String toString() {
-        return "DataUri{" +
-                "contentType='" + contentType + '\'' +
-                ", base64=" + base64 +
-                ", data='" + data + '\'' +
-                '}';
+        return "DataUri{" + "contentType='" + contentType + '\'' + ", base64=" + base64 + ", data='" + data + '\'' + '}';
     }
 
     @Override
