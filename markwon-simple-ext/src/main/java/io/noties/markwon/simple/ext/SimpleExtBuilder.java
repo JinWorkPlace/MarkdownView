@@ -16,33 +16,18 @@ class SimpleExtBuilder {
 
     private boolean isBuilt;
 
-    void addExtension(
-            int length,
-            char character,
-            @NonNull SpanFactory spanFactory) {
+    void addExtension(int length, char character, @NonNull SpanFactory spanFactory) {
 
         checkState();
 
-        extensions.add(new SimpleExtDelimiterProcessor(
-                character,
-                character,
-                length,
-                spanFactory));
+        extensions.add(new SimpleExtDelimiterProcessor(character, character, length, spanFactory));
     }
 
-    void addExtension(
-            int length,
-            char openingCharacter,
-            char closingCharacter,
-            @NonNull SpanFactory spanFactory) {
+    void addExtension(int length, char openingCharacter, char closingCharacter, @NonNull SpanFactory spanFactory) {
 
         checkState();
 
-        extensions.add(new SimpleExtDelimiterProcessor(
-                openingCharacter,
-                closingCharacter,
-                length,
-                spanFactory));
+        extensions.add(new SimpleExtDelimiterProcessor(openingCharacter, closingCharacter, length, spanFactory));
     }
 
     @NonNull
@@ -57,8 +42,7 @@ class SimpleExtBuilder {
 
     private void checkState() {
         if (isBuilt) {
-            throw new IllegalStateException("SimpleExtBuilder is already built, " +
-                    "do not mutate SimpleExtPlugin after configuration is finished");
+            throw new IllegalStateException("SimpleExtBuilder is already built, " + "do not mutate SimpleExtPlugin after configuration is finished");
         }
     }
 }

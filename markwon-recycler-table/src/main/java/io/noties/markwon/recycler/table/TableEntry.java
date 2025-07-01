@@ -113,13 +113,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
 
     private final Map<TableBlock, Table> map = new HashMap<>(3);
 
-    TableEntry(
-            @LayoutRes int tableLayoutResId,
-            @IdRes int tableIdRes,
-            @LayoutRes int textLayoutResId,
-            @IdRes int textIdRes,
-            boolean isRecyclable,
-            boolean cellTextCenterVertical) {
+    TableEntry(@LayoutRes int tableLayoutResId, @IdRes int tableIdRes, @LayoutRes int textLayoutResId, @IdRes int textIdRes, boolean isRecyclable, boolean cellTextCenterVertical) {
         this.tableLayoutResId = tableLayoutResId;
         this.tableIdRes = tableIdRes;
         this.textLayoutResId = textLayoutResId;
@@ -131,10 +125,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
     @NonNull
     @Override
     public Holder createHolder(@NonNull LayoutInflater inflater, @NonNull ViewGroup parent) {
-        return new Holder(
-                isRecyclable,
-                tableIdRes,
-                inflater.inflate(tableLayoutResId, parent, false));
+        return new Holder(isRecyclable, tableIdRes, inflater.inflate(tableLayoutResId, parent, false));
     }
 
     @Override
@@ -150,8 +141,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
         // set tag of tableLayoutResId as it's 100% to be present (we still allow 0 as
         // tableIdRes if tableLayoutResId has TableLayout as root view)
         final TableLayout layout = holder.tableLayout;
-        if (table == null
-                || table == layout.getTag(tableLayoutResId)) {
+        if (table == null || table == layout.getTag(tableLayoutResId)) {
             return;
         }
 
@@ -160,8 +150,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
 
         final TableEntryPlugin plugin = markwon.getPlugin(TableEntryPlugin.class);
         if (plugin == null) {
-            throw new IllegalStateException("No TableEntryPlugin is found. Make sure that it " +
-                    "is _used_ whilst configuring Markwon instance");
+            throw new IllegalStateException("No TableEntryPlugin is found. Make sure that it " + "is _used_ whilst configuring Markwon instance");
         }
 
         // we must remove unwanted ones (rows and columns)
@@ -188,9 +177,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
         final int rowsSize = rows.size();
 
         // all rows should have equal number of columns
-        final int columnsSize = rowsSize > 0
-                ? rows.get(0).columns().size()
-                : 0;
+        final int columnsSize = rowsSize > 0 ? rows.get(0).columns().size() : 0;
 
         Table.Row row;
         Table.Column column;
@@ -231,8 +218,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
                 } else {
                     // just take first
                     final TextView textView = ensureTextView(layout, y, 0);
-                    tableRow.setBackgroundColor(
-                            theme.tableOddRowBackgroundColor(textView.getPaint()));
+                    tableRow.setBackgroundColor(theme.tableOddRowBackgroundColor(textView.getPaint()));
                 }
             }
         }
@@ -296,8 +282,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
                     if (textIdRes == 0) {
                         if (!(view instanceof TextView)) {
                             final String name = layout.getContext().getResources().getResourceName(textLayoutResId);
-                            throw new IllegalStateException(String.format("textLayoutResId(R.layout.%s) " +
-                                    "has other than TextView root view. Specify TextView ID explicitly", name));
+                            throw new IllegalStateException(String.format("textLayoutResId(R.layout.%s) " + "has other than TextView root view. Specify TextView ID explicitly", name));
                         }
                         textView = (TextView) view;
                     } else {
@@ -306,8 +291,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
                             final Resources r = layout.getContext().getResources();
                             final String layoutName = r.getResourceName(textLayoutResId);
                             final String idName = r.getResourceName(textIdRes);
-                            throw new NullPointerException(String.format("textLayoutResId(R.layout.%s) " +
-                                    "has no TextView found by id(R.id.%s): %s", layoutName, idName, view));
+                            throw new NullPointerException(String.format("textLayoutResId(R.layout.%s) " + "has no TextView found by id(R.id.%s): %s", layoutName, idName, view));
                         }
                     }
                     // mark as checked
@@ -406,8 +390,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
             if (tableLayoutIdRes == 0) {
                 // try to cast directly
                 if (!(itemView instanceof TableLayout)) {
-                    throw new IllegalStateException("Root view is not TableLayout. Please provide " +
-                            "TableLayout ID explicitly");
+                    throw new IllegalStateException("Root view is not TableLayout. Please provide " + "TableLayout ID explicitly");
                 }
                 tableLayout = (TableLayout) itemView;
             } else {
@@ -521,11 +504,7 @@ public class TableEntry extends MarkwonAdapter.Entry<TableBlock, TableEntry.Hold
                 throw new IllegalStateException("`textLayoutResId` argument is required");
             }
 
-            return new TableEntry(
-                    tableLayoutResId, tableIdRes,
-                    textLayoutResId, textIdRes,
-                    isRecyclable, cellTextCenterVertical
-            );
+            return new TableEntry(tableLayoutResId, tableIdRes, textLayoutResId, textIdRes, isRecyclable, cellTextCenterVertical);
         }
     }
 }

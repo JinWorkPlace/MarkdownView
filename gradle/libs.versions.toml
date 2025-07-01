@@ -26,7 +26,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-annotations = { group = "androidx.annotation", name = "annotation", version = "1.9.1" }
-
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version = "1.4.0" }
 jlatexmath-android = { group = "ru.noties", name = "jlatexmath-android", version = "0.2.0" }
 prism4j = { group = "io.noties", name = "prism4j", version = "2.0.0" }
 ixjava = { group = "com.github.akarnokd", name = "ixjava", version = "1.0.0" }

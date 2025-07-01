@@ -38,20 +38,13 @@ public class SimpleExtPlugin extends AbstractMarkwonPlugin {
     }
 
     @NonNull
-    public SimpleExtPlugin addExtension(
-            int length,
-            char character,
-            @NonNull SpanFactory spanFactory) {
+    public SimpleExtPlugin addExtension(int length, char character, @NonNull SpanFactory spanFactory) {
         builder.addExtension(length, character, spanFactory);
         return this;
     }
 
     @NonNull
-    public SimpleExtPlugin addExtension(
-            int length,
-            char openingCharacter,
-            char closingCharacter,
-            @NonNull SpanFactory spanFactory) {
+    public SimpleExtPlugin addExtension(int length, char openingCharacter, char closingCharacter, @NonNull SpanFactory spanFactory) {
         builder.addExtension(length, openingCharacter, closingCharacter, spanFactory);
         return this;
     }
@@ -73,12 +66,7 @@ public class SimpleExtPlugin extends AbstractMarkwonPlugin {
 
                 visitor.visitChildren(simpleExtNode);
 
-                SpannableBuilder.setSpans(
-                        visitor.builder(),
-                        simpleExtNode.spanFactory().getSpans(visitor.configuration(), visitor.renderProps()),
-                        length,
-                        visitor.length()
-                );
+                SpannableBuilder.setSpans(visitor.builder(), simpleExtNode.spanFactory().getSpans(visitor.configuration(), visitor.renderProps()), length, visitor.length());
             }
         });
     }
