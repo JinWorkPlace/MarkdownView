@@ -1,59 +1,52 @@
-package io.noties.markwon.image.destination;
+package io.noties.markwon.image.destination
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.MalformedURLException
+import java.net.URL
 
 /**
  * @since 4.4.0
  */
-public class ImageDestinationProcessorRelativeToAbsolute extends ImageDestinationProcessor {
+class ImageDestinationProcessorRelativeToAbsolute : ImageDestinationProcessor {
+    private val base: URL?
 
-    @NonNull
-    public static ImageDestinationProcessorRelativeToAbsolute create(@NonNull String base) {
-        return new ImageDestinationProcessorRelativeToAbsolute(base);
+    constructor(base: String) {
+        this.base = obtain(base)
     }
 
-    public static ImageDestinationProcessorRelativeToAbsolute create(@NonNull URL base) {
-        return new ImageDestinationProcessorRelativeToAbsolute(base);
+    constructor(base: URL) {
+        this.base = base
     }
 
-    private final URL base;
-
-    public ImageDestinationProcessorRelativeToAbsolute(@NonNull String base) {
-        this.base = obtain(base);
-    }
-
-    public ImageDestinationProcessorRelativeToAbsolute(@NonNull URL base) {
-        this.base = base;
-    }
-
-    @NonNull
-    @Override
-    public String process(@NonNull String destination) {
-
-        String out = destination;
+    override fun process(destination: String): String {
+        var out = destination
 
         if (base != null) {
             try {
-                final URL u = new URL(base, destination);
-                out = u.toString();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+                val u = URL(base, destination)
+                out = u.toString()
+            } catch (e: MalformedURLException) {
+                e.printStackTrace()
             }
         }
-        return out;
+        return out
     }
 
-    @Nullable
-    private static URL obtain(String base) {
-        try {
-            return new URL(base);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
+    companion object {
+        fun create(base: String): ImageDestinationProcessorRelativeToAbsolute {
+            return ImageDestinationProcessorRelativeToAbsolute(base)
+        }
+
+        fun create(base: URL): ImageDestinationProcessorRelativeToAbsolute {
+            return ImageDestinationProcessorRelativeToAbsolute(base)
+        }
+
+        private fun obtain(base: String?): URL? {
+            try {
+                return URL(base)
+            } catch (e: MalformedURLException) {
+                e.printStackTrace()
+                return null
+            }
         }
     }
 }

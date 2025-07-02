@@ -1,31 +1,27 @@
-package io.noties.markwon.image;
+package io.noties.markwon.image
 
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Drawable
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-public abstract class AsyncDrawableLoader {
+abstract class AsyncDrawableLoader {
+    /**
+     * @since 4.0.0
+     */
+    abstract fun load(drawable: AsyncDrawable)
 
     /**
-     * @since 3.0.0
+     * @since 4.0.0
      */
-    @NonNull
-    public static AsyncDrawableLoader noOp() {
-        return new AsyncDrawableLoaderNoOp();
+    abstract fun cancel(drawable: AsyncDrawable)
+
+    abstract fun placeholder(drawable: AsyncDrawable): Drawable?
+
+    companion object {
+        /**
+         * @since 3.0.0
+         */
+        @JvmStatic
+        fun noOp(): AsyncDrawableLoader {
+            return AsyncDrawableLoaderNoOp()
+        }
     }
-
-    /**
-     * @since 4.0.0
-     */
-    public abstract void load(@NonNull AsyncDrawable drawable);
-
-    /**
-     * @since 4.0.0
-     */
-    public abstract void cancel(@NonNull AsyncDrawable drawable);
-
-    @Nullable
-    public abstract Drawable placeholder(@NonNull AsyncDrawable drawable);
-
 }

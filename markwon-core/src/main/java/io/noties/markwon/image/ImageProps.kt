@@ -1,20 +1,17 @@
-package io.noties.markwon.image;
+package io.noties.markwon.image
 
-import io.noties.markwon.Prop;
+import io.noties.markwon.Prop
 
 /**
  * @since 3.0.0
  */
-public abstract class ImageProps {
+object ImageProps {
+    @JvmField
+    val DESTINATION: Prop<String> = Prop.of("image-destination")
 
-    public static final Prop<String> DESTINATION = Prop.of("image-destination");
+    @JvmField
+    val REPLACEMENT_TEXT_IS_LINK: Prop<Boolean> = Prop.of("image-replacement-text-is-link")
 
-    public static final Prop<Boolean> REPLACEMENT_TEXT_IS_LINK =
-            Prop.of("image-replacement-text-is-link");
-
-    public static final Prop<ImageSize> IMAGE_SIZE = Prop.of("image-size");
-
-
-    private ImageProps() {
-    }
+    @JvmField
+    val IMAGE_SIZE: Prop<ImageSize> = Prop.of("image-size")
 }

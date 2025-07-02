@@ -1,32 +1,28 @@
-package io.noties.markwon.image;
+package io.noties.markwon.image
 
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-
-import androidx.annotation.CheckResult;
-import androidx.annotation.NonNull;
+import android.graphics.Rect
+import android.graphics.drawable.Drawable
+import androidx.annotation.CheckResult
 
 /**
  * @since 3.0.1
  */
-public abstract class DrawableUtils {
-
-    @NonNull
+object DrawableUtils {
+    @JvmStatic
     @CheckResult
-    public static Rect intrinsicBounds(@NonNull Drawable drawable) {
-        return new Rect(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    fun intrinsicBounds(drawable: Drawable): Rect {
+        return Rect(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     }
 
-    public static void applyIntrinsicBounds(@NonNull Drawable drawable) {
-        drawable.setBounds(intrinsicBounds(drawable));
+    @JvmStatic
+    fun applyIntrinsicBounds(drawable: Drawable) {
+        drawable.bounds = intrinsicBounds(drawable)
     }
 
-    public static void applyIntrinsicBoundsIfEmpty(@NonNull Drawable drawable) {
-        if (drawable.getBounds().isEmpty()) {
-            drawable.setBounds(intrinsicBounds(drawable));
+    @JvmStatic
+    fun applyIntrinsicBoundsIfEmpty(drawable: Drawable) {
+        if (drawable.bounds.isEmpty) {
+            drawable.bounds = intrinsicBounds(drawable)
         }
-    }
-
-    private DrawableUtils() {
     }
 }

@@ -63,7 +63,7 @@ public abstract class AsyncDrawableScheduler {
             AsyncDrawable drawable;
 
             for (AsyncDrawableSpan span : spans) {
-                drawable = span.getDrawable();
+                drawable = span.drawable;
                 drawable.setCallback2(new DrawableCallbackImpl(textView, invalidator, drawable.getBounds()));
             }
         }
@@ -83,7 +83,7 @@ public abstract class AsyncDrawableScheduler {
         if (spans != null
                 && spans.length > 0) {
             for (AsyncDrawableSpan span : spans) {
-                span.getDrawable().setCallback2(null);
+                span.drawable.setCallback2(null);
             }
         }
     }

@@ -1,110 +1,81 @@
-package io.noties.markwon.image;
+package io.noties.markwon.image
 
-import android.graphics.Rect;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.graphics.Rect
 
 /**
  * @since 1.0.1
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
-public class ImageSizeResolverDef extends ImageSizeResolver {
-
-    // we track these two, others are considered to be pixels
-    protected static final String UNIT_PERCENT = "%";
-    protected static final String UNIT_EM = "em";
-
-    @NonNull
-    @Override
-    public Rect resolveImageSize(@NonNull AsyncDrawable drawable) {
+@Suppress("unused")
+open class ImageSizeResolverDef : ImageSizeResolver() {
+    override fun resolveImageSize(drawable: AsyncDrawable): Rect {
         return resolveImageSize(
-                drawable.getImageSize(),
-                drawable.getResult().getBounds(),
-                drawable.getLastKnownCanvasWidth(),
-                drawable.getLastKnowTextSize());
+            drawable.imageSize,
+            drawable.result.bounds,
+            drawable.lastKnownCanvasWidth,
+            drawable.lastKnowTextSize
+        )
     }
 
-    @NonNull
-    protected Rect resolveImageSize(
-            @Nullable ImageSize imageSize,
-            @NonNull Rect imageBounds,
-            int canvasWidth,
-            float textSize
-    ) {
-
+    fun resolveImageSize(
+        imageSize: ImageSize?, imageBounds: Rect, canvasWidth: Int, textSize: Float
+    ): Rect {
         if (imageSize == null) {
             // @since 2.0.0 post process bounds to fit canvasWidth (previously was inside AsyncDrawable)
             //      must be applied only if imageSize is null
-            final Rect rect;
-            final int w = imageBounds.width();
+            val rect: Rect
+            val w = imageBounds.width()
             if (w > canvasWidth) {
-                final float reduceRatio = (float) w / canvasWidth;
-                rect = new Rect(
-                        0,
-                        0,
-                        canvasWidth,
-                        (int) (imageBounds.height() / reduceRatio + .5F)
-                );
+                val reduceRatio = w.toFloat() / canvasWidth
+                rect = Rect(
+                    0, 0, canvasWidth, (imageBounds.height() / reduceRatio + .5f).toInt()
+                )
             } else {
-                rect = imageBounds;
+                rect = imageBounds
             }
-            return rect;
+            return rect
         }
 
-        final Rect rect;
+        val rect: Rect
 
-        final ImageSize.Dimension width = imageSize.width;
-        final ImageSize.Dimension height = imageSize.height;
+        val width = imageSize.width
+        val height: ImageSize.Dimension? = imageSize.height
 
-        final int imageWidth = imageBounds.width();
-        final int imageHeight = imageBounds.height();
+        val imageWidth = imageBounds.width()
+        val imageHeight = imageBounds.height()
 
-        final float ratio = (float) imageWidth / imageHeight;
+        val ratio = imageWidth.toFloat() / imageHeight
 
-        if (width != null) {
-
-            final int w;
-            final int h;
-
-            if (UNIT_PERCENT.equals(width.unit)) {
-                w = (int) (canvasWidth * (width.value / 100.F) + .5F);
-            } else {
-                w = resolveAbsolute(width, imageWidth, textSize);
-            }
-
-            if (height == null
-                    || UNIT_PERCENT.equals(height.unit)) {
-                h = (int) (w / ratio + .5F);
-            } else {
-                h = resolveAbsolute(height, imageHeight, textSize);
-            }
-
-            rect = new Rect(0, 0, w, h);
-
-        } else if (height != null) {
-
-            if (!UNIT_PERCENT.equals(height.unit)) {
-                final int h = resolveAbsolute(height, imageHeight, textSize);
-                final int w = (int) (h * ratio + .5F);
-                rect = new Rect(0, 0, w, h);
-            } else {
-                rect = imageBounds;
-            }
+        val w: Int = if (UNIT_PERCENT == width.unit) {
+            (canvasWidth * (width.value / 100f) + .5f).toInt()
         } else {
-            rect = imageBounds;
+            resolveAbsolute(width, imageWidth, textSize)
         }
 
-        return rect;
+        val h: Int = if (height == null || UNIT_PERCENT == height.unit) {
+            (w / ratio + .5f).toInt()
+        } else {
+            resolveAbsolute(height, imageHeight, textSize)
+        }
+
+        rect = Rect(0, 0, w, h)
+
+        return rect
     }
 
-    protected int resolveAbsolute(@NonNull ImageSize.Dimension dimension, int original, float textSize) {
-        final int out;
-        if (UNIT_EM.equals(dimension.unit)) {
-            out = (int) (dimension.value * textSize + .5F);
+    protected fun resolveAbsolute(
+        dimension: ImageSize.Dimension, original: Int, textSize: Float
+    ): Int {
+        val out: Int = if (UNIT_EM == dimension.unit) {
+            (dimension.value * textSize + .5f).toInt()
         } else {
-            out = (int) (dimension.value + .5F);
+            (dimension.value + .5f).toInt()
         }
-        return out;
+        return out
+    }
+
+    companion object {
+        // we track these two, others are considered to be pixels
+        const val UNIT_PERCENT: String = "%"
+        const val UNIT_EM: String = "em"
     }
 }

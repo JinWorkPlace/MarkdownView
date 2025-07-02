@@ -1,27 +1,23 @@
-package io.noties.markwon.image.destination;
-
-import androidx.annotation.NonNull;
+package io.noties.markwon.image.destination
 
 /**
  * Process destination of image nodes
  *
  * @since 4.4.0
  */
-public abstract class ImageDestinationProcessor {
-    @NonNull
-    public abstract String process(@NonNull String destination);
+abstract class ImageDestinationProcessor {
+    abstract fun process(destination: String): String
 
-    @NonNull
-    public static ImageDestinationProcessor noOp() {
-        return new NoOp();
+    private class NoOp : ImageDestinationProcessor() {
+        override fun process(destination: String): String {
+            return destination
+        }
     }
 
-    private static class NoOp extends ImageDestinationProcessor {
-
-        @NonNull
-        @Override
-        public String process(@NonNull String destination) {
-            return destination;
+    companion object {
+        @JvmStatic
+        fun noOp(): ImageDestinationProcessor {
+            return NoOp()
         }
     }
 }

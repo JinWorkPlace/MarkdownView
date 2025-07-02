@@ -1,19 +1,16 @@
-package io.noties.markwon.image;
+package io.noties.markwon.image
 
-import android.graphics.Rect;
-
-import androidx.annotation.NonNull;
+import android.graphics.Rect
 
 /**
  * @see ImageSizeResolverDef
- * @see io.noties.markwon.MarkwonConfiguration.Builder#imageSizeResolver(ImageSizeResolver)
+ *
+ * @see io.noties.markwon.MarkwonConfiguration.Builder.imageSizeResolver
  * @since 1.0.1
  */
-public abstract class ImageSizeResolver {
-
+abstract class ImageSizeResolver {
     /**
      * @since 4.0.0
      */
-    @NonNull
-    public abstract Rect resolveImageSize(@NonNull AsyncDrawable drawable);
+    abstract fun resolveImageSize(drawable: AsyncDrawable): Rect
 }
