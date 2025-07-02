@@ -137,9 +137,7 @@ public class MarkwonConfiguration {
         }
 
         @NonNull
-        public MarkwonConfiguration build(
-                @NonNull MarkwonTheme theme,
-                @NonNull MarkwonSpansFactory spansFactory) {
+        public MarkwonConfiguration build(@NonNull MarkwonTheme theme, @NonNull MarkwonSpansFactory spansFactory) {
 
             this.theme = theme;
             this.spansFactory = spansFactory;

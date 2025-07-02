@@ -1,26 +1,22 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.commonmark.node.Node;
-import org.commonmark.node.Visitor;
+import org.commonmark.node.Node
+import org.commonmark.node.Visitor
 
 /**
  * Configurable visitor of parsed markdown. Allows visiting certain (registered) nodes without
  * need to create own instance of this class.
  *
- * @see Builder#on(Class, NodeVisitor)
- * @see MarkwonPlugin#configureVisitor(Builder)
+ * @see Builder.on
+ * @see MarkwonPlugin.configureVisitor
  * @since 3.0.0
  */
-public interface MarkwonVisitor extends Visitor {
-
+interface MarkwonVisitor : Visitor {
     /**
-     * @see Builder#on(Class, NodeVisitor)
+     * @see Builder.on
      */
-    interface NodeVisitor<N extends Node> {
-        void visit(@NonNull MarkwonVisitor visitor, @NonNull N n);
+    interface NodeVisitor<N : Node> {
+        fun visit(visitor: MarkwonVisitor, n: N)
     }
 
     /**
@@ -30,51 +26,44 @@ public interface MarkwonVisitor extends Visitor {
      * @since 4.3.0
      */
     interface BlockHandler {
+        fun blockStart(visitor: MarkwonVisitor, node: Node)
 
-        void blockStart(@NonNull MarkwonVisitor visitor, @NonNull Node node);
-
-        void blockEnd(@NonNull MarkwonVisitor visitor, @NonNull Node node);
+        fun blockEnd(visitor: MarkwonVisitor, node: Node)
     }
 
     interface Builder {
-
         /**
          * @param node        to register
-         * @param nodeVisitor {@link NodeVisitor} to be used or null to ignore previously registered
-         *                    visitor for this node
+         * @param nodeVisitor [NodeVisitor] to be used or null to ignore previously registered
+         * visitor for this node
          */
-        @NonNull
-        <N extends Node> Builder on(@NonNull Class<N> node, @Nullable NodeVisitor<? super N> nodeVisitor);
+        fun <N : Node> on(node: Class<N>, nodeVisitor: NodeVisitor<in N>?): Builder
 
         /**
          * @param blockHandler to handle block start/end
          * @see BlockHandler
+         *
          * @see BlockHandlerDef
+         *
          * @since 4.3.0
          */
-        @SuppressWarnings("UnusedReturnValue")
-        @NonNull
-        Builder blockHandler(@NonNull BlockHandler blockHandler);
+        fun blockHandler(blockHandler: BlockHandler): Builder
 
-        @NonNull
-        MarkwonVisitor build(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps renderProps);
+        fun build(configuration: MarkwonConfiguration, renderProps: RenderProps): MarkwonVisitor
     }
 
-    @NonNull
-    MarkwonConfiguration configuration();
+    fun configuration(): MarkwonConfiguration
 
-    @NonNull
-    RenderProps renderProps();
+    fun renderProps(): RenderProps
 
-    @NonNull
-    SpannableBuilder builder();
+    fun builder(): SpannableBuilder
 
     /**
      * Visits all children of supplied node.
      *
      * @param node to visit
      */
-    void visitChildren(@NonNull Node node);
+    fun visitChildren(node: Node)
 
     /**
      * Executes a check if there is further content available.
@@ -82,88 +71,87 @@ public interface MarkwonVisitor extends Visitor {
      * @param node to check
      * @return boolean indicating if there are more nodes after supplied one
      */
-    boolean hasNext(@NonNull Node node);
+    fun hasNext(node: Node): Boolean
 
     /**
-     * This method <strong>ensures</strong> that further content will start at a new line. If current
+     * This method **ensures** that further content will start at a new line. If current
      * last character is already a new line, then it won\'t do anything.
      */
-    void ensureNewLine();
+    fun ensureNewLine()
 
     /**
-     * This method inserts a new line without any condition checking (unlike {@link #ensureNewLine()}).
+     * This method inserts a new line without any condition checking (unlike [.ensureNewLine]).
      */
-    void forceNewLine();
+    fun forceNewLine()
 
     /**
-     * Helper method to call <code>builder().length()</code>
+     * Helper method to call `builder().length()`
      *
-     * @return current length of underlying {@link SpannableBuilder}
+     * @return current length of underlying [SpannableBuilder]
      */
-    int length();
+    fun length(): Int
 
     /**
-     * Clears state of visitor (both {@link RenderProps} and {@link SpannableBuilder} will be cleared
+     * Clears state of visitor (both [RenderProps] and [SpannableBuilder] will be cleared
      */
-    void clear();
+    fun clear()
 
     /**
-     * Sets <code>spans</code> to underlying {@link SpannableBuilder} from <em>start</em>
-     * to <em>{@link SpannableBuilder#length()}</em>.
+     * Sets `spans` to underlying [SpannableBuilder] from *start*
+     * to *[SpannableBuilder.length]*.
      *
      * @param start start position of spans
      * @param spans to apply
      */
-    void setSpans(int start, @Nullable Object spans);
+    fun setSpans(start: Int, spans: Any?)
 
     /**
-     * Helper method to obtain and apply spans for supplied Node. Internally queries {@link SpanFactory}
-     * for the node (via {@link MarkwonSpansFactory#require(Class)} thus throwing an exception
-     * if there is no {@link SpanFactory} registered for the node).
+     * Helper method to obtain and apply spans for supplied Node. Internally queries [SpanFactory]
+     * for the node (via [MarkwonSpansFactory.require] thus throwing an exception
+     * if there is no [SpanFactory] registered for the node).
      *
-     * @param node  to retrieve {@link SpanFactory} for
-     * @param start start position for further {@link #setSpans(int, Object)} call
-     * @see #setSpansForNodeOptional(Node, int)
+     * @param node  to retrieve [SpanFactory] for
+     * @param start start position for further [.setSpans] call
+     * @see .setSpansForNodeOptional
      */
-    <N extends Node> void setSpansForNode(@NonNull N node, int start);
+    fun <N : Node> setSpansForNode(node: N, start: Int)
 
     /**
-     * The same as {@link #setSpansForNode(Node, int)} but can be used in situations when there is
+     * The same as [.setSpansForNode] but can be used in situations when there is
      * no access to a Node instance (for example in HTML rendering which doesn\'t have markdown Nodes).
      *
-     * @see #setSpansForNode(Node, int)
+     * @see .setSpansForNode
      */
-    <N extends Node> void setSpansForNode(@NonNull Class<N> node, int start);
+    fun <N : Node> setSpansForNode(node: Class<N>, start: Int)
 
     // does not throw if there is no SpanFactory registered for this node
-
     /**
-     * Helper method to apply spans from a {@link SpanFactory} <b>if</b> it\'s registered in
-     * {@link MarkwonSpansFactory} instance. Otherwise ignores this call (no spans will be applied).
-     * If there is a need to ensure that specified <code>node</code> has a {@link SpanFactory} registered,
-     * then {@link #setSpansForNode(Node, int)} can be used. {@link #setSpansForNode(Node, int)} internally
-     * uses {@link MarkwonSpansFactory#require(Class)}. This method uses {@link MarkwonSpansFactory#get(Class)}.
+     * Helper method to apply spans from a [SpanFactory] **if** it\'s registered in
+     * [MarkwonSpansFactory] instance. Otherwise ignores this call (no spans will be applied).
+     * If there is a need to ensure that specified `node` has a [SpanFactory] registered,
+     * then [.setSpansForNode] can be used. [.setSpansForNode] internally
+     * uses [MarkwonSpansFactory.require]. This method uses [MarkwonSpansFactory.get].
      *
-     * @see #setSpansForNode(Node, int)
+     * @see .setSpansForNode
      */
-    <N extends Node> void setSpansForNodeOptional(@NonNull N node, int start);
+    fun <N : Node> setSpansForNodeOptional(node: N, start: Int)
 
     /**
-     * The same as {@link #setSpansForNodeOptional(Node, int)} but can be used in situations when
+     * The same as [.setSpansForNodeOptional] but can be used in situations when
      * there is no access to a Node instance (for example in HTML rendering).
      *
-     * @see #setSpansForNodeOptional(Node, int)
+     * @see .setSpansForNodeOptional
      */
-    @SuppressWarnings("unused")
-    <N extends Node> void setSpansForNodeOptional(@NonNull Class<N> node, int start);
+    @Suppress("unused")
+    fun <N : Node> setSpansForNodeOptional(node: Class<N>, start: Int)
 
     /**
      * @since 4.3.0
      */
-    void blockStart(@NonNull Node node);
+    fun blockStart(node: Node)
 
     /**
      * @since 4.3.0
      */
-    void blockEnd(@NonNull Node node);
+    fun blockEnd(node: Node)
 }

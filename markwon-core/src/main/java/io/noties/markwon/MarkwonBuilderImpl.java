@@ -86,8 +86,7 @@ class MarkwonBuilderImpl implements Markwon.Builder {
     public Markwon build() {
 
         if (plugins.isEmpty()) {
-            throw new IllegalStateException("No plugins were added to this builder. Use #usePlugin " +
-                    "method to add them");
+            throw new IllegalStateException("No plugins were added to this builder. Use #usePlugin " + "method to add them");
         }
 
         // please note that this method must not modify supplied collection
@@ -108,25 +107,13 @@ class MarkwonBuilderImpl implements Markwon.Builder {
             plugin.configureSpansFactory(spanFactoryBuilder);
         }
 
-        final MarkwonConfiguration configuration = configurationBuilder.build(
-                themeBuilder.build(),
-                spanFactoryBuilder.build());
+        final MarkwonConfiguration configuration = configurationBuilder.build(themeBuilder.build(), spanFactoryBuilder.build());
 
         // @since 4.1.1
         // @since 4.1.2 - do not reuse render-props (each render call should have own render-props)
-        final MarkwonVisitorFactory visitorFactory = MarkwonVisitorFactory.create(
-                visitorBuilder,
-                configuration);
+        final MarkwonVisitorFactory visitorFactory = MarkwonVisitorFactory.create(visitorBuilder, configuration);
 
-        return new MarkwonImpl(
-                bufferType,
-                textSetter,
-                parserBuilder.build(),
-                visitorFactory,
-                configuration,
-                Collections.unmodifiableList(plugins),
-                fallbackToRawInputWhenEmpty
-        );
+        return new MarkwonImpl(bufferType, textSetter, parserBuilder.build(), visitorFactory, configuration, Collections.unmodifiableList(plugins), fallbackToRawInputWhenEmpty);
     }
 
     @NonNull
