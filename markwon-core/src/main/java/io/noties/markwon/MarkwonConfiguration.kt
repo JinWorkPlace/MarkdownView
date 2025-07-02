@@ -1,171 +1,153 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import androidx.annotation.NonNull;
-
-import io.noties.markwon.core.MarkwonTheme;
-import io.noties.markwon.image.AsyncDrawableLoader;
-import io.noties.markwon.image.ImageSizeResolver;
-import io.noties.markwon.image.ImageSizeResolverDef;
-import io.noties.markwon.image.destination.ImageDestinationProcessor;
-import io.noties.markwon.syntax.SyntaxHighlight;
-import io.noties.markwon.syntax.SyntaxHighlightNoOp;
+import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.image.AsyncDrawableLoader
+import io.noties.markwon.image.ImageSizeResolver
+import io.noties.markwon.image.ImageSizeResolverDef
+import io.noties.markwon.image.destination.ImageDestinationProcessor
+import io.noties.markwon.syntax.SyntaxHighlight
+import io.noties.markwon.syntax.SyntaxHighlightNoOp
 
 /**
  * since 3.0.0 renamed `SpannableConfiguration` -&gt; `MarkwonConfiguration`
  */
-public class MarkwonConfiguration {
+class MarkwonConfiguration private constructor(builder: Builder) {
+    private val theme: MarkwonTheme
+    private val asyncDrawableLoader: AsyncDrawableLoader?
+    private val syntaxHighlight: SyntaxHighlight?
+    private val linkResolver: LinkResolver?
 
-    @NonNull
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    private final MarkwonTheme theme;
-    private final AsyncDrawableLoader asyncDrawableLoader;
-    private final SyntaxHighlight syntaxHighlight;
-    private final LinkResolver linkResolver;
     // @since 4.4.0
-    private final ImageDestinationProcessor imageDestinationProcessor;
-    private final ImageSizeResolver imageSizeResolver;
+    private val imageDestinationProcessor: ImageDestinationProcessor?
+    private val imageSizeResolver: ImageSizeResolver?
 
     // @since 3.0.0
-    private final MarkwonSpansFactory spansFactory;
+    private val spansFactory: MarkwonSpansFactory
 
-    private MarkwonConfiguration(@NonNull Builder builder) {
-        this.theme = builder.theme;
-        this.asyncDrawableLoader = builder.asyncDrawableLoader;
-        this.syntaxHighlight = builder.syntaxHighlight;
-        this.linkResolver = builder.linkResolver;
-        this.imageDestinationProcessor = builder.imageDestinationProcessor;
-        this.imageSizeResolver = builder.imageSizeResolver;
-        this.spansFactory = builder.spansFactory;
+    init {
+        this.theme = builder.theme!!
+        this.asyncDrawableLoader = builder.asyncDrawableLoader
+        this.syntaxHighlight = builder.syntaxHighlight
+        this.linkResolver = builder.linkResolver
+        this.imageDestinationProcessor = builder.imageDestinationProcessor
+        this.imageSizeResolver = builder.imageSizeResolver
+        this.spansFactory = builder.spansFactory!!
     }
 
-    @NonNull
-    public MarkwonTheme theme() {
-        return theme;
+    fun theme(): MarkwonTheme {
+        return theme
     }
 
-    @NonNull
-    public AsyncDrawableLoader asyncDrawableLoader() {
-        return asyncDrawableLoader;
+    fun asyncDrawableLoader(): AsyncDrawableLoader {
+        return asyncDrawableLoader!!
     }
 
-    @NonNull
-    public SyntaxHighlight syntaxHighlight() {
-        return syntaxHighlight;
+    fun syntaxHighlight(): SyntaxHighlight {
+        return syntaxHighlight!!
     }
 
-    @NonNull
-    public LinkResolver linkResolver() {
-        return linkResolver;
+    fun linkResolver(): LinkResolver {
+        return linkResolver!!
     }
 
     /**
      * @since 4.4.0
      */
-    @NonNull
-    public ImageDestinationProcessor imageDestinationProcessor() {
-        return imageDestinationProcessor;
+    fun imageDestinationProcessor(): ImageDestinationProcessor {
+        return imageDestinationProcessor!!
     }
 
-    @NonNull
-    public ImageSizeResolver imageSizeResolver() {
-        return imageSizeResolver;
+    fun imageSizeResolver(): ImageSizeResolver {
+        return imageSizeResolver!!
     }
 
     /**
      * @since 3.0.0
      */
-    @NonNull
-    public MarkwonSpansFactory spansFactory() {
-        return spansFactory;
+    fun spansFactory(): MarkwonSpansFactory {
+        return spansFactory
     }
 
-    @SuppressWarnings({"unused", "UnusedReturnValue"})
-    public static class Builder {
+    @Suppress("unused")
+    class Builder internal constructor() {
+        var theme: MarkwonTheme? = null
+        var asyncDrawableLoader: AsyncDrawableLoader? = null
+        var syntaxHighlight: SyntaxHighlight? = null
+        var linkResolver: LinkResolver? = null
 
-        private MarkwonTheme theme;
-        private AsyncDrawableLoader asyncDrawableLoader;
-        private SyntaxHighlight syntaxHighlight;
-        private LinkResolver linkResolver;
         // @since 4.4.0
-        private ImageDestinationProcessor imageDestinationProcessor;
-        private ImageSizeResolver imageSizeResolver;
-        private MarkwonSpansFactory spansFactory;
-
-        Builder() {
-        }
+        var imageDestinationProcessor: ImageDestinationProcessor? = null
+        var imageSizeResolver: ImageSizeResolver? = null
+        var spansFactory: MarkwonSpansFactory? = null
 
         /**
          * @since 4.0.0
          */
-        @NonNull
-        public Builder asyncDrawableLoader(@NonNull AsyncDrawableLoader asyncDrawableLoader) {
-            this.asyncDrawableLoader = asyncDrawableLoader;
-            return this;
+        fun asyncDrawableLoader(asyncDrawableLoader: AsyncDrawableLoader): Builder {
+            this.asyncDrawableLoader = asyncDrawableLoader
+            return this
         }
 
-        @NonNull
-        public Builder syntaxHighlight(@NonNull SyntaxHighlight syntaxHighlight) {
-            this.syntaxHighlight = syntaxHighlight;
-            return this;
+        fun syntaxHighlight(syntaxHighlight: SyntaxHighlight): Builder {
+            this.syntaxHighlight = syntaxHighlight
+            return this
         }
 
-        @NonNull
-        public Builder linkResolver(@NonNull LinkResolver linkResolver) {
-            this.linkResolver = linkResolver;
-            return this;
+        fun linkResolver(linkResolver: LinkResolver): Builder {
+            this.linkResolver = linkResolver
+            return this
         }
 
         /**
          * @since 4.4.0
          */
-        @NonNull
-        public Builder imageDestinationProcessor(@NonNull ImageDestinationProcessor imageDestinationProcessor) {
-            this.imageDestinationProcessor = imageDestinationProcessor;
-            return this;
+        fun imageDestinationProcessor(imageDestinationProcessor: ImageDestinationProcessor): Builder {
+            this.imageDestinationProcessor = imageDestinationProcessor
+            return this
         }
 
         /**
          * @since 1.0.1
          */
-        @NonNull
-        public Builder imageSizeResolver(@NonNull ImageSizeResolver imageSizeResolver) {
-            this.imageSizeResolver = imageSizeResolver;
-            return this;
+        fun imageSizeResolver(imageSizeResolver: ImageSizeResolver): Builder {
+            this.imageSizeResolver = imageSizeResolver
+            return this
         }
 
-        @NonNull
-        public MarkwonConfiguration build(@NonNull MarkwonTheme theme, @NonNull MarkwonSpansFactory spansFactory) {
-
-            this.theme = theme;
-            this.spansFactory = spansFactory;
+        fun build(theme: MarkwonTheme, spansFactory: MarkwonSpansFactory): MarkwonConfiguration {
+            this.theme = theme
+            this.spansFactory = spansFactory
 
             // @since 4.0.0
             if (asyncDrawableLoader == null) {
-                asyncDrawableLoader = AsyncDrawableLoader.noOp();
+                asyncDrawableLoader = AsyncDrawableLoader.noOp()
             }
 
             if (syntaxHighlight == null) {
-                syntaxHighlight = new SyntaxHighlightNoOp();
+                syntaxHighlight = SyntaxHighlightNoOp()
             }
 
             if (linkResolver == null) {
-                linkResolver = new LinkResolverDef();
+                linkResolver = LinkResolverDef()
             }
 
             // @since 4.4.0
             if (imageDestinationProcessor == null) {
-                imageDestinationProcessor = ImageDestinationProcessor.noOp();
+                imageDestinationProcessor = ImageDestinationProcessor.noOp()
             }
 
             if (imageSizeResolver == null) {
-                imageSizeResolver = new ImageSizeResolverDef();
+                imageSizeResolver = ImageSizeResolverDef()
             }
 
-            return new MarkwonConfiguration(this);
+            return MarkwonConfiguration(this)
         }
     }
 
+    companion object {
+        @JvmStatic
+        fun builder(): Builder {
+            return Builder()
+        }
+    }
 }

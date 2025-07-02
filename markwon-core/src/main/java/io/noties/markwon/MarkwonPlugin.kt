@@ -1,149 +1,148 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import android.text.Spanned;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-
-import io.noties.markwon.core.CorePlugin;
-import io.noties.markwon.core.MarkwonTheme;
-import io.noties.markwon.image.AsyncDrawableSpan;
-import io.noties.markwon.movement.MovementMethodPlugin;
+import android.text.Spanned
+import android.widget.TextView
+import io.noties.markwon.core.MarkwonTheme
+import org.commonmark.node.Node
+import org.commonmark.parser.Parser
 
 /**
  * Class represents a plugin (extension) to Markwon to configure how parsing and rendering
  * of markdown is carried on.
  *
  * @see AbstractMarkwonPlugin
- * @see CorePlugin
- * @see MovementMethodPlugin
+ *
+ * @see io.noties.markwon.core.CorePlugin
+ *
+ * @see io.noties.markwon.movement.MovementMethodPlugin
+ *
  * @since 3.0.0
  */
-public interface MarkwonPlugin {
-
+interface MarkwonPlugin {
     /**
-     * @see Registry#require(Class, Action)
+     * @see Registry.require
      * @since 4.0.0
      */
-    interface Action<P extends MarkwonPlugin> {
-        void apply(@NonNull P p);
+    interface Action<P : MarkwonPlugin> {
+        fun apply(p: P)
     }
 
     /**
-     * @see #configure(Registry)
+     * @see .configure
      * @since 4.0.0
      */
     interface Registry {
+        fun <P : MarkwonPlugin> require(plugin: Class<P>): P
 
-        @NonNull
-        <P extends MarkwonPlugin> P require(@NonNull Class<P> plugin);
-
-        <P extends MarkwonPlugin> void require(
-                @NonNull Class<P> plugin,
-                @NonNull Action<? super P> action);
+        fun <P : MarkwonPlugin> require(
+            plugin: Class<P>, action: Action<in P>
+        )
     }
 
     /**
-     * This method will be called before any other during {@link Markwon} instance construction.
+     * This method will be called before any other during [Markwon] instance construction.
      *
      * @since 4.0.0
      */
-    void configure(@NonNull Registry registry);
+    fun configure(registry: Registry)
 
     /**
-     * Method to configure <code>org.commonmark.parser.Parser</code> (for example register custom
+     * Method to configure `org.commonmark.parser.Parser` (for example register custom
      * extension, etc).
      */
-    void configureParser(@NonNull Parser.Builder builder);
+    fun configureParser(builder: Parser.Builder)
 
     /**
-     * Modify {@link MarkwonTheme} that is used for rendering of markdown.
+     * Modify [MarkwonTheme] that is used for rendering of markdown.
      *
      * @see MarkwonTheme
+     *
      * @see MarkwonTheme.Builder
      */
-    void configureTheme(@NonNull MarkwonTheme.Builder builder);
+    fun configureTheme(builder: MarkwonTheme.Builder)
 
     /**
-     * Configure {@link MarkwonConfiguration}
+     * Configure [MarkwonConfiguration]
      *
      * @see MarkwonConfiguration
+     *
      * @see MarkwonConfiguration.Builder
      */
-    void configureConfiguration(@NonNull MarkwonConfiguration.Builder builder);
+    fun configureConfiguration(builder: MarkwonConfiguration.Builder)
 
     /**
-     * Configure {@link MarkwonVisitor} to accept new node types or override already registered nodes.
+     * Configure [MarkwonVisitor] to accept new node types or override already registered nodes.
      *
      * @see MarkwonVisitor
+     *
      * @see MarkwonVisitor.Builder
      */
-    void configureVisitor(@NonNull MarkwonVisitor.Builder builder);
+    fun configureVisitor(builder: MarkwonVisitor.Builder)
 
     /**
-     * Configure {@link MarkwonSpansFactory} to change what spans are used for certain node types.
+     * Configure [MarkwonSpansFactory] to change what spans are used for certain node types.
      *
      * @see MarkwonSpansFactory
+     *
      * @see MarkwonSpansFactory.Builder
      */
-    void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder);
+    fun configureSpansFactory(builder: MarkwonSpansFactory.Builder)
 
     /**
      * Process input markdown and return new string to be used in parsing stage further.
-     * Can be described as <code>pre-processing</code> of markdown String.
+     * Can be described as `pre-processing` of markdown String.
      *
      * @param markdown String to process
      * @return processed markdown String
      */
-    @NonNull
-    String processMarkdown(@NonNull String markdown);
+    fun processMarkdown(markdown: String): String
 
     /**
-     * This method will be called <strong>before</strong> rendering will occur thus making possible
-     * to <code>post-process</code> parsed node (make changes for example).
+     * This method will be called **before** rendering will occur thus making possible
+     * to `post-process` parsed node (make changes for example).
      *
      * @param node root parsed org.commonmark.node.Node
      */
-    void beforeRender(@NonNull Node node);
+    fun beforeRender(node: Node)
 
     /**
-     * This method will be called <strong>after</strong> rendering (but before applying markdown to a
+     * This method will be called **after** rendering (but before applying markdown to a
      * TextView, if such action will happen). It can be used to clean some
-     * internal state, or trigger certain action. Please note that modifying <code>node</code> won\'t
-     * have any effect as it has been already <i>visited</i> at this stage.
+     * internal state, or trigger certain action. Please note that modifying `node` won\'t
+     * have any effect as it has been already *visited* at this stage.
      *
      * @param node    root parsed org.commonmark.node.Node
-     * @param visitor {@link MarkwonVisitor} instance used to render markdown
+     * @param visitor [MarkwonVisitor] instance used to render markdown
      */
-    void afterRender(@NonNull Node node, @NonNull MarkwonVisitor visitor);
+    fun afterRender(node: Node, visitor: MarkwonVisitor)
 
     /**
-     * This method will be called <strong>before</strong> calling <code>TextView#setText</code>.
-     * <p>
-     * It can be useful to prepare a TextView for markdown. For example {@code ru.noties.markwon.image.ImagesPlugin}
-     * uses this method to unregister previously registered {@link AsyncDrawableSpan}
-     * (if there are such spans in this TextView at this point). Or {@link CorePlugin}
+     * This method will be called **before** calling `TextView#setText`.
+     *
+     *
+     * It can be useful to prepare a TextView for markdown. For example `ru.noties.markwon.image.ImagesPlugin`
+     * uses this method to unregister previously registered [io.noties.markwon.image.AsyncDrawableSpan]
+     * (if there are such spans in this TextView at this point). Or [io.noties.markwon.core.CorePlugin]
      * which measures ordered list numbers
      *
-     * @param textView TextView to which <code>markdown</code> will be applied
+     * @param textView TextView to which `markdown` will be applied
      * @param markdown Parsed markdown
      */
-    void beforeSetText(@NonNull TextView textView, @NonNull Spanned markdown);
+    fun beforeSetText(textView: TextView, markdown: Spanned)
 
     /**
-     * This method will be called <strong>after</strong> markdown was applied.
-     * <p>
-     * It can be useful to trigger certain action on spans/textView. For example {@code ru.noties.markwon.image.ImagesPlugin}
-     * uses this method to register {@link AsyncDrawableSpan} and start
+     * This method will be called **after** markdown was applied.
+     *
+     *
+     * It can be useful to trigger certain action on spans/textView. For example `ru.noties.markwon.image.ImagesPlugin`
+     * uses this method to register [io.noties.markwon.image.AsyncDrawableSpan] and start
      * asynchronously loading images.
-     * <p>
-     * Unlike {@link #beforeSetText(TextView, Spanned)} this method does not receive parsed markdown
-     * as at this point spans must be queried by calling <code>TextView#getText#getSpans</code>.
+     *
+     *
+     * Unlike [.beforeSetText] this method does not receive parsed markdown
+     * as at this point spans must be queried by calling `TextView#getText#getSpans`.
      *
      * @param textView TextView to which markdown was applied
      */
-    void afterSetText(@NonNull TextView textView);
+    fun afterSetText(textView: TextView)
 }

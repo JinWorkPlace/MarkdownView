@@ -33,7 +33,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.annotations)
-    implementation(libs.commonmark)
+    api(libs.commonmark)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
 

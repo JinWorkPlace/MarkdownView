@@ -100,8 +100,8 @@ abstract class MarkwonAdapter : RecyclerView.Adapter<MarkwonAdapter.Holder>() {
         }
 
         // please note that this method should be called after constructor
-        protected fun <V : View?> requireView(@IdRes id: Int): V {
-            val v = itemView.findViewById<V?>(id)
+        protected fun <V : View> requireView(@IdRes id: Int): V {
+            val v = itemView.findViewById<V>(id)
             if (v == null) {
                 val name: String = if (id == 0 || id == View.NO_ID) {
                     id.toString()
