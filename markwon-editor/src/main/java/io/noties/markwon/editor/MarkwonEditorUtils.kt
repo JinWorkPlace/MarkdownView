@@ -1,183 +1,157 @@
-package io.noties.markwon.editor;
+package io.noties.markwon.editor
 
-import android.text.Spanned;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import android.text.Spanned
 
 /**
  * @since 4.2.0
  */
-public abstract class MarkwonEditorUtils {
+object MarkwonEditorUtils {
+    fun extractSpans(
+        spanned: Spanned,
+        types: MutableCollection<Class<*>>
+    ): MutableMap<Class<*>, MutableList<Any?>> {
+        val spans = spanned.getSpans(0, spanned.length, Any::class.java)
+        val map: MutableMap<Class<*>, MutableList<Any?>> =
+            HashMap(3)
 
-    @NonNull
-    public static Map<Class<?>, List<Object>> extractSpans(@NonNull Spanned spanned, @NonNull Collection<Class<?>> types) {
+        var type: Class<*>?
 
-        final Object[] spans = spanned.getSpans(0, spanned.length(), Object.class);
-        final Map<Class<?>, List<Object>> map = new HashMap<>(3);
-
-        Class<?> type;
-
-        for (Object span : spans) {
-            type = span.getClass();
+        for (span in spans) {
+            type = span.javaClass
             if (types.contains(type)) {
-                List<Object> list = map.get(type);
+                var list = map[type]
                 if (list == null) {
-                    list = new ArrayList<>(3);
-                    map.put(type, list);
+                    list = ArrayList(3)
+                    map.put(type, list)
                 }
-                list.add(span);
+                list.add(span)
             }
         }
 
-        return map;
+        return map
     }
 
-    public interface Match {
-
-        @NonNull
-        String delimiter();
-
-        int start();
-
-        int end();
-    }
-
-    @Nullable
-    public static Match findDelimited(@NonNull String input, int startFrom, @NonNull String delimiter) {
-        final int start = input.indexOf(delimiter, startFrom);
+    fun findDelimited(input: String, startFrom: Int, delimiter: String): Match? {
+        val start = input.indexOf(delimiter, startFrom)
         if (start > -1) {
-            final int length = delimiter.length();
-            final int end = input.indexOf(delimiter, start + length);
+            val length = delimiter.length
+            val end = input.indexOf(delimiter, start + length)
             if (end > -1) {
-                return new MatchImpl(delimiter, start, end + length);
+                return MatchImpl(delimiter, start, end + length)
             }
         }
-        return null;
+        return null
     }
 
-    @Nullable
-    public static Match findDelimited(
-            @NonNull String input,
-            int start,
-            @NonNull String delimiter1,
-            @NonNull String delimiter2) {
+    fun findDelimited(
+        input: String,
+        start: Int,
+        delimiter1: String,
+        delimiter2: String
+    ): Match? {
+        val l1 = delimiter1.length
+        val l2 = delimiter2.length
 
-        final int l1 = delimiter1.length();
-        final int l2 = delimiter2.length();
+        val c1 = delimiter1[0]
+        val c2 = delimiter2[0]
 
-        final char c1 = delimiter1.charAt(0);
-        final char c2 = delimiter2.charAt(0);
+        var c: Char
+        var previousC = 0.toChar()
 
-        char c;
-        char previousC = 0;
+        var match: Match?
 
-        Match match;
-
-        for (int i = start, length = input.length(); i < length; i++) {
-            c = input.charAt(i);
+        var i = start
+        val length = input.length
+        while (i < length) {
+            c = input[i]
 
             // if this char is the same as previous (and we obviously have no match) -> skip
             if (c == previousC) {
-                continue;
+                i++
+                continue
             }
 
             if (c == c1) {
-                match = matchDelimiter(input, i, length, delimiter1, l1);
+                match = matchDelimiter(input, i, length, delimiter1, l1)
                 if (match != null) {
-                    return match;
+                    return match
                 }
             } else if (c == c2) {
-                match = matchDelimiter(input, i, length, delimiter2, l2);
+                match = matchDelimiter(input, i, length, delimiter2, l2)
                 if (match != null) {
-                    return match;
+                    return match
                 }
             }
 
-            previousC = c;
+            previousC = c
+            i++
         }
 
-        return null;
+        return null
     }
 
     // This method assumes that first char is matched already
-    @Nullable
-    private static Match matchDelimiter(
-            @NonNull String input,
-            int start,
-            int length,
-            @NonNull String delimiter,
-            int delimiterLength) {
-
+    private fun matchDelimiter(
+        input: String,
+        start: Int,
+        length: Int,
+        delimiter: String,
+        delimiterLength: Int
+    ): Match? {
         if (start + delimiterLength < length) {
+            var result = true
 
-            boolean result = true;
-
-            for (int i = 1; i < delimiterLength; i++) {
-                if (input.charAt(start + i) != delimiter.charAt(i)) {
-                    result = false;
-                    break;
+            for (i in 1..<delimiterLength) {
+                if (input[start + i] != delimiter[i]) {
+                    result = false
+                    break
                 }
             }
 
             if (result) {
                 // find end
-                final int end = input.indexOf(delimiter, start + delimiterLength);
+                val end = input.indexOf(delimiter, start + delimiterLength)
                 // it's important to check if match has content
                 if (end > -1 && (end - start) > delimiterLength) {
-                    return new MatchImpl(delimiter, start, end + delimiterLength);
+                    return MatchImpl(delimiter, start, end + delimiterLength)
                 }
             }
         }
 
-        return null;
+        return null
     }
 
-    private MarkwonEditorUtils() {
+    interface Match {
+        fun delimiter(): String
+
+        fun start(): Int
+
+        fun end(): Int
     }
 
-    private static class MatchImpl implements Match {
-
-        private final String delimiter;
-        private final int start;
-        private final int end;
-
-        MatchImpl(@NonNull String delimiter, int start, int end) {
-            this.delimiter = delimiter;
-            this.start = start;
-            this.end = end;
+    private class MatchImpl(
+        private val delimiter: String,
+        private val start: Int,
+        private val end: Int
+    ) : Match {
+        override fun delimiter(): String {
+            return delimiter
         }
 
-        @NonNull
-        @Override
-        public String delimiter() {
-            return delimiter;
+        override fun start(): Int {
+            return start
         }
 
-        @Override
-        public int start() {
-            return start;
+        override fun end(): Int {
+            return end
         }
 
-        @Override
-        public int end() {
-            return end;
-        }
-
-        @Override
-        @NonNull
-        public String toString() {
+        override fun toString(): String {
             return "MatchImpl{" +
                     "delimiter='" + delimiter + '\'' +
                     ", start=" + start +
                     ", end=" + end +
-                    '}';
+                    '}'
         }
     }
 }

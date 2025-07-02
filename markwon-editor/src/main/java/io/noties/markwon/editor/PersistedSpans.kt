@@ -1,116 +1,92 @@
-package io.noties.markwon.editor;
+package io.noties.markwon.editor
 
-import android.text.Editable;
-import android.text.Spannable;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import static io.noties.markwon.editor.MarkwonEditorUtils.extractSpans;
+import android.text.Spannable
+import android.util.Log
+import java.util.Locale
 
 /**
  * Cache for spans that present in user input. These spans are reused between different
- * {@link MarkwonEditor#process(Editable)} and {@link MarkwonEditor#preRender(Editable, MarkwonEditor.PreRenderResultListener)}
+ * [MarkwonEditor.process] and [MarkwonEditor.preRender]
  * calls.
  *
- * @see EditHandler#handleMarkdownSpan(PersistedSpans, Editable, String, Object, int, int)
- * @see EditHandler#configurePersistedSpans(Builder)
+ * @see EditHandler.handleMarkdownSpan
+ * @see EditHandler.configurePersistedSpans
  * @since 4.2.0
  */
-public abstract class PersistedSpans {
-
-    public interface SpanFactory<T> {
-        @NonNull
-        T create();
+abstract class PersistedSpans {
+    interface SpanFactory<T> {
+        fun create(): T
     }
 
-    public interface Builder {
-        @SuppressWarnings("UnusedReturnValue")
-        @NonNull
-        <T> Builder persistSpan(@NonNull Class<T> type, @NonNull SpanFactory<T> spanFactory);
+    interface Builder {
+        fun <T> persistSpan(type: Class<T>, spanFactory: SpanFactory<T>): Builder
     }
 
-    @NonNull
-    public abstract <T> T get(@NonNull Class<T> type);
+    abstract fun <T> get(type: Class<T>): T
 
-    abstract void removeUnused();
+    abstract fun removeUnused()
 
 
-    @NonNull
-    static Provider provider() {
-        return new Provider();
-    }
+    class Provider : Builder {
+        private val map: MutableMap<Class<*>, SpanFactory<*>> =
+            HashMap(3)
 
-    static class Provider implements Builder {
-
-        private final Map<Class<?>, SpanFactory> map = new HashMap<>(3);
-
-        @NonNull
-        @Override
-        public <T> Builder persistSpan(@NonNull Class<T> type, @NonNull SpanFactory<T> spanFactory) {
+        override fun <T> persistSpan(type: Class<T>, spanFactory: SpanFactory<T>): Builder {
             if (map.put(type, spanFactory) != null) {
-                Log.e("MD-EDITOR", String.format(
+                Log.e(
+                    "MD-EDITOR", String.format(
                         Locale.ROOT,
-                        "Re-declaration of persisted span for '%s'", type.getName()));
+                        "Re-declaration of persisted span for '%s'", type.getName()
+                    )
+                )
             }
-            return this;
+            return this
         }
 
-        @NonNull
-        PersistedSpans provide(@NonNull Spannable spannable) {
-            return new Impl(spannable, map);
+        fun provide(spannable: Spannable): PersistedSpans {
+            return Impl(spannable, map)
         }
     }
 
-    static class Impl extends PersistedSpans {
+    internal class Impl(
+        private val spannable: Spannable,
+        private val spans: MutableMap<Class<*>, SpanFactory<*>>
+    ) : PersistedSpans() {
+        private val map: MutableMap<Class<*>, MutableList<Any?>> =
+            MarkwonEditorUtils.extractSpans(spannable, spans.keys)
 
-        private final Spannable spannable;
-        private final Map<Class<?>, SpanFactory> spans;
-        private final Map<Class<?>, List<Object>> map;
+        override fun <T> get(type: Class<T>): T {
+            val span: Any?
 
-        Impl(@NonNull Spannable spannable, @NonNull Map<Class<?>, SpanFactory> spans) {
-            this.spannable = spannable;
-            this.spans = spans;
-            this.map = extractSpans(spannable, spans.keySet());
-        }
-
-        @NonNull
-        @Override
-        public <T> T get(@NonNull Class<T> type) {
-
-            final Object span;
-
-            final List<Object> list = map.get(type);
-            if (list != null && list.size() > 0) {
-                span = list.remove(0);
+            val list = map[type]
+            if (list != null && list.isNotEmpty()) {
+                span = list.removeAt(0)
             } else {
-                final SpanFactory spanFactory = spans.get(type);
-                if (spanFactory == null) {
-                    throw new IllegalStateException("Requested type `" + type.getName() + "` was " +
-                            "not registered, use PersistedSpans.Builder#persistSpan method to register");
+                val spanFactory = spans[type]
+                checkNotNull(spanFactory) {
+                    "Requested type `" + type.getName() + "` was " +
+                            "not registered, use PersistedSpans.Builder#persistSpan method to register"
                 }
-                span = spanFactory.create();
+                span = spanFactory.create()
             }
 
-            //noinspection unchecked
-            return (T) span;
+            return span as T
         }
 
-        @Override
-        void removeUnused() {
-            for (List<Object> spans : map.values()) {
-                if (spans != null
-                        && spans.size() > 0) {
-                    for (Object span : spans) {
-                        spannable.removeSpan(span);
+        override fun removeUnused() {
+            for (spans in map.values) {
+                if (spans.isNotEmpty()) {
+                    for (span in spans) {
+                        spannable.removeSpan(span)
                     }
                 }
             }
+        }
+    }
+
+    companion object {
+        fun provider(): Provider {
+            return Provider()
         }
     }
 }
