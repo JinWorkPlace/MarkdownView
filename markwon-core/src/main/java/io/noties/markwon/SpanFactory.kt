@@ -1,13 +1,8 @@
-package io.noties.markwon;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+package io.noties.markwon
 
 /**
  * @since 3.0.0
  */
-public interface SpanFactory {
-
-    @Nullable
-    Object getSpans(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps props);
+interface SpanFactory {
+    fun getSpans(configuration: MarkwonConfiguration, props: RenderProps): Any?
 }

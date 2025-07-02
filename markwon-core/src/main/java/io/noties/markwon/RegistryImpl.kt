@@ -1,67 +1,45 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import io.noties.markwon.core.CorePlugin;
+import io.noties.markwon.core.CorePlugin
 
 // @since 4.0.0
-class RegistryImpl implements MarkwonPlugin.Registry {
+internal class RegistryImpl(
+    private val origin: MutableList<MarkwonPlugin>
+) : MarkwonPlugin.Registry {
+    private val plugins: MutableList<MarkwonPlugin> = ArrayList(origin.size)
+    private val pending: MutableSet<MarkwonPlugin?> = HashSet(3)
 
-    private final List<MarkwonPlugin> origin;
-    private final List<MarkwonPlugin> plugins;
-    private final Set<MarkwonPlugin> pending;
-
-    RegistryImpl(@NonNull List<MarkwonPlugin> origin) {
-        this.origin = origin;
-        this.plugins = new ArrayList<>(origin.size());
-        this.pending = new HashSet<>(3);
+    override fun <P : MarkwonPlugin> require(plugin: Class<P>): P {
+        return get(plugin)
     }
 
-    @NonNull
-    @Override
-    public <P extends MarkwonPlugin> P require(@NonNull Class<P> plugin) {
-        return get(plugin);
+    override fun <P : MarkwonPlugin> require(
+        plugin: Class<P>, action: MarkwonPlugin.Action<in P>
+    ) {
+        action.apply(get(plugin))
     }
 
-    @Override
-    public <P extends MarkwonPlugin> void require(
-            @NonNull Class<P> plugin,
-            @NonNull MarkwonPlugin.Action<? super P> action) {
-        action.apply(get(plugin));
-    }
-
-    @NonNull
-    List<MarkwonPlugin> process() {
-        for (MarkwonPlugin plugin : origin) {
-            configure(plugin);
+    fun process(): MutableList<MarkwonPlugin> {
+        for (plugin in origin) {
+            configure(plugin)
         }
-        return plugins;
+        return plugins
     }
 
-    private void configure(@NonNull MarkwonPlugin plugin) {
-
+    private fun configure(plugin: MarkwonPlugin) {
         // important -> check if it's in plugins
         //  if it is -> no need to configure (already configured)
 
         if (!plugins.contains(plugin)) {
-
-            if (pending.contains(plugin)) {
-                throw new IllegalStateException("Cyclic dependency chain found: " + pending);
-            }
+            check(!pending.contains(plugin)) { "Cyclic dependency chain found: $pending" }
 
             // start tracking plugins that are pending for configuration
-            pending.add(plugin);
+            pending.add(plugin)
 
-            plugin.configure(this);
+            plugin.configure(this)
 
             // stop pending tracking
-            pending.remove(plugin);
+            pending.remove(plugin)
 
             // check again if it's included (a child might've configured it already)
             // add to out-collection if not already present
@@ -69,48 +47,44 @@ class RegistryImpl implements MarkwonPlugin.Registry {
             // and not a sub-type
             if (!plugins.contains(plugin)) {
                 // core-plugin must always be the first one (if it's present)
-                if (CorePlugin.class.isAssignableFrom(plugin.getClass())) {
-                    plugins.add(0, plugin);
+                if (CorePlugin::class.java.isAssignableFrom(plugin.javaClass)) {
+                    plugins.add(0, plugin)
                 } else {
-                    plugins.add(plugin);
+                    plugins.add(plugin)
                 }
             }
         }
     }
 
-    @NonNull
-    private <P extends MarkwonPlugin> P get(@NonNull Class<P> type) {
-
+    private fun <P : MarkwonPlugin> get(type: Class<P>): P {
         // check if present already in plugins
         // find in origin, if not found -> throw, else add to out-plugins
 
-        P plugin = find(plugins, type);
+        var plugin: P? = find(plugins, type)
 
         if (plugin == null) {
+            plugin = find(origin, type)
 
-            plugin = find(origin, type);
-
-            if (plugin == null) {
-                throw new IllegalStateException("Requested plugin is not added: " +
-                        "" + type.getName() + ", plugins: " + origin);
+            checkNotNull(plugin) {
+                "Requested plugin is not added: " + "" + type.name + ", plugins: " + origin
             }
 
-            configure(plugin);
+            configure(plugin)
         }
 
-        return plugin;
+        return plugin
     }
 
-    @Nullable
-    private static <P extends MarkwonPlugin> P find(
-            @NonNull List<MarkwonPlugin> plugins,
-            @NonNull Class<P> type) {
-        for (MarkwonPlugin plugin : plugins) {
-            if (type.isAssignableFrom(plugin.getClass())) {
-                //noinspection unchecked
-                return (P) plugin;
+    companion object {
+        private fun <P : MarkwonPlugin> find(
+            plugins: MutableList<MarkwonPlugin>, type: Class<P>
+        ): P? {
+            for (plugin in plugins) {
+                if (type.isAssignableFrom(plugin.javaClass)) {
+                    return plugin as P
+                }
             }
+            return null
         }
-        return null;
     }
 }

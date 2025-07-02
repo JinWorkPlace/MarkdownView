@@ -1,22 +1,16 @@
-package io.noties.markwon;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+package io.noties.markwon
 
 /**
  * @since 3.0.0
  */
-public interface RenderProps {
+interface RenderProps {
+    fun <T> get(prop: Prop<T>): T
 
-    @Nullable
-    <T> T get(@NonNull Prop<T> prop);
+    fun <T> get(prop: Prop<T>, defValue: T): T
 
-    @NonNull
-    <T> T get(@NonNull Prop<T> prop, @NonNull T defValue);
+    fun <T> set(prop: Prop<T>, value: T?)
 
-    <T> void set(@NonNull Prop<T> prop, @Nullable T value);
+    fun <T> clear(prop: Prop<T>)
 
-    <T> void clear(@NonNull Prop<T> prop);
-
-    void clearAll();
+    fun clearAll()
 }

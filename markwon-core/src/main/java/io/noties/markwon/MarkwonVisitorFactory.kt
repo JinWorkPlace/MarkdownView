@@ -1,25 +1,20 @@
-package io.noties.markwon;
-
-import androidx.annotation.NonNull;
+package io.noties.markwon
 
 /**
  * @since 4.1.1
  */
-abstract class MarkwonVisitorFactory {
+internal abstract class MarkwonVisitorFactory {
+    abstract fun create(): MarkwonVisitor
 
-    @NonNull
-    abstract MarkwonVisitor create();
-
-    @NonNull
-    static MarkwonVisitorFactory create(
-            @NonNull final MarkwonVisitorImpl.Builder builder,
-            @NonNull final MarkwonConfiguration configuration) {
-        return new MarkwonVisitorFactory() {
-            @NonNull
-            @Override
-            MarkwonVisitor create() {
-                return builder.build(configuration, new RenderPropsImpl());
+    companion object {
+        fun create(
+            builder: MarkwonVisitor.Builder, configuration: MarkwonConfiguration
+        ): MarkwonVisitorFactory {
+            return object : MarkwonVisitorFactory() {
+                override fun create(): MarkwonVisitor {
+                    return builder.build(configuration, RenderPropsImpl())
+                }
             }
-        };
+        }
     }
 }

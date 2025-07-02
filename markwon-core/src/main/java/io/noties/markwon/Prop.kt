@@ -1,86 +1,68 @@
-package io.noties.markwon;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+package io.noties.markwon
 
 /**
- * Class to hold data in {@link RenderProps}. Represents a certain <em>property</em>.
+ * Class to hold data in [RenderProps]. Represents a certain *property*.
  *
  * @param <T> represents the type that this instance holds
- * @see #of(String)
- * @see #of(Class, String)
+ * @see .of
+ * @see .of
  * @since 3.0.0
- */
-public class Prop<T> {
-
-    @SuppressWarnings("unused")
-    @NonNull
-    public static <T> Prop<T> of(@NonNull Class<T> type, @NonNull String name) {
-        return new Prop<>(name);
+</T> */
+class Prop<T> internal constructor(private val name: String) {
+    fun name(): String {
+        return name
     }
 
-    @NonNull
-    public static <T> Prop<T> of(@NonNull String name) {
-        return new Prop<>(name);
+    fun get(props: RenderProps): T? {
+        return props.get(this)
     }
 
-    private final String name;
-
-    Prop(@NonNull String name) {
-        this.name = name;
+    fun get(props: RenderProps, defValue: T): T {
+        return props.get(this, defValue!!)
     }
 
-    @NonNull
-    public String name() {
-        return name;
-    }
-
-    @Nullable
-    public T get(@NonNull RenderProps props) {
-        return props.get(this);
-    }
-
-    @NonNull
-    public T get(@NonNull RenderProps props, @NonNull T defValue) {
-        return props.get(this, defValue);
-    }
-
-    @NonNull
-    public T require(@NonNull RenderProps props) {
-        final T t = get(props);
+    fun require(props: RenderProps): T {
+        val t = get(props)
         if (t == null) {
-            throw new NullPointerException(name);
+            throw NullPointerException(name)
         }
-        return t;
+        return t
     }
 
-    public void set(@NonNull RenderProps props, @Nullable T value) {
-        props.set(this, value);
+    fun set(props: RenderProps, value: T?) {
+        props.set(this, value)
     }
 
-    public void clear(@NonNull RenderProps props) {
-        props.clear(this);
+    fun clear(props: RenderProps) {
+        props.clear(this)
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    override fun equals(other: Any?): Boolean {
+        if (this == other) return true
+        if (other == null || javaClass != other.javaClass) return false
 
-        Prop<?> prop = (Prop<?>) o;
+        val prop = other as Prop<*>
 
-        return name.equals(prop.name);
+        return name == prop.name
     }
 
-    @Override
-    public int hashCode() {
-        return name.hashCode();
+    override fun hashCode(): Int {
+        return name.hashCode()
     }
 
-    @Override
-    public String toString() {
-        return "Prop{" +
-                "name='" + name + '\'' +
-                '}';
+    override fun toString(): String {
+        return "Prop{name='$name'}"
+    }
+
+    companion object {
+        @Suppress("unused")
+        fun <T> of(type: Class<T?>, name: String): Prop<T?> {
+            return Prop(name)
+        }
+
+        @JvmStatic
+        fun <T> of(name: String): Prop<T?> {
+            return Prop(name)
+        }
     }
 }

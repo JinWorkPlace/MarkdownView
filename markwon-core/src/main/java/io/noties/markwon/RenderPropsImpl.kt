@@ -1,52 +1,36 @@
-package io.noties.markwon;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
+package io.noties.markwon
 
 /**
  * @since 3.0.0
  */
-class RenderPropsImpl implements RenderProps {
+internal class RenderPropsImpl : RenderProps {
+    private val values: MutableMap<Prop<*>, Any> = HashMap(3)
 
-    private final Map<Prop, Object> values = new HashMap<>(3);
-
-    @Nullable
-    @Override
-    public <T> T get(@NonNull Prop<T> prop) {
-        //noinspection unchecked
-        return (T) values.get(prop);
+    override fun <T> get(prop: Prop<T>): T {
+        return values[prop] as T
     }
 
-    @NonNull
-    @Override
-    public <T> T get(@NonNull Prop<T> prop, @NonNull T defValue) {
-        Object value = values.get(prop);
+    override fun <T> get(prop: Prop<T?>, defValue: T): T {
+        val value = values[prop]
         if (value != null) {
-            //noinspection unchecked
-            return (T) value;
+            return value as T
         }
-        return defValue;
+        return defValue
     }
 
-    @Override
-    public <T> void set(@NonNull Prop<T> prop, @Nullable T value) {
+    override fun <T> set(prop: Prop<T?>, value: T?) {
         if (value == null) {
-            values.remove(prop);
+            values.remove(prop)
         } else {
-            values.put(prop, value);
+            values.put(prop, value)
         }
     }
 
-    @Override
-    public <T> void clear(@NonNull Prop<T> prop) {
-        values.remove(prop);
+    override fun <T> clear(prop: Prop<T?>) {
+        values.remove(prop)
     }
 
-    @Override
-    public void clearAll() {
-        values.clear();
+    override fun clearAll() {
+        values.clear()
     }
 }
