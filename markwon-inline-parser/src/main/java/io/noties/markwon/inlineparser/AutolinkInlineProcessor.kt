@@ -6,7 +6,7 @@ import org.commonmark.node.Text
 import java.util.regex.Pattern
 
 /**
- * Parses autolinks, for example `<me@mydoma.in>`
+ * Parses auto links, for example `<me@mydoma.in>`
  *
  * @since 4.2.0
  */

@@ -17,10 +17,10 @@ class EntityInlineProcessor : InlineProcessor() {
 
     override fun parse(): Node? {
         val m: String?
-        if ((match(ENTITY_HERE).also { m = it }) != null) {
-            return text(Html5Entities.entityToString(m))
+        return if ((match(ENTITY_HERE).also { m = it }) != null) {
+            text(Html5Entities.entityToString(m))
         } else {
-            return null
+            null
         }
     }
 

@@ -31,7 +31,7 @@ class BackticksInlineProcessor : InlineProcessor() {
 
                 // spec: If the resulting string both begins and ends with a space character, but does not consist
                 // entirely of space characters, a single space character is removed from the front and back.
-                if (content.length >= 3 && content.get(0) == ' ' && content.get(content.length - 1) == ' ' && Parsing.hasNonSpace(
+                if (content.length >= 3 && content[0] == ' ' && content[content.length - 1] == ' ' && Parsing.hasNonSpace(
                         content
                     )
                 ) {
