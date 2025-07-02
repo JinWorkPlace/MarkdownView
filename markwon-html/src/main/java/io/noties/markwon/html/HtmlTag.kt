@@ -63,7 +63,7 @@ interface HtmlTag {
         /**
          * @return parent [Block] or null if there is no parent (this block is at root level)
          */
-        fun parent(): Block
+        fun parent(): Block?
 
         /**
          * @return list of children
