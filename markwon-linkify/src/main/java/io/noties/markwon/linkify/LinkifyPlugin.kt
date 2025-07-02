@@ -1,145 +1,119 @@
-package io.noties.markwon.linkify;
+package io.noties.markwon.linkify
 
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.URLSpan;
-import android.text.util.Linkify;
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.URLSpan
+import android.text.util.Linkify
+import androidx.annotation.IntDef
+import androidx.core.text.util.LinkifyCompat
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.MarkwonPlugin
+import io.noties.markwon.MarkwonVisitor
+import io.noties.markwon.SpannableBuilder
+import io.noties.markwon.core.CorePlugin
+import io.noties.markwon.core.CorePlugin.OnTextAddedListener
+import io.noties.markwon.core.CoreProps
+import org.commonmark.node.Link
 
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.core.text.util.LinkifyCompat;
+class LinkifyPlugin internal constructor(
+    @param:LinkifyMask private val mask: Int,
+    private val useCompat: Boolean
+) : AbstractMarkwonPlugin() {
+    @IntDef(flag = true, value = [Linkify.EMAIL_ADDRESSES, Linkify.PHONE_NUMBERS, Linkify.WEB_URLS])
+    @Retention(
+        AnnotationRetention.SOURCE
+    )
+    internal annotation class LinkifyMask
 
-import org.commonmark.node.Link;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.MarkwonVisitor;
-import io.noties.markwon.RenderProps;
-import io.noties.markwon.SpanFactory;
-import io.noties.markwon.SpannableBuilder;
-import io.noties.markwon.core.CorePlugin;
-import io.noties.markwon.core.CoreProps;
-
-public class LinkifyPlugin extends AbstractMarkwonPlugin {
-
-    @IntDef(flag = true, value = {Linkify.EMAIL_ADDRESSES, Linkify.PHONE_NUMBERS, Linkify.WEB_URLS})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface LinkifyMask {
-    }
-
-    @NonNull
-    public static LinkifyPlugin create() {
-        return create(false);
-    }
-
-    /**
-     * @param useCompat If true, use {@link LinkifyCompat} to handle links.
-     *                  Note that the {@link LinkifyCompat} depends on androidx.core:core,
-     *                  the dependency must be added on a client side explicitly.
-     * @since 4.3.0 `useCompat` argument
-     */
-    @NonNull
-    public static LinkifyPlugin create(boolean useCompat) {
-        return create(Linkify.EMAIL_ADDRESSES | Linkify.PHONE_NUMBERS | Linkify.WEB_URLS, useCompat);
-    }
-
-    @NonNull
-    public static LinkifyPlugin create(@LinkifyMask int mask) {
-        return new LinkifyPlugin(mask, false);
-    }
-
-    /**
-     * @param useCompat If true, use {@link LinkifyCompat} to handle links.
-     *                  Note that the {@link LinkifyCompat} depends on androidx.core:core,
-     *                  the dependency must be added on a client side explicitly.
-     * @since 4.3.0 `useCompat` argument
-     */
-    @NonNull
-    public static LinkifyPlugin create(@LinkifyMask int mask, boolean useCompat) {
-        return new LinkifyPlugin(mask, useCompat);
-    }
-
-    private final int mask;
-    private final boolean useCompat;
-
-    @SuppressWarnings("WeakerAccess")
-    LinkifyPlugin(@LinkifyMask int mask, boolean useCompat) {
-        this.mask = mask;
-        this.useCompat = useCompat;
-    }
-
-    @Override
-    public void configure(@NonNull Registry registry) {
-        registry.require(CorePlugin.class, new Action<CorePlugin>() {
-            @Override
-            public void apply(@NonNull CorePlugin corePlugin) {
-                final LinkifyTextAddedListener listener;
+    override fun configure(registry: MarkwonPlugin.Registry) {
+        registry.require(
+            CorePlugin::class.java,
+            MarkwonPlugin.Action { corePlugin ->
                 // @since 4.3.0
-                if (useCompat) {
-                    listener = new LinkifyCompatTextAddedListener(mask);
+                val listener: LinkifyTextAddedListener = if (useCompat) {
+                    LinkifyCompatTextAddedListener(mask)
                 } else {
-                    listener = new LinkifyTextAddedListener(mask);
+                    LinkifyTextAddedListener(mask)
                 }
-                corePlugin.addOnTextAddedListener(listener);
-            }
-        });
+                corePlugin.addOnTextAddedListener(listener)
+            })
     }
 
-    private static class LinkifyTextAddedListener implements CorePlugin.OnTextAddedListener {
-
-        private final int mask;
-
-        LinkifyTextAddedListener(int mask) {
-            this.mask = mask;
-        }
-
-        @Override
-        public void onTextAdded(@NonNull MarkwonVisitor visitor, @NonNull String text, int start) {
-
+    private open class LinkifyTextAddedListener(private val mask: Int) : OnTextAddedListener {
+        override fun onTextAdded(visitor: MarkwonVisitor, text: String, start: Int) {
             // @since 4.2.0 obtain span factory for links
             //  we will be using the link that is used by markdown (instead of directly applying URLSpan)
-            final SpanFactory spanFactory = visitor.configuration().spansFactory().get(Link.class);
+
+            val spanFactory = visitor.configuration().spansFactory().get(Link::class.java)
             if (spanFactory == null) {
-                return;
+                return
             }
 
             // @since 4.2.0 we no longer re-use builder (thread safety achieved for
             //  render calls from different threads and ... better performance)
-            final SpannableStringBuilder builder = new SpannableStringBuilder(text);
+            val builder = SpannableStringBuilder(text)
 
             if (addLinks(builder, mask)) {
                 // target URL span specifically
-                final URLSpan[] spans = builder.getSpans(0, builder.length(), URLSpan.class);
-                if (spans != null && spans.length > 0) {
+                val spans = builder.getSpans(0, builder.length, URLSpan::class.java)
+                if (spans != null && spans.size > 0) {
+                    val renderProps = visitor.renderProps()
+                    val spannableBuilder = visitor.builder()
 
-                    final RenderProps renderProps = visitor.renderProps();
-                    final SpannableBuilder spannableBuilder = visitor.builder();
-
-                    for (URLSpan span : spans) {
-                        CoreProps.LINK_DESTINATION.set(renderProps, span.getURL());
-                        SpannableBuilder.setSpans(spannableBuilder, spanFactory.getSpans(visitor.configuration(), renderProps), start + builder.getSpanStart(span), start + builder.getSpanEnd(span));
+                    for (span in spans) {
+                        if (span != null) {
+                            CoreProps.LINK_DESTINATION.set(renderProps, span.url)
+                        }
+                        SpannableBuilder.setSpans(
+                            spannableBuilder,
+                            spanFactory.getSpans(visitor.configuration(), renderProps),
+                            start + builder.getSpanStart(span),
+                            start + builder.getSpanEnd(span)
+                        )
                     }
                 }
             }
         }
 
-        protected boolean addLinks(@NonNull Spannable text, @LinkifyMask int mask) {
-            return Linkify.addLinks(text, mask);
+        protected open fun addLinks(text: Spannable, @LinkifyMask mask: Int): Boolean {
+            return Linkify.addLinks(text, mask)
         }
     }
 
     // @since 4.3.0
-    private static class LinkifyCompatTextAddedListener extends LinkifyTextAddedListener {
+    private class LinkifyCompatTextAddedListener(mask: Int) : LinkifyTextAddedListener(mask) {
+        override fun addLinks(text: Spannable, @LinkifyMask mask: Int): Boolean {
+            return LinkifyCompat.addLinks(text, mask)
+        }
+    }
 
-        LinkifyCompatTextAddedListener(int mask) {
-            super(mask);
+    companion object {
+        /**
+         * @param useCompat If true, use [LinkifyCompat] to handle links.
+         * Note that the [LinkifyCompat] depends on androidx.core:core,
+         * the dependency must be added on a client side explicitly.
+         * @since 4.3.0 `useCompat` argument
+         */
+        @JvmOverloads
+        fun create(useCompat: Boolean = false): LinkifyPlugin {
+            return create(
+                Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS or Linkify.WEB_URLS,
+                useCompat
+            )
         }
 
-        @Override
-        protected boolean addLinks(@NonNull Spannable text, @LinkifyMask int mask) {
-            return LinkifyCompat.addLinks(text, mask);
+        fun create(@LinkifyMask mask: Int): LinkifyPlugin {
+            return LinkifyPlugin(mask, false)
+        }
+
+        /**
+         * @param useCompat If true, use [LinkifyCompat] to handle links.
+         * Note that the [LinkifyCompat] depends on androidx.core:core,
+         * the dependency must be added on a client side explicitly.
+         * @since 4.3.0 `useCompat` argument
+         */
+        fun create(@LinkifyMask mask: Int, useCompat: Boolean): LinkifyPlugin {
+            return LinkifyPlugin(mask, useCompat)
         }
     }
 }
