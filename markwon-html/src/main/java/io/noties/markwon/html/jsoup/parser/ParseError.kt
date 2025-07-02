@@ -1,41 +1,33 @@
-package io.noties.markwon.html.jsoup.parser;
+package io.noties.markwon.html.jsoup.parser
 
 /**
  * A Parse Error records an error in the input HTML that occurs in either the tokenisation or the tree building phase.
  */
-public class ParseError {
-    private int pos;
-    private String errorMsg;
-
-    ParseError(int pos, String errorMsg) {
-        this.pos = pos;
-        this.errorMsg = errorMsg;
-    }
-
-    ParseError(int pos, String errorFormat, Object... args) {
-        this.errorMsg = String.format(errorFormat, args);
-        this.pos = pos;
-    }
+class ParseError {
+    /**
+     * Retrieves the offset of the error.
+     * @return error offset within input
+     */
+    val position: Int
 
     /**
      * Retrieve the error message.
      * @return the error message.
      */
-    public String getErrorMessage() {
-        return errorMsg;
+    val errorMessage: String?
+
+    internal constructor(pos: Int, errorMsg: String?) {
+        this.position = pos
+        this.errorMessage = errorMsg
     }
 
-    /**
-     * Retrieves the offset of the error.
-     * @return error offset within input
-     */
-    public int getPosition() {
-        return pos;
+    internal constructor(pos: Int, errorFormat: String, vararg args: Any?) {
+        this.errorMessage = String.format(errorFormat, *args)
+        this.position = pos
     }
 
-    @Override
-    public String toString() {
-        return pos + ": " + errorMsg;
+    override fun toString(): String {
+        return position.toString() + ": " + this.errorMessage
     }
 }
 

@@ -1,34 +1,27 @@
-package io.noties.markwon.html.jsoup.parser;
-
-import java.util.ArrayList;
+package io.noties.markwon.html.jsoup.parser
 
 /**
  * A container for ParseErrors.
  *
  * @author Jonathan Hedley
  */
-public class ParseErrorList extends ArrayList<ParseError>{
-    private static final int INITIAL_CAPACITY = 16;
-    private final int maxSize;
-
-    ParseErrorList(int initialCapacity, int maxSize) {
-        super(initialCapacity);
-        this.maxSize = maxSize;
+class ParseErrorList internal constructor(
+    initialCapacity: Int, val maxSize: Int
+) : ArrayList<ParseError>(initialCapacity) {
+    fun canAddError(): Boolean {
+        return size < maxSize
     }
 
-    boolean canAddError() {
-        return size() < maxSize;
-    }
+    companion object {
+        private const val INITIAL_CAPACITY = 16
 
-    int getMaxSize() {
-        return maxSize;
-    }
+        @JvmStatic
+        fun noTracking(): ParseErrorList {
+            return ParseErrorList(0, 0)
+        }
 
-    public static ParseErrorList noTracking() {
-        return new ParseErrorList(0, 0);
-    }
-
-    public static ParseErrorList tracking(int maxSize) {
-        return new ParseErrorList(INITIAL_CAPACITY, maxSize);
+        fun tracking(maxSize: Int): ParseErrorList {
+            return ParseErrorList(INITIAL_CAPACITY, maxSize)
+        }
     }
 }

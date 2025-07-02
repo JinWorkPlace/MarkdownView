@@ -20,7 +20,7 @@ class SimpleBlockNodeVisitor : MarkwonVisitor.NodeVisitor<Node> {
         visitor.visitChildren(node)
 
         // @since 3.0.1 we apply optional spans
-        visitor.setSpansForNodeOptional<Node>(node, length)
+        visitor.setSpansForNodeOptional(node, length)
 
         visitor.blockEnd(node)
     }

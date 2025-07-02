@@ -7,22 +7,22 @@ import org.commonmark.node.Node
  * @since 3.0.0
  */
 abstract class MarkwonReducer {
-    abstract fun reduce(node: Node): MutableList<Node?>
+    abstract fun reduce(root: Node): MutableList<Node>
 
 
     internal class DirectChildren : MarkwonReducer() {
-        override fun reduce(root: Node): MutableList<Node?> {
-            val list: MutableList<Node?>
+        override fun reduce(root: Node): MutableList<Node> {
+            val list: MutableList<Node>
 
             // we will extract all blocks that are direct children of Document
-            var node = root.getFirstChild()
+            var node = root.firstChild
 
             // please note, that if there are no children -> we will return a list with
             // single element (which was supplied)
             if (node == null) {
-                list = mutableListOf<Node?>(root)
+                list = mutableListOf(root)
             } else {
-                list = ArrayList<Node?>()
+                list = ArrayList()
 
                 var temp: Node?
 
@@ -32,7 +32,7 @@ abstract class MarkwonReducer {
                     if (node !is LinkReferenceDefinition) {
                         list.add(node)
                     }
-                    temp = node.getNext()
+                    temp = node.next
                     node.unlink()
                     node = temp
                 }

@@ -1,13 +1,9 @@
-package io.noties.markwon.html.jsoup;
+package io.noties.markwon.html.jsoup
 
-import java.io.IOException;
+import java.io.IOException
 
-public class UncheckedIOException extends RuntimeException {
-    public UncheckedIOException(IOException cause) {
-        super(cause);
-    }
-
-    public IOException ioException() {
-        return (IOException) getCause();
+class UncheckedIOException(cause: IOException) : RuntimeException(cause) {
+    fun ioException(): IOException {
+        return cause as IOException
     }
 }
