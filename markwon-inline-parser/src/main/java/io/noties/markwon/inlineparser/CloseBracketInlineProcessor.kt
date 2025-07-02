@@ -71,10 +71,10 @@ class CloseBracketInlineProcessor : InlineProcessor() {
 
             if (ref != null) {
                 val label = Escaping.normalizeReference(ref)
-                val definition = context.getLinkReferenceDefinition(label)
+                val definition = context?.getLinkReferenceDefinition(label)
                 if (definition != null) {
-                    dest = definition.getDestination()
-                    title = definition.getTitle()
+                    dest = definition.destination
+                    title = definition.title
                     isLinkOrImage = true
                 }
             }
@@ -84,9 +84,9 @@ class CloseBracketInlineProcessor : InlineProcessor() {
             // If we got here, open is a potential opener
             val linkOrImage = if (opener.image) Image(dest, title) else Link(dest, title)
 
-            var node = opener.node.getNext()
+            var node = opener.node.next
             while (node != null) {
-                val next = node.getNext()
+                val next = node.next
                 linkOrImage.appendChild(node)
                 node = next
             }

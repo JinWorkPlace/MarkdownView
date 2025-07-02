@@ -18,7 +18,7 @@ class NewLineInlineProcessor : InlineProcessor() {
     override fun parse(): Node? {
         index++ // assume we're at a \n
 
-        val previous = block.lastChild
+        val previous = block?.lastChild
 
         // Check previous text for trailing spaces.
         // The "endsWith" is an optimization to avoid an RE match in the common case.
