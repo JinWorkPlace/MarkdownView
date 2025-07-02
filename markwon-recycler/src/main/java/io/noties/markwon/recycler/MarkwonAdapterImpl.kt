@@ -1,181 +1,138 @@
-package io.noties.markwon.recycler;
+package io.noties.markwon.recycler
 
-import android.util.SparseArray;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonReducer
+import org.commonmark.node.Node
+import java.util.Collections
 
-import androidx.annotation.NonNull;
+internal class MarkwonAdapterImpl(
+    private val entries: MutableList<Entry<Node, Holder>>,
+    private val defaultEntry: Entry<Node, Holder>,
+    private val reducer: MarkwonReducer
+) : MarkwonAdapter() {
+    private var layoutInflater: LayoutInflater? = null
 
-import org.commonmark.node.Node;
+    private var markwon: Markwon? = null
+    private var nodes: MutableList<Node>? = null
 
-import java.util.Collections;
-import java.util.List;
-
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonReducer;
-
-class MarkwonAdapterImpl extends MarkwonAdapter {
-
-    private final SparseArray<Entry<Node, Holder>> entries;
-    private final Entry<Node, Holder> defaultEntry;
-    private final MarkwonReducer reducer;
-
-    private LayoutInflater layoutInflater;
-
-    private Markwon markwon;
-    private List<Node> nodes;
-
-    @SuppressWarnings("WeakerAccess")
-    MarkwonAdapterImpl(
-            @NonNull SparseArray<Entry<Node, Holder>> entries,
-            @NonNull Entry<Node, Holder> defaultEntry,
-            @NonNull MarkwonReducer reducer) {
-        this.entries = entries;
-        this.defaultEntry = defaultEntry;
-        this.reducer = reducer;
-
-        setHasStableIds(true);
+    init {
+        setHasStableIds(true)
     }
 
-    @Override
-    public void setMarkdown(@NonNull Markwon markwon, @NonNull String markdown) {
-        setParsedMarkdown(markwon, markwon.parse(markdown));
+    override fun setMarkdown(markwon: Markwon, markdown: String) {
+        setParsedMarkdown(markwon, markwon.parse(markdown))
     }
 
-    @Override
-    public void setParsedMarkdown(@NonNull Markwon markwon, @NonNull Node document) {
-        setParsedMarkdown(markwon, reducer.reduce(document));
+    override fun setParsedMarkdown(markwon: Markwon, document: Node) {
+        setParsedMarkdown(markwon, reducer.reduce(document))
     }
 
-    @Override
-    public void setParsedMarkdown(@NonNull Markwon markwon, @NonNull List<Node> nodes) {
+    override fun setParsedMarkdown(markwon: Markwon, nodes: MutableList<Node>) {
         // clear all entries before applying
 
-        defaultEntry.clear();
+        defaultEntry.clear()
 
-        for (int i = 0, size = entries.size(); i < size; i++) {
-            entries.valueAt(i).clear();
+        var i = 0
+        val size = entries.size
+        while (i < size) {
+            entries[i].clear()
+            i++
         }
 
-        this.markwon = markwon;
-        this.nodes = nodes;
+        this.markwon = markwon
+        this.nodes = nodes
     }
 
-    @NonNull
-    @Override
-    public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         if (layoutInflater == null) {
-            layoutInflater = LayoutInflater.from(parent.getContext());
+            layoutInflater = LayoutInflater.from(parent.context)
         }
 
-        final Entry<Node, Holder> entry = getEntry(viewType);
+        val entry = getEntry(viewType)
 
-        return entry.createHolder(layoutInflater, parent);
+        return entry.createHolder(layoutInflater!!, parent)
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull Holder holder, int position) {
+    override fun onBindViewHolder(holder: Holder, position: Int) {
+        val node = nodes!![position]
+        val viewType = getNodeViewType(node.javaClass)
 
-        final Node node = nodes.get(position);
-        final int viewType = getNodeViewType(node.getClass());
+        val entry = getEntry(viewType)
 
-        final Entry<Node, Holder> entry = getEntry(viewType);
-
-        entry.bindHolder(markwon, holder, node);
+        entry.bindHolder(markwon!!, holder, node)
     }
 
-    @Override
-    public int getItemCount() {
-        return nodes != null
-                ? nodes.size()
-                : 0;
+    override fun getItemCount(): Int {
+        return if (nodes != null)
+            nodes!!.size
+        else
+            0
     }
 
-    @Override
-    public void onViewRecycled(@NonNull Holder holder) {
-        super.onViewRecycled(holder);
+    override fun onViewRecycled(holder: Holder) {
+        super.onViewRecycled(holder)
 
-        final Entry<Node, Holder> entry = getEntry(holder.getItemViewType());
-        entry.onViewRecycled(holder);
+        val entry = getEntry(holder.itemViewType)
+        entry.onViewRecycled(holder)
     }
 
-    @SuppressWarnings("unused")
-    @NonNull
-    public List<Node> getItems() {
-        return nodes != null
-                ? Collections.unmodifiableList(nodes)
-                : Collections.<Node>emptyList();
+    @get:Suppress("unused")
+    val items: MutableList<Node>
+        get() = if (nodes != null)
+            Collections.unmodifiableList(nodes)
+        else mutableListOf()
+
+    override fun getItemViewType(position: Int): Int {
+        return getNodeViewType(nodes!![position].javaClass)
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        return getNodeViewType(nodes.get(position).getClass());
+    override fun getItemId(position: Int): Long {
+        val node = nodes!![position]
+        val type = getNodeViewType(node.javaClass)
+        val entry = getEntry(type)
+        return entry.id(node)
     }
 
-    @Override
-    public long getItemId(int position) {
-        final Node node = nodes.get(position);
-        final int type = getNodeViewType(node.getClass());
-        final Entry<Node, Holder> entry = getEntry(type);
-        return entry.id(node);
-    }
-
-    @Override
-    public int getNodeViewType(@NonNull Class<? extends Node> node) {
+    override fun getNodeViewType(node: Class<out Node>): Int {
         // if has registered -> then return it, else 0
-        final int hash = node.hashCode();
-        if (entries.indexOfKey(hash) > -1) {
-            return hash;
+        val hash = node.hashCode()
+
+        if (entries.indexOfFirst { it.hashCode() == hash } > -1) {
+            return hash
         }
-        return 0;
+        return 0
     }
 
-    @NonNull
-    private Entry<Node, Holder> getEntry(int viewType) {
-        return viewType == 0
-                ? defaultEntry
-                : entries.get(viewType);
+    private fun getEntry(viewType: Int): Entry<Node, Holder> {
+        return if (viewType == 0)
+            defaultEntry
+        else
+            entries[viewType]
     }
 
-    static class BuilderImpl implements Builder {
+    internal class BuilderImpl(private val defaultEntry: Entry<Node, Holder>) : Builder {
+        private val entries = ArrayList<Entry<Node, Holder>>(3)
 
-        private final SparseArray<Entry<Node, Holder>> entries = new SparseArray<>(3);
+        private var reducer: MarkwonReducer? = null
 
-        private final Entry<Node, Holder> defaultEntry;
-
-        private MarkwonReducer reducer;
-
-        BuilderImpl(@NonNull Entry<Node, Holder> defaultEntry) {
-            this.defaultEntry = defaultEntry;
+        override fun <N : Node> include(node: Class<N>, entry: Entry<in N, out Holder>): Builder {
+            entries.add(entry as Entry<Node, Holder>)
+            return this
         }
 
-        @NonNull
-        @Override
-        public <N extends Node> Builder include(
-                @NonNull Class<N> node,
-                @NonNull Entry<? super N, ? extends Holder> entry) {
-            //noinspection unchecked
-            entries.append(node.hashCode(), (Entry<Node, Holder>) entry);
-            return this;
+        override fun reducer(reducer: MarkwonReducer): Builder {
+            this.reducer = reducer
+            return this
         }
 
-        @NonNull
-        @Override
-        public Builder reducer(@NonNull MarkwonReducer reducer) {
-            this.reducer = reducer;
-            return this;
-        }
-
-        @NonNull
-        @Override
-        public MarkwonAdapter build() {
-
+        override fun build(): MarkwonAdapter {
             if (reducer == null) {
-                reducer = MarkwonReducer.directChildren();
+                reducer = MarkwonReducer.directChildren()
             }
 
-            return new MarkwonAdapterImpl(entries, defaultEntry, reducer);
+            return MarkwonAdapterImpl(entries, defaultEntry, reducer!!)
         }
     }
 }

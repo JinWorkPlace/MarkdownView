@@ -1,193 +1,176 @@
-package io.noties.markwon.recycler;
+package io.noties.markwon.recycler
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.IdRes;
-import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
-
-import org.commonmark.node.Node;
-
-import java.util.List;
-
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonReducer;
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.IdRes
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.RecyclerView
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonReducer
+import org.commonmark.node.Node
 
 /**
  * Adapter to display markdown in a RecyclerView. It is done by extracting root blocks from a
- * parsed markdown document (via {@link MarkwonReducer} and rendering each block in a standalone RecyclerView entry. Provides
+ * parsed markdown document (via [MarkwonReducer] and rendering each block in a standalone RecyclerView entry. Provides
  * ability to customize rendering of blocks. For example display certain blocks in a horizontal
- * scrolling container or display tables in a specific widget designed for it ({@link Builder#include(Class, Entry)}).
+ * scrolling container or display tables in a specific widget designed for it ([Builder.include]).
  *
- * @see #builder(int, int)
- * @see #builder(Entry)
- * @see #create(int, int)
- * @see #create(Entry)
- * @see #setMarkdown(Markwon, String)
- * @see #setParsedMarkdown(Markwon, Node)
- * @see #setParsedMarkdown(Markwon, List)
+ * @see .builder
+ * @see .builder
+ * @see .create
+ * @see .create
+ * @see .setMarkdown
+ * @see .setParsedMarkdown
+ * @see .setParsedMarkdown
  * @since 3.0.0
  */
-public abstract class MarkwonAdapter extends RecyclerView.Adapter<MarkwonAdapter.Holder> {
-
-    @NonNull
-    public static Builder builderTextViewIsRoot(@LayoutRes int defaultEntryLayoutResId) {
-        return builder(SimpleEntry.createTextViewIsRoot(defaultEntryLayoutResId));
-    }
-
+abstract class MarkwonAdapter : RecyclerView.Adapter<MarkwonAdapter.Holder>() {
     /**
-     * Factory method to obtain {@link Builder} instance.
+     * Builder to create an instance of [MarkwonAdapter]
      *
-     * @see Builder
+     * @see .include
+     * @see .reducer
+     * @see .build
      */
-    @NonNull
-    public static Builder builder(@LayoutRes int defaultEntryLayoutResId, @IdRes int defaultEntryTextViewResId) {
-        return builder(SimpleEntry.create(defaultEntryLayoutResId, defaultEntryTextViewResId));
-    }
-
-    @NonNull
-    public static Builder builder(@NonNull Entry<? extends Node, ? extends Holder> defaultEntry) {
-        //noinspection unchecked
-        return new MarkwonAdapterImpl.BuilderImpl((Entry<Node, Holder>) defaultEntry);
-    }
-
-    @NonNull
-    public static MarkwonAdapter createTextViewIsRoot(@LayoutRes int defaultEntryLayoutResId) {
-        return builderTextViewIsRoot(defaultEntryLayoutResId).build();
-    }
-
-    /**
-     * Factory method to create a {@link MarkwonAdapter} for evaluation purposes. Resulting
-     * adapter will use default layout for all blocks. Default layout has no styling and should
-     * be specified explicitly.
-     *
-     * @see #create(Entry)
-     * @see #builder(int, int)
-     * @see SimpleEntry
-     */
-    @NonNull
-    public static MarkwonAdapter create(@LayoutRes int defaultEntryLayoutResId, @IdRes int defaultEntryTextViewResId) {
-        return builder(defaultEntryLayoutResId, defaultEntryTextViewResId).build();
-    }
-
-    /**
-     * Factory method to create a {@link MarkwonAdapter} that uses supplied entry to render all
-     * nodes.
-     *
-     * @param defaultEntry {@link Entry} to be used for node rendering
-     * @see #builder(Entry)
-     */
-    @NonNull
-    public static MarkwonAdapter create(@NonNull Entry<? extends Node, ? extends Holder> defaultEntry) {
-        return builder(defaultEntry).build();
-    }
-
-    /**
-     * Builder to create an instance of {@link MarkwonAdapter}
-     *
-     * @see #include(Class, Entry)
-     * @see #reducer(MarkwonReducer)
-     * @see #build()
-     */
-    public interface Builder {
-
+    interface Builder {
         /**
-         * Include a custom {@link Entry} rendering for a Node. Please note that `node` argument
-         * must be <em>exact</em> type, as internally there is no validation for inheritance. if multiple
-         * nodes should be rendered with the same {@link Entry} they must specify so explicitly.
+         * Include a custom [Entry] rendering for a Node. Please note that `node` argument
+         * must be *exact* type, as internally there is no validation for inheritance. if multiple
+         * nodes should be rendered with the same [Entry] they must specify so explicitly.
          * By calling this method for each.
          *
          * @param node  type of the node to register
-         * @param entry {@link Entry} to be used for `node` rendering
+         * @param entry [Entry] to be used for `node` rendering
          * @return self
          */
-        @NonNull
-        <N extends Node> Builder include(@NonNull Class<N> node, @NonNull Entry<? super N, ? extends Holder> entry);
+        fun <N : Node> include(node: Class<N>, entry: Entry<in N, out Holder>): Builder
 
         /**
-         * Specify how root Node will be <em>reduced</em> to a list of nodes. There is a default
-         * {@link MarkwonReducer} that will be used if not provided explicitly (there is no need to
+         * Specify how root Node will be *reduced* to a list of nodes. There is a default
+         * [MarkwonReducer] that will be used if not provided explicitly (there is no need to
          * register your own unless you require it).
          *
-         * @param reducer {@link MarkwonReducer}
+         * @param reducer [MarkwonReducer]
          * @return self
          * @see MarkwonReducer
          */
-        @NonNull
-        Builder reducer(@NonNull MarkwonReducer reducer);
+        fun reducer(reducer: MarkwonReducer): Builder
 
         /**
-         * @return {@link MarkwonAdapter}
+         * @return [MarkwonAdapter]
          */
-        @NonNull
-        MarkwonAdapter build();
+        fun build(): MarkwonAdapter
     }
 
     /**
      * @see SimpleEntry
      */
-    public static abstract class Entry<N extends Node, H extends Holder> {
+    abstract class Entry<N : Node, H : Holder> {
+        abstract fun createHolder(inflater: LayoutInflater, parent: ViewGroup): H
 
-        @NonNull
-        public abstract H createHolder(@NonNull LayoutInflater inflater, @NonNull ViewGroup parent);
-
-        public abstract void bindHolder(@NonNull Markwon markwon, @NonNull H holder, @NonNull N node);
+        abstract fun bindHolder(markwon: Markwon, holder: H, node: N)
 
         /**
          * Will be called when new content is available (clear internal cache if any)
          */
-        public void clear() {
-
+        open fun clear() {
         }
 
-        public long id(@NonNull N node) {
-            return node.hashCode();
+        fun id(node: N): Long {
+            return node.hashCode().toLong()
         }
 
-        public void onViewRecycled(@NonNull H holder) {
-
+        fun onViewRecycled(holder: H) {
         }
     }
 
-    public abstract void setMarkdown(@NonNull Markwon markwon, @NonNull String markdown);
+    abstract fun setMarkdown(markwon: Markwon, markdown: String)
 
-    public abstract void setParsedMarkdown(@NonNull Markwon markwon, @NonNull Node document);
+    abstract fun setParsedMarkdown(markwon: Markwon, document: Node)
 
-    public abstract void setParsedMarkdown(@NonNull Markwon markwon, @NonNull List<Node> nodes);
+    abstract fun setParsedMarkdown(markwon: Markwon, nodes: MutableList<Node>)
 
-    public abstract int getNodeViewType(@NonNull Class<? extends Node> node);
+    abstract fun getNodeViewType(node: Class<out Node>): Int
 
-    @SuppressWarnings("WeakerAccess")
-    public static class Holder extends RecyclerView.ViewHolder {
-
-        public Holder(@NonNull View itemView) {
-            super(itemView);
+    open class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        // please note that this method should be called after constructor
+        protected fun <V : View> findView(@IdRes id: Int): V {
+            return itemView.findViewById<V>(id)
         }
 
         // please note that this method should be called after constructor
-        @Nullable
-        protected <V extends View> V findView(@IdRes int id) {
-            return itemView.findViewById(id);
-        }
-
-        // please note that this method should be called after constructor
-        @NonNull
-        protected <V extends View> V requireView(@IdRes int id) {
-            final V v = itemView.findViewById(id);
+        protected fun <V : View?> requireView(@IdRes id: Int): V {
+            val v = itemView.findViewById<V?>(id)
             if (v == null) {
-                final String name;
-                if (id == 0 || id == View.NO_ID) {
-                    name = String.valueOf(id);
+                val name: String = if (id == 0 || id == View.NO_ID) {
+                    id.toString()
                 } else {
-                    name = "R.id." + itemView.getResources().getResourceName(id);
+                    "R.id." + itemView.resources.getResourceName(id)
                 }
-                throw new NullPointerException(String.format("No view with id(R.id.%s) is found " + "in layout: %s", name, itemView));
+                throw NullPointerException(
+                    String.format(
+                        "No view with id(R.id.%s) is found " + "in layout: %s",
+                        name,
+                        itemView
+                    )
+                )
             }
-            return v;
+            return v
+        }
+    }
+
+    companion object {
+        fun builderTextViewIsRoot(@LayoutRes defaultEntryLayoutResId: Int): Builder {
+            return builder(SimpleEntry.createTextViewIsRoot(defaultEntryLayoutResId) as Entry<Node, Holder>)
+        }
+
+        /**
+         * Factory method to obtain [Builder] instance.
+         *
+         * @see Builder
+         */
+        fun builder(
+            @LayoutRes defaultEntryLayoutResId: Int,
+            @IdRes defaultEntryTextViewResId: Int
+        ): Builder {
+            val simpleEntry = SimpleEntry.create(defaultEntryLayoutResId, defaultEntryTextViewResId)
+            return builder(simpleEntry as Entry<Node, Holder>)
+        }
+
+        fun builder(defaultEntry: Entry<Node, Holder>): Builder {
+            return MarkwonAdapterImpl.BuilderImpl(defaultEntry)
+        }
+
+        fun createTextViewIsRoot(@LayoutRes defaultEntryLayoutResId: Int): MarkwonAdapter {
+            return builderTextViewIsRoot(defaultEntryLayoutResId).build()
+        }
+
+        /**
+         * Factory method to create a [MarkwonAdapter] for evaluation purposes. Resulting
+         * adapter will use default layout for all blocks. Default layout has no styling and should
+         * be specified explicitly.
+         *
+         * @see .create
+         * @see .builder
+         * @see SimpleEntry
+         */
+        fun create(
+            @LayoutRes defaultEntryLayoutResId: Int,
+            @IdRes defaultEntryTextViewResId: Int
+        ): MarkwonAdapter {
+            return builder(defaultEntryLayoutResId, defaultEntryTextViewResId).build()
+        }
+
+        /**
+         * Factory method to create a [MarkwonAdapter] that uses supplied entry to render all
+         * nodes.
+         *
+         * @param defaultEntry [Entry] to be used for node rendering
+         * @see .builder
+         */
+        fun create(defaultEntry: Entry<out Node, out Holder>): MarkwonAdapter {
+            return builder(defaultEntry as Entry<Node, Holder>).build()
         }
     }
 }
