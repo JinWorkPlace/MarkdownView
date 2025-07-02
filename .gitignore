@@ -1,3 +1,5 @@
+*.aab
+*.apk
 *.iml
 .gradle
 /local.properties
@@ -22,3 +24,5 @@ local.properties
 /.idea/runConfigurations.xml
 /.idea/vcs.xml
 /.idea/git_toolbox_prj.xml
+/.idea/*
+/zip-cache/
