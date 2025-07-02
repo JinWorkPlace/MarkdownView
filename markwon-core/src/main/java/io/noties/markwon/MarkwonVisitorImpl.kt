@@ -1,322 +1,266 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.commonmark.node.BlockQuote;
-import org.commonmark.node.BulletList;
-import org.commonmark.node.Code;
-import org.commonmark.node.CustomBlock;
-import org.commonmark.node.CustomNode;
-import org.commonmark.node.Document;
-import org.commonmark.node.Emphasis;
-import org.commonmark.node.FencedCodeBlock;
-import org.commonmark.node.HardLineBreak;
-import org.commonmark.node.Heading;
-import org.commonmark.node.HtmlBlock;
-import org.commonmark.node.HtmlInline;
-import org.commonmark.node.Image;
-import org.commonmark.node.IndentedCodeBlock;
-import org.commonmark.node.Link;
-import org.commonmark.node.LinkReferenceDefinition;
-import org.commonmark.node.ListItem;
-import org.commonmark.node.Node;
-import org.commonmark.node.OrderedList;
-import org.commonmark.node.Paragraph;
-import org.commonmark.node.SoftLineBreak;
-import org.commonmark.node.StrongEmphasis;
-import org.commonmark.node.Text;
-import org.commonmark.node.ThematicBreak;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import io.noties.markwon.MarkwonVisitor.BlockHandler
+import org.commonmark.node.BlockQuote
+import org.commonmark.node.BulletList
+import org.commonmark.node.Code
+import org.commonmark.node.CustomBlock
+import org.commonmark.node.CustomNode
+import org.commonmark.node.Document
+import org.commonmark.node.Emphasis
+import org.commonmark.node.FencedCodeBlock
+import org.commonmark.node.HardLineBreak
+import org.commonmark.node.Heading
+import org.commonmark.node.HtmlBlock
+import org.commonmark.node.HtmlInline
+import org.commonmark.node.Image
+import org.commonmark.node.IndentedCodeBlock
+import org.commonmark.node.Link
+import org.commonmark.node.LinkReferenceDefinition
+import org.commonmark.node.ListItem
+import org.commonmark.node.Node
+import org.commonmark.node.OrderedList
+import org.commonmark.node.Paragraph
+import org.commonmark.node.SoftLineBreak
+import org.commonmark.node.StrongEmphasis
+import org.commonmark.node.Text
+import org.commonmark.node.ThematicBreak
+import java.util.Collections
 
 /**
  * @since 3.0.0
  */
-class MarkwonVisitorImpl implements MarkwonVisitor {
-
-    private final MarkwonConfiguration configuration;
-
-    private final RenderProps renderProps;
-
-    private final SpannableBuilder builder;
-
-    private final Map<Class<? extends Node>, NodeVisitor<? extends Node>> nodes;
-
-    // @since 4.3.0
-    private final BlockHandler blockHandler;
-
-    MarkwonVisitorImpl(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps renderProps, @NonNull SpannableBuilder builder, @NonNull Map<Class<? extends Node>, NodeVisitor<? extends Node>> nodes, @NonNull BlockHandler blockHandler) {
-        this.configuration = configuration;
-        this.renderProps = renderProps;
-        this.builder = builder;
-        this.nodes = nodes;
-        this.blockHandler = blockHandler;
+internal open class MarkwonVisitorImpl(
+    private val configuration: MarkwonConfiguration,
+    private val renderProps: RenderProps,
+    private val builder: SpannableBuilder,
+    private val nodes: MutableMap<Class<out Node>, MarkwonVisitor.NodeVisitor<out Node>>, // @since 4.3.0
+    private val blockHandler: BlockHandler
+) : MarkwonVisitor {
+    override fun visit(blockQuote: BlockQuote) {
+        visit(blockQuote as Node)
     }
 
-    @Override
-    public void visit(BlockQuote blockQuote) {
-        visit((Node) blockQuote);
+    override fun visit(bulletList: BulletList) {
+        visit(bulletList as Node)
     }
 
-    @Override
-    public void visit(BulletList bulletList) {
-        visit((Node) bulletList);
+    override fun visit(code: Code) {
+        visit(code as Node)
     }
 
-    @Override
-    public void visit(Code code) {
-        visit((Node) code);
+    override fun visit(document: Document) {
+        visit(document as Node)
     }
 
-    @Override
-    public void visit(Document document) {
-        visit((Node) document);
+    override fun visit(emphasis: Emphasis) {
+        visit(emphasis as Node)
     }
 
-    @Override
-    public void visit(Emphasis emphasis) {
-        visit((Node) emphasis);
+    override fun visit(fencedCodeBlock: FencedCodeBlock) {
+        visit(fencedCodeBlock as Node)
     }
 
-    @Override
-    public void visit(FencedCodeBlock fencedCodeBlock) {
-        visit((Node) fencedCodeBlock);
+    override fun visit(hardLineBreak: HardLineBreak?) {
+        visit(hardLineBreak as Node)
     }
 
-    @Override
-    public void visit(HardLineBreak hardLineBreak) {
-        visit((Node) hardLineBreak);
+    override fun visit(heading: Heading) {
+        visit(heading as Node)
     }
 
-    @Override
-    public void visit(Heading heading) {
-        visit((Node) heading);
+    override fun visit(thematicBreak: ThematicBreak) {
+        visit(thematicBreak as Node)
     }
 
-    @Override
-    public void visit(ThematicBreak thematicBreak) {
-        visit((Node) thematicBreak);
+    override fun visit(htmlInline: HtmlInline) {
+        visit(htmlInline as Node)
     }
 
-    @Override
-    public void visit(HtmlInline htmlInline) {
-        visit((Node) htmlInline);
+    override fun visit(htmlBlock: HtmlBlock) {
+        visit(htmlBlock as Node)
     }
 
-    @Override
-    public void visit(HtmlBlock htmlBlock) {
-        visit((Node) htmlBlock);
+    override fun visit(image: Image) {
+        visit(image as Node)
     }
 
-    @Override
-    public void visit(Image image) {
-        visit((Node) image);
+    override fun visit(indentedCodeBlock: IndentedCodeBlock) {
+        visit(indentedCodeBlock as Node)
     }
 
-    @Override
-    public void visit(IndentedCodeBlock indentedCodeBlock) {
-        visit((Node) indentedCodeBlock);
+    override fun visit(link: Link) {
+        visit(link as Node)
     }
 
-    @Override
-    public void visit(Link link) {
-        visit((Node) link);
+    override fun visit(listItem: ListItem) {
+        visit(listItem as Node)
     }
 
-    @Override
-    public void visit(ListItem listItem) {
-        visit((Node) listItem);
+    override fun visit(orderedList: OrderedList) {
+        visit(orderedList as Node)
     }
 
-    @Override
-    public void visit(OrderedList orderedList) {
-        visit((Node) orderedList);
+    override fun visit(paragraph: Paragraph) {
+        visit(paragraph as Node)
     }
 
-    @Override
-    public void visit(Paragraph paragraph) {
-        visit((Node) paragraph);
+    override fun visit(softLineBreak: SoftLineBreak) {
+        visit(softLineBreak as Node)
     }
 
-    @Override
-    public void visit(SoftLineBreak softLineBreak) {
-        visit((Node) softLineBreak);
+    override fun visit(strongEmphasis: StrongEmphasis) {
+        visit(strongEmphasis as Node)
     }
 
-    @Override
-    public void visit(StrongEmphasis strongEmphasis) {
-        visit((Node) strongEmphasis);
+    override fun visit(text: Text) {
+        visit(text as Node)
     }
 
-    @Override
-    public void visit(Text text) {
-        visit((Node) text);
+    override fun visit(linkReferenceDefinition: LinkReferenceDefinition) {
+        visit(linkReferenceDefinition as Node)
     }
 
-    @Override
-    public void visit(LinkReferenceDefinition linkReferenceDefinition) {
-        visit((Node) linkReferenceDefinition);
+    override fun visit(customBlock: CustomBlock) {
+        visit(customBlock as Node)
     }
 
-    @Override
-    public void visit(CustomBlock customBlock) {
-        visit((Node) customBlock);
+    override fun visit(customNode: CustomNode) {
+        visit(customNode as Node)
     }
 
-    @Override
-    public void visit(CustomNode customNode) {
-        visit((Node) customNode);
-    }
-
-    private void visit(@NonNull Node node) {
-        //noinspection unchecked
-        final NodeVisitor<Node> nodeVisitor = (NodeVisitor<Node>) nodes.get(node.getClass());
+    private fun visit(node: Node) {
+        val nodeVisitor = nodes[node.javaClass] as MarkwonVisitor.NodeVisitor<Node>?
         if (nodeVisitor != null) {
-            nodeVisitor.visit(this, node);
+            nodeVisitor.visit(this, node)
         } else {
-            visitChildren(node);
+            visitChildren(node)
         }
     }
 
-    @NonNull
-    @Override
-    public MarkwonConfiguration configuration() {
-        return configuration;
+    override fun configuration(): MarkwonConfiguration {
+        return configuration
     }
 
-    @NonNull
-    @Override
-    public RenderProps renderProps() {
-        return renderProps;
+    override fun renderProps(): RenderProps {
+        return renderProps
     }
 
-    @NonNull
-    @Override
-    public SpannableBuilder builder() {
-        return builder;
+    override fun builder(): SpannableBuilder {
+        return builder
     }
 
-    @Override
-    public void visitChildren(@NonNull Node parent) {
-        Node node = parent.getFirstChild();
-        while (node != null) {
+    override fun visitChildren(node: Node) {
+        var firstChild = node.firstChild
+        while (firstChild != null) {
             // A subclass of this visitor might modify the node, resulting in getNext returning a different node or no
             // node after visiting it. So get the next node before visiting.
-            Node next = node.getNext();
-            node.accept(this);
-            node = next;
+            val next = firstChild.next
+            firstChild.accept(this)
+            firstChild = next
         }
     }
 
-    @Override
-    public boolean hasNext(@NonNull Node node) {
-        return node.getNext() != null;
+    override fun hasNext(node: Node): Boolean {
+        return node.next != null
     }
 
-    @Override
-    public void ensureNewLine() {
-        if (builder.length() > 0 && '\n' != builder.lastChar()) {
-            builder.append('\n');
+    override fun ensureNewLine() {
+        if (builder.isNotEmpty() && '\n' != builder.lastChar()) {
+            builder.append('\n')
         }
     }
 
-    @Override
-    public void forceNewLine() {
-        builder.append('\n');
+    override fun forceNewLine() {
+        builder.append('\n')
     }
 
-    @Override
-    public int length() {
-        return builder.length();
+    override fun length(): Int {
+        return builder.length
     }
 
-    @Override
-    public void setSpans(int start, @Nullable Object spans) {
-        SpannableBuilder.setSpans(builder, spans, start, builder.length());
+    override fun setSpans(start: Int, spans: Any?) {
+        SpannableBuilder.setSpans(builder, spans, start, builder.length)
     }
 
-    @Override
-    public void clear() {
-        renderProps.clearAll();
-        builder.clear();
+    override fun clear() {
+        renderProps.clearAll()
+        builder.clear()
     }
 
-    @Override
-    public <N extends Node> void setSpansForNode(@NonNull N node, int start) {
-        setSpansForNode(node.getClass(), start);
+    override fun <N : Node> setSpansForNode(node: N, start: Int) {
+        setSpansForNode(node.javaClass, start)
     }
 
-    @Override
-    public <N extends Node> void setSpansForNode(@NonNull Class<N> node, int start) {
-        setSpans(start, configuration.spansFactory().require(node).getSpans(configuration, renderProps));
+    override fun <N : Node> setSpansForNode(node: Class<N>, start: Int) {
+        setSpans(
+            start, configuration.spansFactory().require(node).getSpans(configuration, renderProps)
+        )
     }
 
-    @Override
-    public <N extends Node> void setSpansForNodeOptional(@NonNull N node, int start) {
-        setSpansForNodeOptional(node.getClass(), start);
+    override fun <N : Node> setSpansForNodeOptional(node: N, start: Int) {
+        setSpansForNodeOptional(node.javaClass, start)
     }
 
-    @Override
-    public <N extends Node> void setSpansForNodeOptional(@NonNull Class<N> node, int start) {
-        final SpanFactory factory = configuration.spansFactory().get(node);
+    override fun <N : Node> setSpansForNodeOptional(node: Class<N>, start: Int) {
+        val factory = configuration.spansFactory().get(node)
         if (factory != null) {
-            setSpans(start, factory.getSpans(configuration, renderProps));
+            setSpans(start, factory.getSpans(configuration, renderProps))
         }
     }
 
-    @Override
-    public void blockStart(@NonNull Node node) {
-        blockHandler.blockStart(this, node);
+    override fun blockStart(node: Node) {
+        blockHandler.blockStart(this, node)
     }
 
-    @Override
-    public void blockEnd(@NonNull Node node) {
-        blockHandler.blockEnd(this, node);
+    override fun blockEnd(node: Node) {
+        blockHandler.blockEnd(this, node)
     }
 
-    static class BuilderImpl implements Builder {
+    internal class BuilderImpl : MarkwonVisitor.Builder {
+        private val nodes: MutableMap<Class<out Node>, MarkwonVisitor.NodeVisitor<out Node>> =
+            HashMap()
+        private var blockHandler: BlockHandler? = null
 
-        private final Map<Class<? extends Node>, NodeVisitor<? extends Node>> nodes = new HashMap<>();
-        private BlockHandler blockHandler;
-
-        @NonNull
-        @Override
-        public <N extends Node> Builder on(@NonNull Class<N> node, @Nullable NodeVisitor<? super N> nodeVisitor) {
-
+        override fun <N : Node> on(
+            node: Class<N>, nodeVisitor: MarkwonVisitor.NodeVisitor<in N>?
+        ): MarkwonVisitor.Builder {
             // @since 4.1.1 we might actually introduce a local flag to check if it's been built
             //  and throw an exception here if some modification is requested
             //  NB, as we might be built from different threads this flag must be synchronized
 
             // we should allow `null` to exclude node from being visited (for example to disable
             // some functionality)
+
             if (nodeVisitor == null) {
-                nodes.remove(node);
+                nodes.remove(node)
             } else {
-                nodes.put(node, nodeVisitor);
+                nodes.put(node, nodeVisitor)
             }
-            return this;
+            return this
         }
 
-        @NonNull
-        @Override
-        public Builder blockHandler(@NonNull BlockHandler blockHandler) {
-            this.blockHandler = blockHandler;
-            return this;
+        override fun blockHandler(blockHandler: BlockHandler): MarkwonVisitor.Builder {
+            this.blockHandler = blockHandler
+            return this
         }
 
-        @NonNull
-        @Override
-        public MarkwonVisitor build(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps renderProps) {
+        override fun build(
+            configuration: MarkwonConfiguration, renderProps: RenderProps
+        ): MarkwonVisitor {
             // @since 4.3.0
-            BlockHandler blockHandler = this.blockHandler;
+            var blockHandler = this.blockHandler
             if (blockHandler == null) {
-                blockHandler = new BlockHandlerDef();
+                blockHandler = BlockHandlerDef()
             }
 
-            return new MarkwonVisitorImpl(configuration, renderProps, new SpannableBuilder(), Collections.unmodifiableMap(nodes), blockHandler);
+            return MarkwonVisitorImpl(
+                configuration,
+                renderProps,
+                SpannableBuilder(),
+                Collections.unmodifiableMap(nodes),
+                blockHandler
+            )
         }
     }
 }
