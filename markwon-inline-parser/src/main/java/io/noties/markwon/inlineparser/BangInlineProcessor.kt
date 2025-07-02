@@ -1,35 +1,32 @@
-package io.noties.markwon.inlineparser;
+package io.noties.markwon.inlineparser
 
-import org.commonmark.internal.Bracket;
-import org.commonmark.node.Node;
-import org.commonmark.node.Text;
+import org.commonmark.internal.Bracket
+import org.commonmark.node.Node
 
 /**
- * Parses markdown images {@code ![alt](#href)}
+ * Parses markdown images `![alt](#href)`
  *
  * @since 4.2.0
  */
-public class BangInlineProcessor extends InlineProcessor {
-    @Override
-    public char specialCharacter() {
-        return '!';
+class BangInlineProcessor : InlineProcessor() {
+    override fun specialCharacter(): Char {
+        return '!'
     }
 
-    @Override
-    protected Node parse() {
-        int startIndex = index;
-        index++;
+    override fun parse(): Node? {
+        val startIndex = index
+        index++
         if (peek() == '[') {
-            index++;
+            index++
 
-            Text node = text("![");
+            val node = text("![")
 
             // Add entry to stack for this opener
-            addBracket(Bracket.image(node, startIndex + 1, lastBracket(), lastDelimiter()));
+            addBracket(Bracket.image(node, startIndex + 1, lastBracket(), lastDelimiter()))
 
-            return node;
+            return node
         } else {
-            return null;
+            return null
         }
     }
 }

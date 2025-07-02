@@ -1,64 +1,49 @@
-package io.noties.markwon.inlineparser;
+package io.noties.markwon.inlineparser
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import org.commonmark.internal.Bracket
+import org.commonmark.internal.Delimiter
+import org.commonmark.node.LinkReferenceDefinition
+import org.commonmark.node.Node
+import org.commonmark.node.Text
+import java.util.regex.Pattern
 
-import org.commonmark.internal.Bracket;
-import org.commonmark.internal.Delimiter;
-import org.commonmark.node.Link;
-import org.commonmark.node.LinkReferenceDefinition;
-import org.commonmark.node.Node;
-import org.commonmark.node.Text;
+interface MarkwonInlineParserContext {
+    fun block(): Node
 
-import java.util.Map;
-import java.util.regex.Pattern;
+    fun input(): String
 
-public interface MarkwonInlineParserContext {
+    fun index(): Int
 
-    @NonNull
-    Node block();
+    fun setIndex(index: Int)
 
-    @NonNull
-    String input();
+    fun lastBracket(): Bracket?
 
-    int index();
+    fun lastDelimiter(): Delimiter?
 
-    void setIndex(int index);
+    fun addBracket(bracket: Bracket?)
 
-    Bracket lastBracket();
+    fun removeLastBracket()
 
-    Delimiter lastDelimiter();
-
-    void addBracket(Bracket bracket);
-
-    void removeLastBracket();
-
-    void spnl();
+    fun spnl()
 
     /**
-     * Returns the char at the current input index, or {@code '\0'} in case there are no more characters.
+     * Returns the char at the current input index, or `'\0'` in case there are no more characters.
      */
-    char peek();
+    fun peek(): Char
 
-    @Nullable
-    String match(@NonNull Pattern re);
+    fun match(re: Pattern): String?
 
-    @NonNull
-    Text text(@NonNull String text);
+    fun text(text: String): Text
 
-    @NonNull
-    Text text(@NonNull String text, int beginIndex, int endIndex);
+    fun text(text: String, beginIndex: Int, endIndex: Int): Text
 
-    @Nullable
-    LinkReferenceDefinition getLinkReferenceDefinition(String label);
+    fun getLinkReferenceDefinition(label: String?): LinkReferenceDefinition?
 
-    @Nullable
-    String parseLinkDestination();
+    fun parseLinkDestination(): String?
 
-    @Nullable
-    String parseLinkTitle();
+    fun parseLinkTitle(): String?
 
-    int parseLinkLabel();
+    fun parseLinkLabel(): Int
 
-    void processDelimiters(Delimiter stackBottom);
+    fun processDelimiters(stackBottom: Delimiter?)
 }

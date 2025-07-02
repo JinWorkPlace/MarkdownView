@@ -33,11 +33,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-
-    api(project(":markwon-core"))
-    api(libs.commonmark)
+    implementation(project(":markwon-core"))
+    implementation(libs.commonmark)
     implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.junit)

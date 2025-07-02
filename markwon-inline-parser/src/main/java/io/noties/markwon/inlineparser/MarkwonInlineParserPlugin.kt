@@ -1,59 +1,44 @@
-package io.noties.markwon.inlineparser;
+package io.noties.markwon.inlineparser
 
-import androidx.annotation.NonNull;
-
-import org.commonmark.parser.Parser;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.inlineparser.MarkwonInlineParser.FactoryBuilder
+import org.commonmark.parser.Parser
 
 /**
  * @since 4.3.0
  */
-public class MarkwonInlineParserPlugin extends AbstractMarkwonPlugin {
-
-    public interface BuilderConfigure<B extends MarkwonInlineParser.FactoryBuilder> {
-        void configureBuilder(@NonNull B factoryBuilder);
+class MarkwonInlineParserPlugin internal constructor(
+    private val factoryBuilder: FactoryBuilder
+) : AbstractMarkwonPlugin() {
+    interface BuilderConfigure<B : FactoryBuilder> {
+        fun configureBuilder(factoryBuilder: B)
     }
 
-    @NonNull
-    public static MarkwonInlineParserPlugin create() {
-        return create(MarkwonInlineParser.factoryBuilder());
+    override fun configureParser(builder: Parser.Builder) {
+        builder.inlineParserFactory(factoryBuilder.build())
     }
 
-    @NonNull
-    public static MarkwonInlineParserPlugin create(@NonNull BuilderConfigure<MarkwonInlineParser.FactoryBuilder> configure) {
-        final MarkwonInlineParser.FactoryBuilder factoryBuilder = MarkwonInlineParser.factoryBuilder();
-        configure.configureBuilder(factoryBuilder);
-        return new MarkwonInlineParserPlugin(factoryBuilder);
+    fun factoryBuilder(): FactoryBuilder {
+        return factoryBuilder
     }
 
-    @NonNull
-    public static MarkwonInlineParserPlugin create(@NonNull MarkwonInlineParser.FactoryBuilder factoryBuilder) {
-        return new MarkwonInlineParserPlugin(factoryBuilder);
-    }
+    companion object {
+        fun create(configure: BuilderConfigure<FactoryBuilder>): MarkwonInlineParserPlugin {
+            val factoryBuilder = MarkwonInlineParser.factoryBuilder()
+            configure.configureBuilder(factoryBuilder)
+            return MarkwonInlineParserPlugin(factoryBuilder)
+        }
 
-    @NonNull
-    public static <B extends MarkwonInlineParser.FactoryBuilder> MarkwonInlineParserPlugin create(
-            @NonNull B factoryBuilder,
-            @NonNull BuilderConfigure<B> configure) {
-        configure.configureBuilder(factoryBuilder);
-        return new MarkwonInlineParserPlugin(factoryBuilder);
-    }
+        @JvmOverloads
+        fun create(factoryBuilder: FactoryBuilder = MarkwonInlineParser.factoryBuilder()): MarkwonInlineParserPlugin {
+            return MarkwonInlineParserPlugin(factoryBuilder)
+        }
 
-    private final MarkwonInlineParser.FactoryBuilder factoryBuilder;
-
-    @SuppressWarnings("WeakerAccess")
-    MarkwonInlineParserPlugin(@NonNull MarkwonInlineParser.FactoryBuilder factoryBuilder) {
-        this.factoryBuilder = factoryBuilder;
-    }
-
-    @Override
-    public void configureParser(@NonNull Parser.Builder builder) {
-        builder.inlineParserFactory(factoryBuilder.build());
-    }
-
-    @NonNull
-    public MarkwonInlineParser.FactoryBuilder factoryBuilder() {
-        return factoryBuilder;
+        fun <B : FactoryBuilder> create(
+            factoryBuilder: B, configure: BuilderConfigure<B>
+        ): MarkwonInlineParserPlugin {
+            configure.configureBuilder(factoryBuilder)
+            return MarkwonInlineParserPlugin(factoryBuilder)
+        }
     }
 }

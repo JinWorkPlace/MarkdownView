@@ -1,75 +1,57 @@
-package io.noties.markwon.inlineparser;
+package io.noties.markwon.inlineparser
 
-import org.commonmark.node.Text;
-import org.commonmark.parser.delimiter.DelimiterProcessor;
-import org.commonmark.parser.delimiter.DelimiterRun;
+import org.commonmark.node.Text
+import org.commonmark.parser.delimiter.DelimiterProcessor
+import org.commonmark.parser.delimiter.DelimiterRun
+import java.util.LinkedList
 
-import java.util.LinkedList;
-import java.util.ListIterator;
+internal class StaggeredDelimiterProcessor(
+    private val delim: Char
+) : DelimiterProcessor {
+    private var minLength = 0
+    private val processors = LinkedList<DelimiterProcessor>() // in reverse getMinLength order
 
-class StaggeredDelimiterProcessor implements DelimiterProcessor {
+    override fun getOpeningCharacter(): Char = delim
 
-    private final char delim;
-    private int minLength = 0;
-    private LinkedList<DelimiterProcessor> processors = new LinkedList<>(); // in reverse getMinLength order
+    override fun getClosingCharacter(): Char = delim
 
-    StaggeredDelimiterProcessor(char delim) {
-        this.delim = delim;
-    }
+    override fun getMinLength(): Int = minLength
 
-    @Override
-    public char getOpeningCharacter() {
-        return delim;
-    }
-
-    @Override
-    public char getClosingCharacter() {
-        return delim;
-    }
-
-    @Override
-    public int getMinLength() {
-        return minLength;
-    }
-
-    void add(DelimiterProcessor dp) {
-        final int len = dp.getMinLength();
-        ListIterator<DelimiterProcessor> it = processors.listIterator();
-        boolean added = false;
+    fun add(dp: DelimiterProcessor) {
+        val len = dp.minLength
+        val it = processors.listIterator()
+        var added = false
         while (it.hasNext()) {
-            DelimiterProcessor p = it.next();
-            int pLen = p.getMinLength();
+            val p = it.next()
+            val pLen = p.minLength
             if (len > pLen) {
-                it.previous();
-                it.add(dp);
-                added = true;
-                break;
-            } else if (len == pLen) {
-                throw new IllegalArgumentException("Cannot add two delimiter processors for char '" + delim + "' and minimum length " + len);
-            }
+                it.previous()
+                it.add(dp)
+                added = true
+                break
+            } else require(len != pLen) { "Cannot add two delimiter processors for char '$delim' and minimum length $len" }
         }
+
         if (!added) {
-            processors.add(dp);
-            this.minLength = len;
+            processors.add(dp)
+            this.minLength = len
         }
     }
 
-    private DelimiterProcessor findProcessor(int len) {
-        for (DelimiterProcessor p : processors) {
-            if (p.getMinLength() <= len) {
-                return p;
+    private fun findProcessor(len: Int): DelimiterProcessor {
+        for (p in processors) {
+            if (p.minLength <= len) {
+                return p
             }
         }
-        return processors.getFirst();
+        return processors.getFirst()
     }
 
-    @Override
-    public int getDelimiterUse(DelimiterRun opener, DelimiterRun closer) {
-        return findProcessor(opener.length()).getDelimiterUse(opener, closer);
+    override fun getDelimiterUse(opener: DelimiterRun, closer: DelimiterRun): Int {
+        return findProcessor(opener.length()).getDelimiterUse(opener, closer)
     }
 
-    @Override
-    public void process(Text opener, Text closer, int delimiterUse) {
-        findProcessor(delimiterUse).process(opener, closer, delimiterUse);
+    override fun process(opener: Text?, closer: Text?, delimiterUse: Int) {
+        findProcessor(delimiterUse).process(opener, closer, delimiterUse)
     }
 }

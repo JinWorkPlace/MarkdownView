@@ -1,125 +1,109 @@
-package io.noties.markwon.test;
+package io.noties.markwon.test
 
-import androidx.annotation.NonNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Collections
 
 /**
  * Utility class to validate spannable content
  *
  * @since 3.0.0
  */
-public abstract class TestSpan {
+abstract class TestSpan internal constructor() {
+    abstract fun children(): MutableList<TestSpan>
 
-    @NonNull
-    public static TestSpan.Document document(TestSpan... children) {
-        return new TestSpanDocument(children(children));
+    abstract override fun hashCode(): Int
+
+    abstract override fun equals(other: Any?): Boolean
+
+
+    abstract class Document : TestSpan() {
+        abstract fun wholeText(): String
     }
 
-    @NonNull
-    public static TestSpan.Span span(@NonNull String name, TestSpan... children) {
-        return span(name, Collections.<String, Object>emptyMap(), children);
-    }
+    abstract class Text : TestSpan() {
+        abstract fun literal(): String
 
-    @NonNull
-    public static TestSpan.Span span(@NonNull String name, @NonNull Map<String, Object> arguments, TestSpan... children) {
-        return new TestSpanSpan(name, children(children), arguments);
-    }
-
-    @NonNull
-    public static TestSpan.Text text(@NonNull String literal) {
-        return new TestSpanText(literal);
-    }
-
-    @NonNull
-    public static List<TestSpan> children(TestSpan... children) {
-        final int length = children.length;
-        final List<TestSpan> list;
-        if (length == 0) {
-            list = Collections.emptyList();
-        } else if (length == 1) {
-            list = Collections.singletonList(children[0]);
-        } else {
-            final List<TestSpan> spans = new ArrayList<>(length);
-            Collections.addAll(spans, children);
-            list = Collections.unmodifiableList(spans);
-        }
-        return list;
-    }
-
-    @NonNull
-    public static Map<String, Object> args(Object... args) {
-
-        final int length = args.length;
-        if (length == 0) {
-            return Collections.emptyMap();
-        }
-
-        // validate that length is even (k=v)
-        if ((length % 2) != 0) {
-            throw new IllegalStateException("Supplied key-values array must contain " +
-                    "even number of arguments");
-        }
-
-        final Map<String, Object> map = new HashMap<>(length / 2 + 1);
-
-        String key;
-        Object value;
-
-        for (int i = 0; i < length; i += 2) {
-            // possible class-cast exception
-            key = (String) args[i];
-            value = args[i + 1];
-            map.put(key, value);
-        }
-
-        return Collections.unmodifiableMap(map);
-    }
-
-
-    @NonNull
-    public abstract List<TestSpan> children();
-
-    @Override
-    public abstract int hashCode();
-
-    @Override
-    public abstract boolean equals(Object o);
-
-
-    public static abstract class Document extends TestSpan {
-
-        @NonNull
-        public abstract String wholeText();
-    }
-
-    public static abstract class Text extends TestSpan {
-
-        @NonNull
-        public abstract String literal();
-
-        public abstract int length();
+        abstract fun length(): Int
     }
 
     // important: children should not be included in equals...
-    public static abstract class Span extends TestSpan {
+    abstract class Span : TestSpan() {
+        abstract fun name(): String
 
-        @NonNull
-        public abstract String name();
+        abstract fun arguments(): MutableMap<String?, Any?>
 
-        @NonNull
-        public abstract Map<String, Object> arguments();
-
-        @NonNull
-        @Override
-        public abstract List<TestSpan> children();
+        abstract override fun children(): MutableList<TestSpan>
     }
 
-    // package-private constructor
-    TestSpan() {
+    companion object {
+        @JvmStatic
+        fun document(vararg children: TestSpan): Document {
+            return TestSpanDocument(children(*children))
+        }
+
+        @JvmStatic
+        fun span(name: String, vararg children: TestSpan): Span {
+            return span(name, mutableMapOf(), *children)
+        }
+
+        fun span(
+            name: String, arguments: MutableMap<String?, Any?>, vararg children: TestSpan
+        ): Span {
+            return TestSpanSpan(name, children(*children), arguments)
+        }
+
+        @JvmStatic
+        fun text(literal: String): Text {
+            return TestSpanText(literal)
+        }
+
+        fun children(vararg children: TestSpan): MutableList<TestSpan> {
+            val length = children.size
+            val list: MutableList<TestSpan>
+            when (length) {
+                0 -> {
+                    list = mutableListOf()
+                }
+
+                1 -> {
+                    list = mutableListOf(children[0])
+                }
+
+                else -> {
+                    val spans: MutableList<TestSpan?> = ArrayList(length)
+                    Collections.addAll(spans, *children)
+                    list = Collections.unmodifiableList(spans)
+                }
+            }
+            return list
+        }
+
+        @JvmStatic
+        fun args(vararg args: Any?): MutableMap<String?, Any?> {
+            val length = args.size
+            if (length == 0) {
+                return mutableMapOf()
+            }
+
+            // validate that length is even (k=v)
+            check((length % 2) == 0) {
+                "Supplied key-values array must contain " + "even number of arguments"
+            }
+
+            val map: MutableMap<String?, Any?> = HashMap(length / 2 + 1)
+
+            var key: String?
+            var value: Any?
+
+            var i = 0
+            while (i < length) {
+                // possible class-cast exception
+                key = args[i] as String?
+                value = args[i + 1]
+                map.put(key, value)
+                i += 2
+            }
+
+            return Collections.unmodifiableMap<String?, Any?>(map)
+        }
     }
 }

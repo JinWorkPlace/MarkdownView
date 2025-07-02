@@ -33,9 +33,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.junit)
+    testImplementation(libs.ixjava)
 }

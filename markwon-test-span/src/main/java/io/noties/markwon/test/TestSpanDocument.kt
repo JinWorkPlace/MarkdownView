@@ -1,60 +1,54 @@
-package io.noties.markwon.test;
+package io.noties.markwon.test
 
-import androidx.annotation.NonNull;
+internal class TestSpanDocument(
+    private val children: MutableList<TestSpan>
+) : TestSpan.Document() {
+    override fun children(): MutableList<TestSpan> {
+        return children
+    }
 
-import java.util.List;
+    override fun wholeText(): String {
+        val builder = StringBuilder()
 
-class TestSpanDocument extends TestSpan.Document {
+        for (child in children) {
+            fillWholeText(builder, child)
+        }
 
-    private static void fillWholeText(@NonNull StringBuilder builder, @NonNull TestSpan span) {
-        if (span instanceof Text) {
-            builder.append(((Text) span).literal());
-        } else if (span instanceof Span) {
-            for (TestSpan child : span.children()) {
-                fillWholeText(builder, child);
+        return builder.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+
+        val that = other as TestSpanDocument
+
+        return children == that.children
+    }
+
+    override fun hashCode(): Int {
+        return children.hashCode()
+    }
+
+    companion object {
+        private fun fillWholeText(builder: StringBuilder, span: TestSpan) {
+            when (span) {
+                is Text -> {
+                    builder.append(span.literal())
+                }
+
+                is Span -> {
+                    for (child in span.children()) {
+                        fillWholeText(builder, child)
+                    }
+                }
+
+                else -> {
+                    throw IllegalStateException(
+                        "Unexpected state. Found unexpected TestSpan " + "object of type `" + span.javaClass.name + "`"
+                    )
+                }
             }
-        } else {
-            throw new IllegalStateException("Unexpected state. Found unexpected TestSpan " +
-                    "object of type `" + span.getClass().getName() + "`");
         }
-    }
-
-    private final List<TestSpan> children;
-
-    TestSpanDocument(@NonNull List<TestSpan> children) {
-        this.children = children;
-    }
-
-    @NonNull
-    @Override
-    public List<TestSpan> children() {
-        return children;
-    }
-
-    @NonNull
-    @Override
-    public String wholeText() {
-        final StringBuilder builder = new StringBuilder();
-
-        for (TestSpan child : children) {
-            fillWholeText(builder, child);
-        }
-
-        return builder.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        TestSpanDocument that = (TestSpanDocument) o;
-
-        return children.equals(that.children);
-    }
-
-    @Override
-    public int hashCode() {
-        return children.hashCode();
     }
 }

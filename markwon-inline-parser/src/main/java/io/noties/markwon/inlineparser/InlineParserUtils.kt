@@ -1,77 +1,75 @@
-package io.noties.markwon.inlineparser;
+package io.noties.markwon.inlineparser
 
-import org.commonmark.node.Node;
-import org.commonmark.node.Text;
+import org.commonmark.node.Node
+import org.commonmark.node.Text
 
 /**
  * @since 4.2.0
  */
-public abstract class InlineParserUtils {
-
-    public static void mergeTextNodesBetweenExclusive(Node fromNode, Node toNode) {
+object InlineParserUtils {
+    @JvmStatic
+    fun mergeTextNodesBetweenExclusive(fromNode: Node, toNode: Node) {
         // No nodes between them
-        if (fromNode == toNode || fromNode.getNext() == toNode) {
-            return;
+        if (fromNode === toNode || fromNode.next === toNode) {
+            return
         }
 
-        mergeTextNodesInclusive(fromNode.getNext(), toNode.getPrevious());
+        mergeTextNodesInclusive(fromNode.next, toNode.previous)
     }
 
-    public static void mergeChildTextNodes(Node node) {
+    @JvmStatic
+    fun mergeChildTextNodes(node: Node) {
         // No children or just one child node, no need for merging
-        if (node.getFirstChild() == node.getLastChild()) {
-            return;
+        if (node.firstChild === node.lastChild) {
+            return
         }
 
-        mergeTextNodesInclusive(node.getFirstChild(), node.getLastChild());
+        mergeTextNodesInclusive(node.firstChild, node.lastChild)
     }
 
-    public static void mergeTextNodesInclusive(Node fromNode, Node toNode) {
-        Text first = null;
-        Text last = null;
-        int length = 0;
+    fun mergeTextNodesInclusive(fromNode: Node?, toNode: Node?) {
+        var first: Text? = null
+        var last: Text? = null
+        var length = 0
 
-        Node node = fromNode;
+        var node = fromNode
         while (node != null) {
-            if (node instanceof Text) {
-                Text text = (Text) node;
+            if (node is Text) {
+                val text = node
                 if (first == null) {
-                    first = text;
+                    first = text
                 }
-                length += text.getLiteral().length();
-                last = text;
+                length += text.literal.length
+                last = text
             } else {
-                mergeIfNeeded(first, last, length);
-                first = null;
-                last = null;
-                length = 0;
+                mergeIfNeeded(first, last, length)
+                first = null
+                last = null
+                length = 0
             }
-            if (node == toNode) {
-                break;
+            if (node === toNode) {
+                break
             }
-            node = node.getNext();
+            node = node.next
         }
 
-        mergeIfNeeded(first, last, length);
+        mergeIfNeeded(first, last, length)
     }
 
-    public static void mergeIfNeeded(Text first, Text last, int textLength) {
-        if (first != null && last != null && first != last) {
-            StringBuilder sb = new StringBuilder(textLength);
-            sb.append(first.getLiteral());
-            Node node = first.getNext();
-            Node stop = last.getNext();
-            while (node != stop) {
-                sb.append(((Text) node).getLiteral());
-                Node unlink = node;
-                node = node.getNext();
-                unlink.unlink();
+    fun mergeIfNeeded(first: Text?, last: Text?, textLength: Int) {
+        if (first != null && last != null && first !== last) {
+            val sb = StringBuilder(textLength)
+            sb.append(first.literal)
+            var node = first.next
+            val stop = last.next
+            while (node !== stop) {
+                sb.append((node as Text).literal)
+                val unlink: Node = node
+                node = node.next
+                unlink.unlink()
             }
-            String literal = sb.toString();
-            first.setLiteral(literal);
+            val literal = sb.toString()
+            first.literal = literal
         }
-    }
-
-    private InlineParserUtils() {
     }
 }
