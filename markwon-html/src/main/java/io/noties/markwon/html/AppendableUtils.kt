@@ -1,35 +1,32 @@
-package io.noties.markwon.html;
+package io.noties.markwon.html
 
-import androidx.annotation.NonNull;
+import java.io.IOException
 
-import java.io.IOException;
-
-abstract class AppendableUtils {
-
-    static void appendQuietly(@NonNull Appendable appendable, char c) {
+internal object AppendableUtils {
+    @JvmStatic
+    fun appendQuietly(appendable: Appendable, c: Char) {
         try {
-            appendable.append(c);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            appendable.append(c)
+        } catch (e: IOException) {
+            throw RuntimeException(e)
         }
     }
 
-    static void appendQuietly(@NonNull Appendable appendable, @NonNull CharSequence cs) {
+    @JvmStatic
+    fun appendQuietly(appendable: Appendable, cs: CharSequence) {
         try {
-            appendable.append(cs);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            appendable.append(cs)
+        } catch (e: IOException) {
+            throw RuntimeException(e)
         }
     }
 
-    static void appendQuietly(@NonNull Appendable appendable, @NonNull CharSequence cs, int start, int end) {
+    @JvmStatic
+    fun appendQuietly(appendable: Appendable, cs: CharSequence, start: Int, end: Int) {
         try {
-            appendable.append(cs, start, end);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            appendable.append(cs, start, end)
+        } catch (e: IOException) {
+            throw RuntimeException(e)
         }
-    }
-
-    private AppendableUtils() {
     }
 }

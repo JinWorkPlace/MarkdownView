@@ -1,52 +1,46 @@
-package io.noties.markwon.html;
-
-import androidx.annotation.NonNull;
-
-import java.util.List;
+package io.noties.markwon.html
 
 /**
  * @since 2.0.0
  */
-public abstract class MarkwonHtmlParser {
-
-    public interface FlushAction<T> {
-        void apply(@NonNull List<T> tags);
+abstract class MarkwonHtmlParser {
+    interface FlushAction<T> {
+        fun apply(tags: MutableList<T>)
     }
 
-    public abstract <T extends Appendable & CharSequence> void processFragment(
-            @NonNull T output,
-            @NonNull String htmlFragment);
+    abstract fun <T> processFragment(
+        output: T, htmlFragment: String
+    ) where T : Appendable, T : CharSequence
 
     /**
-     * After this method exists a {@link MarkwonHtmlParser} will clear internal state for stored tags.
+     * After this method exists a [MarkwonHtmlParser] will clear internal state for stored tags.
      * If you wish to process them further after this method exists create own copy of supplied
      * collection.
      *
      * @param documentLength known document length. This value is used to close all non-closed tags.
-     *                       If you wish to keep them open (do not force close at the end of a
-     *                       document pass here {@link HtmlTag#NO_END}. Later non-closed tags
-     *                       can be detected by calling {@link HtmlTag#isClosed()}
-     * @param action         {@link FlushAction} to be called with resulting tags ({@link HtmlTag.Inline})
+     * If you wish to keep them open (do not force close at the end of a
+     * document pass here [HtmlTag.NO_END]. Later non-closed tags
+     * can be detected by calling [HtmlTag.isClosed]
+     * @param action         [FlushAction] to be called with resulting tags ([HtmlTag.Inline])
      */
-    public abstract void flushInlineTags(
-            int documentLength,
-            @NonNull FlushAction<HtmlTag.Inline> action);
+    abstract fun flushInlineTags(
+        documentLength: Int, action: FlushAction<HtmlTag.Inline>
+    )
 
     /**
-     * After this method exists a {@link MarkwonHtmlParser} will clear internal state for stored tags.
+     * After this method exists a [MarkwonHtmlParser] will clear internal state for stored tags.
      * If you wish to process them further after this method exists create own copy of supplied
      * collection.
      *
      * @param documentLength known document length. This value is used to close all non-closed tags.
-     *                       If you wish to keep them open (do not force close at the end of a
-     *                       document pass here {@link HtmlTag#NO_END}. Later non-closed tags
-     *                       can be detected by calling {@link HtmlTag#isClosed()}
-     * @param action         {@link FlushAction} to be called with resulting tags ({@link HtmlTag.Block})
+     * If you wish to keep them open (do not force close at the end of a
+     * document pass here [HtmlTag.NO_END]. Later non-closed tags
+     * can be detected by calling [HtmlTag.isClosed]
+     * @param action         [FlushAction] to be called with resulting tags ([HtmlTag.Block])
      */
-    public abstract void flushBlockTags(
-            int documentLength,
-            @NonNull FlushAction<HtmlTag.Block> action);
+    abstract fun flushBlockTags(
+        documentLength: Int, action: FlushAction<HtmlTag.Block>
+    )
 
-    public abstract void reset();
-
+    abstract fun reset()
 }

@@ -1,18 +1,16 @@
-package io.noties.markwon.html.jsoup.helper;
-
-import java.util.Locale;
+package io.noties.markwon.html.jsoup.helper
 
 /**
  * Util methods for normalizing strings. Jsoup internal use only, please don't depend on this API.
  */
-public final class Normalizer {
-
-    public static String lowerCase(final String input) {
-        return input != null ? input.toLowerCase(Locale.ENGLISH) : "";
+object Normalizer {
+    @JvmStatic
+    fun lowerCase(input: String?): String {
+        return input?.lowercase() ?: ""
     }
 
-    public static String normalize(final String input) {
-        return lowerCase(input).trim();
+    fun normalize(input: String?): String {
+        return lowerCase(input).trim { it <= ' ' }
     }
 }
 

@@ -1,26 +1,18 @@
-package io.noties.markwon.html.tag;
+package io.noties.markwon.html.tag
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.RenderProps
+import io.noties.markwon.html.HtmlTag
+import io.noties.markwon.html.span.SuperScriptSpan
 
-import java.util.Collection;
-import java.util.Collections;
-
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.RenderProps;
-import io.noties.markwon.html.HtmlTag;
-import io.noties.markwon.html.span.SuperScriptSpan;
-
-public class SuperScriptHandler extends SimpleTagHandler {
-    @Nullable
-    @Override
-    public Object getSpans(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps renderProps, @NonNull HtmlTag tag) {
-        return new SuperScriptSpan();
+class SuperScriptHandler : SimpleTagHandler() {
+    override fun getSpans(
+        configuration: MarkwonConfiguration, renderProps: RenderProps, tag: HtmlTag
+    ): Any? {
+        return SuperScriptSpan()
     }
 
-    @NonNull
-    @Override
-    public Collection<String> supportedTags() {
-        return Collections.singleton("sup");
+    override fun supportedTags(): MutableCollection<String> {
+        return mutableSetOf("sup")
     }
 }

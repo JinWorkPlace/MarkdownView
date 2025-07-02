@@ -1,26 +1,20 @@
-package io.noties.markwon.html.span;
+package io.noties.markwon.html.span
 
-import android.text.TextPaint;
-import android.text.style.MetricAffectingSpan;
+import android.text.TextPaint
+import android.text.style.MetricAffectingSpan
+import io.noties.markwon.html.HtmlPlugin
 
-import androidx.annotation.NonNull;
-
-import io.noties.markwon.html.HtmlPlugin;
-
-public class SubScriptSpan extends MetricAffectingSpan {
-
-    @Override
-    public void updateDrawState(TextPaint tp) {
-        apply(tp);
+class SubScriptSpan : MetricAffectingSpan() {
+    override fun updateDrawState(tp: TextPaint) {
+        apply(tp)
     }
 
-    @Override
-    public void updateMeasureState(@NonNull TextPaint tp) {
-        apply(tp);
+    override fun updateMeasureState(tp: TextPaint) {
+        apply(tp)
     }
 
-    private void apply(TextPaint paint) {
-        paint.setTextSize(paint.getTextSize() * HtmlPlugin.SCRIPT_DEF_TEXT_SIZE_RATIO);
-        paint.baselineShift -= (int) (paint.ascent() / 2);
+    private fun apply(paint: TextPaint) {
+        paint.textSize = paint.textSize * HtmlPlugin.SCRIPT_DEF_TEXT_SIZE_RATIO
+        paint.baselineShift -= (paint.ascent() / 2).toInt()
     }
 }

@@ -1,111 +1,87 @@
-package io.noties.markwon.html.tag;
+package io.noties.markwon.html.tag
 
-import android.text.TextUtils;
+import android.text.TextUtils
+import androidx.annotation.VisibleForTesting
+import io.noties.markwon.html.CssInlineStyleParser
+import io.noties.markwon.html.tag.ImageHandler.ImageSizeParser
+import io.noties.markwon.image.ImageSize
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
-import java.util.Map;
-
-import io.noties.markwon.html.CssInlineStyleParser;
-import io.noties.markwon.html.CssProperty;
-import io.noties.markwon.image.ImageSize;
-
-class ImageSizeParserImpl implements ImageHandler.ImageSizeParser {
-
-    private final CssInlineStyleParser inlineStyleParser;
-
-    ImageSizeParserImpl(@NonNull CssInlineStyleParser inlineStyleParser) {
-        this.inlineStyleParser = inlineStyleParser;
-    }
-
-    @Override
-    public ImageSize parse(@NonNull Map<String, String> attributes) {
-
+internal class ImageSizeParserImpl(
+    private val inlineStyleParser: CssInlineStyleParser
+) : ImageSizeParser {
+    override fun parse(attributes: MutableMap<String, String>): ImageSize? {
         // strictly speaking percents when specified directly on an attribute
         // are not part of the HTML spec (I couldn't find any reference)
 
-        ImageSize.Dimension width = null;
-        ImageSize.Dimension height = null;
+        var width: ImageSize.Dimension? = null
+        var height: ImageSize.Dimension? = null
 
         // okay, let's first check styles
-        final String style = attributes.get("style");
+        val style = attributes["style"]
 
         if (!TextUtils.isEmpty(style)) {
+            var key: String?
 
-            String key;
+            for (cssProperty in inlineStyleParser.parse(style!!)) {
+                key = cssProperty.key()
 
-            for (CssProperty cssProperty : inlineStyleParser.parse(style)) {
-
-                key = cssProperty.key();
-
-                if ("width".equals(key)) {
-                    width = dimension(cssProperty.value());
-                } else if ("height".equals(key)) {
-                    height = dimension(cssProperty.value());
+                if ("width" == key) {
+                    width = dimension(cssProperty.value())
+                } else if ("height" == key) {
+                    height = dimension(cssProperty.value())
                 }
 
-                if (width != null
-                        && height != null) {
-                    break;
+                if (width != null && height != null) {
+                    break
                 }
             }
         }
 
-        if (width != null
-                && height != null) {
-            return new ImageSize(width, height);
+        if (width != null && height != null) {
+            return ImageSize(width, height)
         }
 
         // check tag attributes
         if (width == null) {
-            width = dimension(attributes.get("width"));
+            width = dimension(attributes["width"])
         }
 
         if (height == null) {
-            height = dimension(attributes.get("height"));
+            height = dimension(attributes["height"])
         }
 
-        if (width == null
-                && height == null) {
-            return null;
+        if (width == null && height == null) {
+            return null
         }
 
-        return new ImageSize(width, height);
+        return ImageSize(width!!, height!!)
     }
 
-    @Nullable
     @VisibleForTesting
-    ImageSize.Dimension dimension(@Nullable String value) {
-
+    fun dimension(value: String?): ImageSize.Dimension? {
         if (TextUtils.isEmpty(value)) {
-            return null;
+            return null
         }
 
-        final int length = value.length();
+        val length = value!!.length
 
-        for (int i = length - 1; i > -1; i--) {
-
-            if (Character.isDigit(value.charAt(i))) {
-
+        for (i in length - 1 downTo -1 + 1) {
+            if (Character.isDigit(value[i])) {
                 try {
-                    final float val = Float.parseFloat(value.substring(0, i + 1));
-                    final String unit;
-                    if (i == length - 1) {
-                        // no unit info
-                        unit = null;
+                    val `val` = value.substring(0, i + 1).toFloat()
+                    val unit: String? = if (i == length - 1) {
+                        null
                     } else {
-                        unit = value.substring(i + 1, length);
+                        value.substring(i + 1, length)
                     }
-                    return new ImageSize.Dimension(val, unit);
-                } catch (NumberFormatException e) {
+                    return ImageSize.Dimension(`val`, unit)
+                } catch (_: NumberFormatException) {
                     // value cannot not be represented as a float
-                    return null;
+                    return null
                 }
             }
         }
 
-        return null;
+        return null
     }
 }

@@ -1,20 +1,14 @@
-package io.noties.markwon.html;
+package io.noties.markwon.html
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.noties.markwon.MarkwonVisitor;
+import io.noties.markwon.MarkwonVisitor
 
 /**
  * @since 2.0.0
  */
-public abstract class MarkwonHtmlRenderer {
+abstract class MarkwonHtmlRenderer {
+    abstract fun render(
+        visitor: MarkwonVisitor, parser: MarkwonHtmlParser
+    )
 
-    public abstract void render(
-            @NonNull MarkwonVisitor visitor,
-            @NonNull MarkwonHtmlParser parser
-    );
-
-    @Nullable
-    public abstract TagHandler tagHandler(@NonNull String tagName);
+    abstract fun tagHandler(tagName: String): TagHandler?
 }

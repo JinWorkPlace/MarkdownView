@@ -1,35 +1,22 @@
-package io.noties.markwon.html.tag;
+package io.noties.markwon.html.tag
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.RenderProps
+import io.noties.markwon.html.HtmlTag
+import org.commonmark.node.Emphasis
 
-import org.commonmark.node.Emphasis;
-
-import java.util.Arrays;
-import java.util.Collection;
-
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.RenderProps;
-import io.noties.markwon.SpanFactory;
-import io.noties.markwon.html.HtmlTag;
-
-public class EmphasisHandler extends SimpleTagHandler {
-    @Nullable
-    @Override
-    public Object getSpans(
-            @NonNull MarkwonConfiguration configuration,
-            @NonNull RenderProps renderProps,
-            @NonNull HtmlTag tag) {
-        final SpanFactory spanFactory = configuration.spansFactory().get(Emphasis.class);
+class EmphasisHandler : SimpleTagHandler() {
+    override fun getSpans(
+        configuration: MarkwonConfiguration, renderProps: RenderProps, tag: HtmlTag
+    ): Any? {
+        val spanFactory = configuration.spansFactory().get(Emphasis::class.java)
         if (spanFactory == null) {
-            return null;
+            return null
         }
-        return spanFactory.getSpans(configuration, renderProps);
+        return spanFactory.getSpans(configuration, renderProps)
     }
 
-    @NonNull
-    @Override
-    public Collection<String> supportedTags() {
-        return Arrays.asList("i", "em", "cite", "dfn");
+    override fun supportedTags(): MutableCollection<String> {
+        return mutableListOf("i", "em", "cite", "dfn")
     }
 }

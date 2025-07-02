@@ -1,208 +1,136 @@
-package io.noties.markwon.html;
+package io.noties.markwon.html
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import java.util.Collections
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+internal abstract class HtmlTagImpl protected constructor(
+    @JvmField val name: String, @JvmField val start: Int, val attributes: MutableMap<String, String>
+) : HtmlTag {
+    @JvmField
+    var end: Int = HtmlTag.Companion.NO_END
 
-abstract class HtmlTagImpl implements HtmlTag {
-
-    final String name;
-    final int start;
-    final Map<String, String> attributes;
-    int end = NO_END;
-
-    protected HtmlTagImpl(@NonNull String name, int start, @NonNull Map<String, String> attributes) {
-        this.name = name;
-        this.start = start;
-        this.attributes = attributes;
+    override fun name(): String {
+        return name
     }
 
-    @NonNull
-    @Override
-    public String name() {
-        return name;
+    override fun start(): Int {
+        return start
     }
 
-    @Override
-    public int start() {
-        return start;
+    override fun end(): Int {
+        return end
     }
 
-    @Override
-    public int end() {
-        return end;
+    override val isEmpty: Boolean
+        get() = start == end
+
+    override fun attributes(): MutableMap<String, String> {
+        return attributes
     }
 
-    @Override
-    public boolean isEmpty() {
-        return start == end;
-    }
+    override val isClosed: Boolean
+        get() = end > HtmlTag.Companion.NO_END
 
-    @NonNull
-    @Override
-    public Map<String, String> attributes() {
-        return attributes;
-    }
-
-    @Override
-    public boolean isClosed() {
-        return end > NO_END;
-    }
-
-    abstract void closeAt(int end);
+    abstract fun closeAt(end: Int)
 
 
-    static class InlineImpl extends HtmlTagImpl implements Inline {
-
-        InlineImpl(@NonNull String name, int start, @NonNull Map<String, String> attributes) {
-            super(name, start, attributes);
-        }
-
-        @Override
-        void closeAt(int end) {
-            if (!isClosed()) {
-                super.end = end;
+    internal class InlineImpl(
+        name: String, start: Int, attributes: MutableMap<String, String>
+    ) : HtmlTagImpl(name, start, attributes), HtmlTag.Inline {
+        override fun closeAt(end: Int) {
+            if (!isClosed) {
+                super.end = end
             }
         }
 
-        @Override
-        public String toString() {
-            return "InlineImpl{" +
-                    "name='" + name + '\'' +
-                    ", start=" + start +
-                    ", end=" + end +
-                    ", attributes=" + attributes +
-                    '}';
+        override fun toString(): String {
+            return "InlineImpl{name='$name', start=$start, end=$end, attributes=$attributes}"
         }
 
-        @Override
-        public boolean isInline() {
-            return true;
-        }
+        override val isInline: Boolean
+            get() = true
 
-        @Override
-        public boolean isBlock() {
-            return false;
-        }
+        override val isBlock: Boolean
+            get() = false
 
-        @NonNull
-        @Override
-        public Inline getAsInline() {
-            return this;
-        }
+        override val asInline: HtmlTag.Inline
+            get() = this
 
-        @NonNull
-        @Override
-        public Block getAsBlock() {
-            throw new ClassCastException("Cannot cast Inline instance to Block");
-        }
+        override val asBlock: HtmlTag.Block
+            get() {
+                throw ClassCastException("Cannot cast Inline instance to Block")
+            }
     }
 
-    static class BlockImpl extends HtmlTagImpl implements Block {
+    internal class BlockImpl(
+        name: String,
+        start: Int,
+        attributes: MutableMap<String, String>,
+        @JvmField val parent: BlockImpl?
+    ) : HtmlTagImpl(name, start, attributes), HtmlTag.Block {
+        @JvmField
+        var children: MutableList<BlockImpl>? = null
 
-        @NonNull
-        static BlockImpl root() {
-            return new BlockImpl("", 0, Collections.<String, String>emptyMap(), null);
-        }
-
-        @NonNull
-        static BlockImpl create(
-                @NonNull String name,
-                int start,
-                @NonNull Map<String, String> attributes,
-                @Nullable BlockImpl parent) {
-            return new BlockImpl(name, start, attributes, parent);
-        }
-
-        final BlockImpl parent;
-        List<BlockImpl> children;
-
-        @SuppressWarnings("NullableProblems")
-        BlockImpl(
-                @NonNull String name,
-                int start,
-                @NonNull Map<String, String> attributes,
-                @Nullable BlockImpl parent) {
-            super(name, start, attributes);
-            this.parent = parent;
-        }
-
-        @Override
-        void closeAt(int end) {
-            if (!isClosed()) {
-                super.end = end;
+        override fun closeAt(end: Int) {
+            if (!isClosed) {
+                super.end = end
                 if (children != null) {
-                    for (BlockImpl child : children) {
-                        child.closeAt(end);
+                    for (child in children) {
+                        child.closeAt(end)
                     }
                 }
             }
         }
 
-        @Override
-        public boolean isRoot() {
-            return parent == null;
+        override val isRoot: Boolean
+            get() = parent == null
+
+        override fun parent(): HtmlTag.Block? {
+            return parent
         }
 
-        @Nullable
-        @Override
-        public Block parent() {
-            return parent;
-        }
-
-        @NonNull
-        @Override
-        public List<Block> children() {
-            final List<Block> list;
+        override fun children(): MutableList<HtmlTag.Block> {
+            val list: MutableList<HtmlTag.Block>
             if (children == null) {
-                list = Collections.emptyList();
+                list = mutableListOf()
             } else {
-                list = Collections.unmodifiableList((List<? extends Block>) children);
+                list = Collections.unmodifiableList(children as MutableList<out HtmlTag.Block>)
             }
-            return list;
+            return list
         }
 
-        @NonNull
-        @Override
-        public Map<String, String> attributes() {
-            return attributes;
+        override fun attributes(): MutableMap<String, String> {
+            return attributes
         }
 
-        @Override
-        public boolean isInline() {
-            return false;
+        override val isInline: Boolean
+            get() = false
+
+        override val isBlock: Boolean
+            get() = true
+
+        override val asInline: HtmlTag.Inline
+            get() {
+                throw ClassCastException("Cannot cast Block instance to Inline")
+            }
+
+        override val asBlock: HtmlTag.Block
+            get() = this
+
+        override fun toString(): String {
+            return "BlockImpl{" + "name='" + name + '\'' + ", start=" + start + ", end=" + end + ", attributes=" + attributes + ", parent=" + (parent?.name) + ", children=" + children + '}'
         }
 
-        @Override
-        public boolean isBlock() {
-            return true;
-        }
+        companion object {
+            @JvmStatic
+            fun root(): BlockImpl {
+                return BlockImpl("", 0, mutableMapOf(), null)
+            }
 
-        @NonNull
-        @Override
-        public Inline getAsInline() {
-            throw new ClassCastException("Cannot cast Block instance to Inline");
-        }
-
-        @NonNull
-        @Override
-        public Block getAsBlock() {
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return "BlockImpl{" +
-                    "name='" + name + '\'' +
-                    ", start=" + start +
-                    ", end=" + end +
-                    ", attributes=" + attributes +
-                    ", parent=" + (parent != null ? parent.name : null) +
-                    ", children=" + children +
-                    '}';
+            fun create(
+                name: String, start: Int, attributes: MutableMap<String, String>, parent: BlockImpl?
+            ): BlockImpl {
+                return BlockImpl(name, start, attributes, parent)
+            }
         }
     }
 }

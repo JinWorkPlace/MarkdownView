@@ -1,42 +1,29 @@
-package io.noties.markwon.html;
+package io.noties.markwon.html
 
-import androidx.annotation.NonNull;
+class CssProperty internal constructor() {
+    private var key: String? = null
+    private var value: String? = null
 
-public class CssProperty {
-
-    private String key;
-    private String value;
-
-    CssProperty() {
+    fun set(key: String, value: String) {
+        this.key = key
+        this.value = value
     }
 
-    void set(@NonNull String key, @NonNull String value) {
-        this.key = key;
-        this.value = value;
+    fun key(): String {
+        return key!!
     }
 
-    @NonNull
-    public String key() {
-        return key;
+    fun value(): String {
+        return value!!
     }
 
-    @NonNull
-    public String value() {
-        return value;
+    fun mutate(): CssProperty {
+        val cssProperty = CssProperty()
+        cssProperty.set(this.key!!, this.value!!)
+        return cssProperty
     }
 
-    @NonNull
-    public CssProperty mutate() {
-        final CssProperty cssProperty = new CssProperty();
-        cssProperty.set(this.key, this.value);
-        return cssProperty;
-    }
-
-    @Override
-    public String toString() {
-        return "CssProperty{" +
-                "key='" + key + '\'' +
-                ", value='" + value + '\'' +
-                '}';
+    override fun toString(): String {
+        return "CssProperty{key='$key', value='$value'}"
     }
 }

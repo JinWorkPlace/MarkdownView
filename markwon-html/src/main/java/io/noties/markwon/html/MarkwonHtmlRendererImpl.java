@@ -22,9 +22,7 @@ class MarkwonHtmlRendererImpl extends MarkwonHtmlRenderer {
     }
 
     @Override
-    public void render(
-            @NonNull final MarkwonVisitor visitor,
-            @NonNull MarkwonHtmlParser parser) {
+    public void render(@NonNull final MarkwonVisitor visitor, @NonNull MarkwonHtmlParser parser) {
 
         final int end;
         if (!allowNonClosedTags) {
@@ -33,23 +31,20 @@ class MarkwonHtmlRendererImpl extends MarkwonHtmlRenderer {
             end = visitor.length();
         }
 
-        parser.flushInlineTags(end, new MarkwonHtmlParser.FlushAction<HtmlTag.Inline>() {
-            @Override
-            public void apply(@NonNull List<HtmlTag.Inline> tags) {
+        parser.flushInlineTags(end, tags -> {
 
-                TagHandler handler;
+            TagHandler handler;
 
-                for (HtmlTag.Inline inline : tags) {
+            for (HtmlTag.Inline inline : tags) {
 
-                    // if tag is not closed -> do not render
-                    if (!inline.isClosed()) {
-                        continue;
-                    }
+                // if tag is not closed -> do not render
+                if (!inline.isClosed) {
+                    continue;
+                }
 
-                    handler = tagHandler(inline.name());
-                    if (handler != null) {
-                        handler.handle(visitor, MarkwonHtmlRendererImpl.this, inline);
-                    }
+                handler = tagHandler(inline.name());
+                if (handler != null) {
+                    handler.handle(visitor, MarkwonHtmlRendererImpl.this, inline);
                 }
             }
         });
@@ -62,7 +57,7 @@ class MarkwonHtmlRendererImpl extends MarkwonHtmlRenderer {
 
                 for (HtmlTag.Block block : tags) {
 
-                    if (!block.isClosed()) {
+                    if (!block.isClosed) {
                         continue;
                     }
 
@@ -130,9 +125,7 @@ class MarkwonHtmlRendererImpl extends MarkwonHtmlRenderer {
 
             // okay, let's validate that we have at least one tagHandler registered
             // if we have none -> return no-op implementation
-            return tagHandlers.size() > 0
-                    ? new MarkwonHtmlRendererImpl(allowNonClosedTags, Collections.unmodifiableMap(tagHandlers))
-                    : new MarkwonHtmlRendererNoOp();
+            return !tagHandlers.isEmpty() ? new MarkwonHtmlRendererImpl(allowNonClosedTags, Collections.unmodifiableMap(tagHandlers)) : new MarkwonHtmlRendererNoOp();
         }
 
         private void checkState() {
