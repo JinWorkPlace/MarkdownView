@@ -1,149 +1,120 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.commonmark.node.Node;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.commonmark.node.Node
+import java.util.Collections
 
 /**
  * @since 3.0.0
  */
-class MarkwonSpansFactoryImpl implements MarkwonSpansFactory {
-
-    private final Map<Class<? extends Node>, SpanFactory> factories;
-
-    MarkwonSpansFactoryImpl(@NonNull Map<Class<? extends Node>, SpanFactory> factories) {
-        this.factories = factories;
+internal class MarkwonSpansFactoryImpl(
+    private val factories: MutableMap<Class<out Node>, SpanFactory>
+) : MarkwonSpansFactory {
+    override fun <N : Node> get(node: Class<N>): SpanFactory? {
+        return factories[node]
     }
 
-    @Nullable
-    @Override
-    public <N extends Node> SpanFactory get(@NonNull Class<N> node) {
-        return factories.get(node);
+    override fun <N : Node> require(node: Class<N>): SpanFactory {
+        val f: SpanFactory = get(node)!!
+        return f
     }
 
-    @NonNull
-    @Override
-    public <N extends Node> SpanFactory require(@NonNull Class<N> node) {
-        final SpanFactory f = get(node);
-        if (f == null) {
-            throw new NullPointerException(node.getName());
-        }
-        return f;
-    }
+    internal class BuilderImpl : MarkwonSpansFactory.Builder {
+        private val factories: MutableMap<Class<out Node>, SpanFactory> = HashMap(3)
 
-    static class BuilderImpl implements Builder {
-
-        private final Map<Class<? extends Node>, SpanFactory> factories =
-                new HashMap<>(3);
-
-        @NonNull
-        @Override
-        public <N extends Node> Builder setFactory(@NonNull Class<N> node, @Nullable SpanFactory factory) {
+        override fun <N : Node> setFactory(
+            node: Class<N>, factory: SpanFactory?
+        ): MarkwonSpansFactory.Builder {
             if (factory == null) {
-                factories.remove(node);
+                factories.remove(node)
             } else {
-                factories.put(node, factory);
+                factories.put(node, factory)
             }
-            return this;
+            return this
         }
 
-        @NonNull
-        @Override
-        @Deprecated
-        public <N extends Node> Builder addFactory(@NonNull Class<N> node, @NonNull SpanFactory factory) {
-            return prependFactory(node, factory);
+        @Deprecated("")
+        override fun <N : Node> addFactory(
+            node: Class<N>, factory: SpanFactory
+        ): MarkwonSpansFactory.Builder {
+            return prependFactory(node, factory)
         }
 
-        @NonNull
-        @Override
-        public <N extends Node> Builder appendFactory(@NonNull Class<N> node, @NonNull SpanFactory factory) {
-            final SpanFactory existing = factories.get(node);
+        override fun <N : Node> appendFactory(
+            node: Class<N>, factory: SpanFactory
+        ): MarkwonSpansFactory.Builder {
+            val existing = factories[node]
             if (existing == null) {
-                factories.put(node, factory);
+                factories.put(node, factory)
             } else {
-                if (existing instanceof CompositeSpanFactory) {
-                    ((CompositeSpanFactory) existing).factories.add(0, factory);
+                if (existing is CompositeSpanFactory) {
+                    existing.factories.add(0, factory)
                 } else {
-                    final CompositeSpanFactory compositeSpanFactory =
-                            new CompositeSpanFactory(factory, existing);
-                    factories.put(node, compositeSpanFactory);
+                    val compositeSpanFactory = CompositeSpanFactory(factory, existing)
+                    factories.put(node, compositeSpanFactory)
                 }
             }
-            return this;
+            return this
         }
 
-        @NonNull
-        @Override
-        public <N extends Node> Builder prependFactory(@NonNull Class<N> node, @NonNull SpanFactory factory) {
+        override fun <N : Node> prependFactory(
+            node: Class<N>, factory: SpanFactory
+        ): MarkwonSpansFactory.Builder {
             // if there is no factory registered for this node -> just add it
-            final SpanFactory existing = factories.get(node);
+            val existing = factories[node]
             if (existing == null) {
-                factories.put(node, factory);
+                factories.put(node, factory)
             } else {
                 // existing span factory can be of CompositeSpanFactory at this point -> append to it
-                if (existing instanceof CompositeSpanFactory) {
-                    ((CompositeSpanFactory) existing).factories.add(factory);
+                if (existing is CompositeSpanFactory) {
+                    existing.factories.add(factory)
                 } else {
                     // if it's not composite at this point -> make it
-                    final CompositeSpanFactory compositeSpanFactory =
-                            new CompositeSpanFactory(existing, factory);
-                    factories.put(node, compositeSpanFactory);
+                    val compositeSpanFactory = CompositeSpanFactory(existing, factory)
+                    factories.put(node, compositeSpanFactory)
                 }
             }
-            return this;
+            return this
         }
 
-        @Nullable
-        @Override
-        public <N extends Node> SpanFactory getFactory(@NonNull Class<N> node) {
-            return factories.get(node);
+        override fun <N : Node> getFactory(node: Class<N>): SpanFactory? {
+            return factories[node]
         }
 
-        @NonNull
-        @Override
-        public <N extends Node> SpanFactory requireFactory(@NonNull Class<N> node) {
-            final SpanFactory factory = getFactory(node);
+        override fun <N : Node> requireFactory(node: Class<N>): SpanFactory {
+            val factory: SpanFactory? = getFactory(node)
             if (factory == null) {
-                throw new NullPointerException(node.getName());
+                throw NullPointerException(node.name)
             }
-            return factory;
+            return factory
         }
 
-        @NonNull
-        @Override
-        public MarkwonSpansFactory build() {
-            return new MarkwonSpansFactoryImpl(Collections.unmodifiableMap(factories));
+        override fun build(): MarkwonSpansFactory {
+            return MarkwonSpansFactoryImpl(
+                Collections.unmodifiableMap(
+                    factories
+                )
+            )
         }
     }
 
-    static class CompositeSpanFactory implements SpanFactory {
+    internal class CompositeSpanFactory(first: SpanFactory, second: SpanFactory) : SpanFactory {
+        @JvmField
+        val factories: MutableList<SpanFactory> = ArrayList(3)
 
-        final List<SpanFactory> factories;
-
-        CompositeSpanFactory(@NonNull SpanFactory first, @NonNull SpanFactory second) {
-            this.factories = new ArrayList<>(3);
-            this.factories.add(first);
-            this.factories.add(second);
+        init {
+            this.factories.add(first)
+            this.factories.add(second)
         }
 
-        @Nullable
-        @Override
-        public Object getSpans(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps props) {
+        override fun getSpans(configuration: MarkwonConfiguration, props: RenderProps): Any {
             // please note that we do not check it factory itself returns an array of spans,
             // as this behaviour is supported now (previously we supported only a single-level array)
-            final int length = factories.size();
-            final Object[] out = new Object[length];
-            for (int i = 0; i < length; i++) {
-                out[i] = factories.get(i).getSpans(configuration, props);
+            val length = factories.size
+            val out = arrayOfNulls<Any>(length)
+            for (i in 0..<length) {
+                out[i] = factories[i].getSpans(configuration, props)
             }
-            return out;
+            return out
         }
     }
 }

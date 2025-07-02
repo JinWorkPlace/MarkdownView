@@ -156,6 +156,7 @@ public class SpannableBuilder implements Appendable, CharSequence {
     /**
      * @since 2.0.0 to follow CharSequence interface
      */
+    @NonNull
     @Override
     public CharSequence subSequence(int start, int end) {
 

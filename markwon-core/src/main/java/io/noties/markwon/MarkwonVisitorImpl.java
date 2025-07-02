@@ -48,12 +48,7 @@ class MarkwonVisitorImpl implements MarkwonVisitor {
     // @since 4.3.0
     private final BlockHandler blockHandler;
 
-    MarkwonVisitorImpl(
-            @NonNull MarkwonConfiguration configuration,
-            @NonNull RenderProps renderProps,
-            @NonNull SpannableBuilder builder,
-            @NonNull Map<Class<? extends Node>, NodeVisitor<? extends Node>> nodes,
-            @NonNull BlockHandler blockHandler) {
+    MarkwonVisitorImpl(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps renderProps, @NonNull SpannableBuilder builder, @NonNull Map<Class<? extends Node>, NodeVisitor<? extends Node>> nodes, @NonNull BlockHandler blockHandler) {
         this.configuration = configuration;
         this.renderProps = renderProps;
         this.builder = builder;
@@ -223,8 +218,7 @@ class MarkwonVisitorImpl implements MarkwonVisitor {
 
     @Override
     public void ensureNewLine() {
-        if (builder.length() > 0
-                && '\n' != builder.lastChar()) {
+        if (builder.length() > 0 && '\n' != builder.lastChar()) {
             builder.append('\n');
         }
     }
@@ -322,12 +316,7 @@ class MarkwonVisitorImpl implements MarkwonVisitor {
                 blockHandler = new BlockHandlerDef();
             }
 
-            return new MarkwonVisitorImpl(
-                    configuration,
-                    renderProps,
-                    new SpannableBuilder(),
-                    Collections.unmodifiableMap(nodes),
-                    blockHandler);
+            return new MarkwonVisitorImpl(configuration, renderProps, new SpannableBuilder(), Collections.unmodifiableMap(nodes), blockHandler);
         }
     }
 }

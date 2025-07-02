@@ -1,62 +1,54 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.commonmark.node.Node;
+import org.commonmark.node.Node
 
 /**
  * Class that controls what spans are used for certain Nodes.
  *
  * @see SpanFactory
+ *
  * @since 3.0.0
  */
-public interface MarkwonSpansFactory {
-
+interface MarkwonSpansFactory {
     /**
-     * Returns registered {@link SpanFactory} or <code>null</code> if a factory for this node type
-     * is not registered. There is {@link #require(Class)} method that will throw an exception
-     * if required {@link SpanFactory} is not registered, thus making return type <code>non-null</code>
+     * Returns registered [SpanFactory] or `null` if a factory for this node type
+     * is not registered. There is [.require] method that will throw an exception
+     * if required [SpanFactory] is not registered, thus making return type `non-null`
      *
      * @param node type of the node
-     * @return registered {@link SpanFactory} or null if it\'s not registered
-     * @see #require(Class)
+     * @return registered [SpanFactory] or null if it\'s not registered
+     * @see .require
      */
-    @Nullable
-    <N extends Node> SpanFactory get(@NonNull Class<N> node);
+    fun <N : Node> get(node: Class<N>): SpanFactory?
 
-    @NonNull
-    <N extends Node> SpanFactory require(@NonNull Class<N> node);
+    fun <N : Node> require(node: Class<N>): SpanFactory
 
 
     interface Builder {
-
-        @NonNull
-        <N extends Node> Builder setFactory(@NonNull Class<N> node, @Nullable SpanFactory factory);
+        fun <N : Node> setFactory(node: Class<N>, factory: SpanFactory?): Builder
 
         /**
-         * Helper method to add a {@link SpanFactory} for a Node. This method will merge existing
-         * {@link SpanFactory} with the specified one.
+         * Helper method to add a [SpanFactory] for a Node. This method will merge existing
+         * [SpanFactory] with the specified one.
          *
          * @since 3.0.1
-         * @deprecated 4.2.2 consider using {@link #appendFactory(Class, SpanFactory)} or
-         * {@link #prependFactory(Class, SpanFactory)} methods for more explicit factory ordering.
-         * `addFactory` behaved like {@link #prependFactory(Class, SpanFactory)}, so
-         * this method call can be replaced with it
          */
-        @NonNull
-        @Deprecated
-        <N extends Node> Builder addFactory(@NonNull Class<N> node, @NonNull SpanFactory factory);
+        @Deprecated(
+            """4.2.2 consider using {@link #appendFactory(Class, SpanFactory)} or
+          {@link #prependFactory(Class, SpanFactory)} methods for more explicit factory ordering.
+          `addFactory` behaved like {@link #prependFactory(Class, SpanFactory)}, so
+          this method call can be replaced with it"""
+        )
+        fun <N : Node> addFactory(node: Class<N>, factory: SpanFactory): Builder
 
         /**
          * Append a factory to existing one (or make the first one for specified node). Specified factory
-         * will be called <strong>after</strong> original (if present) factory. Can be used to
-         * <em>change</em> behavior or original span factory.
+         * will be called **after** original (if present) factory. Can be used to
+         * *change* behavior or original span factory.
          *
          * @since 4.2.2
          */
-        @NonNull
-        <N extends Node> Builder appendFactory(@NonNull Class<N> node, @NonNull SpanFactory factory);
+        fun <N : Node> appendFactory(node: Class<N>, factory: SpanFactory): Builder
 
         /**
          * Prepend a factory to existing one (or make the first one for specified node). Specified factory
@@ -64,27 +56,23 @@ public interface MarkwonSpansFactory {
          *
          * @since 4.2.2
          */
-        @NonNull
-        <N extends Node> Builder prependFactory(@NonNull Class<N> node, @NonNull SpanFactory factory);
+        fun <N : Node> prependFactory(node: Class<N>, factory: SpanFactory): Builder
 
         /**
-         * Can be useful when <em>enhancing</em> an already defined SpanFactory with another one.
+         * Can be useful when *enhancing* an already defined SpanFactory with another one.
          */
-        @Nullable
-        <N extends Node> SpanFactory getFactory(@NonNull Class<N> node);
+        fun <N : Node> getFactory(node: Class<N>): SpanFactory?
 
         /**
-         * To obtain current {@link SpanFactory} associated with specified node. Can be used
+         * To obtain current [SpanFactory] associated with specified node. Can be used
          * when SpanFactory must be present for node. If it\'s not added/registered a runtime
          * exception will be thrown
          *
-         * @see #getFactory(Class)
+         * @see .getFactory
          * @since 3.0.1
          */
-        @NonNull
-        <N extends Node> SpanFactory requireFactory(@NonNull Class<N> node);
+        fun <N : Node> requireFactory(node: Class<N>): SpanFactory?
 
-        @NonNull
-        MarkwonSpansFactory build();
+        fun build(): MarkwonSpansFactory?
     }
 }

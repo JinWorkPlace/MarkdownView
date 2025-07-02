@@ -91,13 +91,7 @@ public class MarkwonTheme {
     public static Builder builderWithDefaults(@NonNull Context context) {
 
         final Dip dip = Dip.create(context);
-        return new Builder()
-                .codeBlockMargin(dip.toPx(8))
-                .blockMargin(dip.toPx(24))
-                .blockQuoteWidth(dip.toPx(4))
-                .bulletListItemStrokeWidth(dip.toPx(1))
-                .headingBreakHeight(dip.toPx(1))
-                .thematicBreakHeight(dip.toPx(4));
+        return new Builder().codeBlockMargin(dip.toPx(8)).blockMargin(dip.toPx(24)).blockQuoteWidth(dip.toPx(4)).bulletListItemStrokeWidth(dip.toPx(1)).headingBreakHeight(dip.toPx(1)).thematicBreakHeight(dip.toPx(4));
     }
 
     protected static final int BLOCK_QUOTE_DEF_COLOR_ALPHA = 25;
@@ -109,9 +103,7 @@ public class MarkwonTheme {
 
     // taken from html spec (most browsers render headings like that)
     // is not exposed via protected modifier in order to disallow modification
-    private static final float[] HEADING_SIZES = {
-            2.F, 1.5F, 1.17F, 1.F, .83F, .67F,
-    };
+    private static final float[] HEADING_SIZES = {2.F, 1.5F, 1.17F, 1.F, .83F, .67F,};
 
     protected static final int THEMATIC_BREAK_DEF_ALPHA = 25;
 
@@ -285,8 +277,7 @@ public class MarkwonTheme {
         final int min = Math.min(blockMargin, height) / 2;
 
         final int width;
-        if (bulletWidth == 0
-                || bulletWidth > min) {
+        if (bulletWidth == 0 || bulletWidth > min) {
             width = min;
         } else {
             width = bulletWidth;
@@ -331,17 +322,13 @@ public class MarkwonTheme {
 
         // apply text color, first check for block specific value,
         // then check for code (inline), else do nothing (keep original color of text)
-        final int textColor = codeBlockTextColor != 0
-                ? codeBlockTextColor
-                : codeTextColor;
+        final int textColor = codeBlockTextColor != 0 ? codeBlockTextColor : codeTextColor;
 
         if (textColor != 0) {
             paint.setColor(textColor);
         }
 
-        final Typeface typeface = codeBlockTypeface != null
-                ? codeBlockTypeface
-                : codeTypeface;
+        final Typeface typeface = codeBlockTypeface != null ? codeBlockTypeface : codeTypeface;
 
         if (typeface != null) {
 
@@ -350,9 +337,7 @@ public class MarkwonTheme {
             // please note that we won't be calculating textSize
             // (like we do when no Typeface is provided), if it's some specific typeface
             // we would confuse users about textSize
-            final int textSize = codeBlockTextSize > 0
-                    ? codeBlockTextSize
-                    : codeTextSize;
+            final int textSize = codeBlockTextSize > 0 ? codeBlockTextSize : codeTextSize;
 
             if (textSize > 0) {
                 paint.setTextSize(textSize);
@@ -362,9 +347,7 @@ public class MarkwonTheme {
             // by default use monospace
             paint.setTypeface(Typeface.MONOSPACE);
 
-            final int textSize = codeBlockTextSize > 0
-                    ? codeBlockTextSize
-                    : codeTextSize;
+            final int textSize = codeBlockTextSize > 0 ? codeBlockTextSize : codeTextSize;
 
             if (textSize > 0) {
                 paint.setTextSize(textSize);
@@ -398,13 +381,9 @@ public class MarkwonTheme {
      */
     public int getCodeBlockBackgroundColor(@NonNull Paint paint) {
 
-        final int color = codeBlockBackgroundColor != 0
-                ? codeBlockBackgroundColor
-                : codeBackgroundColor;
+        final int color = codeBlockBackgroundColor != 0 ? codeBlockBackgroundColor : codeBackgroundColor;
 
-        return color != 0
-                ? color
-                : ColorUtils.applyAlpha(paint.getColor(), CODE_DEF_BACKGROUND_COLOR_ALPHA);
+        return color != 0 ? color : ColorUtils.applyAlpha(paint.getColor(), CODE_DEF_BACKGROUND_COLOR_ALPHA);
     }
 
     public void applyHeadingTextStyle(@NonNull Paint paint, @IntRange(from = 1, to = 6) int level) {
@@ -413,17 +392,12 @@ public class MarkwonTheme {
         } else {
             paint.setTypeface(headingTypeface);
         }
-        final float[] textSizes = headingTextSizeMultipliers != null
-                ? headingTextSizeMultipliers
-                : HEADING_SIZES;
+        final float[] textSizes = headingTextSizeMultipliers != null ? headingTextSizeMultipliers : HEADING_SIZES;
 
         if (textSizes != null && textSizes.length >= level) {
             paint.setTextSize(paint.getTextSize() * textSizes[level - 1]);
         } else {
-            throw new IllegalStateException(String.format(
-                    Locale.US,
-                    "Supplied heading level: %d is invalid, where configured heading sizes are: `%s`",
-                    level, Arrays.toString(textSizes)));
+            throw new IllegalStateException(String.format(Locale.US, "Supplied heading level: %d is invalid, where configured heading sizes are: `%s`", level, Arrays.toString(textSizes)));
         }
     }
 
@@ -681,5 +655,4 @@ public class MarkwonTheme {
             return new MarkwonTheme(this);
         }
     }
-
 }
