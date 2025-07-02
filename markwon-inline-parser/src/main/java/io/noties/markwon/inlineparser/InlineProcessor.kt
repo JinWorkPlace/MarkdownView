@@ -43,7 +43,7 @@ abstract class InlineProcessor {
 
     protected var context: MarkwonInlineParserContext? = null
     protected var block: Node? = null
-    protected var input: String? = null
+    protected var input: String = ""
     protected var index: Int = 0
 
     fun parse(context: MarkwonInlineParserContext): Node? {
