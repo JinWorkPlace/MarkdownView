@@ -1,141 +1,122 @@
-package io.noties.markwon.syntax;
+package io.noties.markwon.syntax
 
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import androidx.annotation.ColorInt
+import androidx.annotation.FloatRange
+import androidx.annotation.IntRange
+import io.noties.prism4j.Prism4j
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.FloatRange;
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+abstract class Prism4jThemeBase protected constructor() : Prism4jTheme {
+    private val colorHashMap: ColorHashMap
 
-import java.util.HashMap;
+    init {
+        this.colorHashMap = init()
+    }
 
-import io.noties.prism4j.Prism4j;
-
-public abstract class Prism4jThemeBase implements Prism4jTheme {
+    protected abstract fun init(): ColorHashMap
 
     @ColorInt
-    protected static int applyAlpha(@IntRange(from = 0, to = 255) int alpha, @ColorInt int color) {
-        return (color & 0x00FFFFFF) | (alpha << 24);
-    }
-
-    @ColorInt
-    protected static int applyAlpha(@FloatRange(from = .0F, to = 1.F) float alpha, @ColorInt int color) {
-        return applyAlpha((int) (255 * alpha + .5F), color);
-    }
-
-    protected static boolean isOfType(@NonNull String expected, @NonNull String type, @Nullable String alias) {
-        return expected.equals(type) || expected.equals(alias);
-    }
-
-    private final ColorHashMap colorHashMap;
-
-    protected Prism4jThemeBase() {
-        this.colorHashMap = init();
-    }
-
-    @NonNull
-    protected abstract ColorHashMap init();
-
-    @ColorInt
-    protected int color(@NonNull String language, @NonNull String type, @Nullable String alias) {
-
-        Color color = colorHashMap.get(type);
-        if (color == null
-                && alias != null) {
-            color = colorHashMap.get(alias);
+    protected fun color(type: String, alias: String?): Int {
+        var color = colorHashMap[type]
+        if (color == null && alias != null) {
+            color = colorHashMap.get(alias)
         }
 
-        return color != null
-                ? color.color
-                : 0;
+        return color?.color ?: 0
     }
 
-    @Override
-    public void apply(
-            @NonNull String language,
-            @NonNull Prism4j.Syntax syntax,
-            @NonNull SpannableStringBuilder builder,
-            int start,
-            int end) {
+    override fun apply(
+        language: String,
+        syntax: Prism4j.Syntax,
+        builder: SpannableStringBuilder,
+        start: Int,
+        end: Int
+    ) {
+        val type = syntax.type()
+        val alias = syntax.alias()
 
-        final String type = syntax.type();
-        final String alias = syntax.alias();
-
-        final int color = color(language, type, alias);
+        val color = color(type, alias)
         if (color != 0) {
-            applyColor(language, type, alias, color, builder, start, end);
+            applyColor(language, type, alias, color, builder, start, end)
         }
     }
 
-    @SuppressWarnings("unused")
-    protected void applyColor(
-            @NonNull String language,
-            @NonNull String type,
-            @Nullable String alias,
-            @ColorInt int color,
-            @NonNull SpannableStringBuilder builder,
-            int start,
-            int end) {
-        builder.setSpan(new ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    @Suppress("unused")
+    protected open fun applyColor(
+        language: String,
+        type: String,
+        alias: String?,
+        @ColorInt color: Int,
+        builder: SpannableStringBuilder,
+        start: Int,
+        end: Int
+    ) {
+        builder.setSpan(ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 
-    protected static class Color {
-
-        @NonNull
-        public static Color of(@ColorInt int color) {
-            return new Color(color);
-        }
-
-        @ColorInt
-        protected final int color;
-
-        protected Color(@ColorInt int color) {
-            this.color = color;
-        }
-    }
-
-    protected static class ColorHashMap extends HashMap<String, Color> {
-
-        @NonNull
-        protected ColorHashMap add(@ColorInt int color, String name) {
-            put(name, Color.of(color));
-            return this;
-        }
-
-        @NonNull
-        protected ColorHashMap add(
-                @ColorInt int color,
-                @NonNull String name1,
-                @NonNull String name2) {
-            final Color c = Color.of(color);
-            put(name1, c);
-            put(name2, c);
-            return this;
-        }
-
-        @NonNull
-        protected ColorHashMap add(
-                @ColorInt int color,
-                @NonNull String name1,
-                @NonNull String name2,
-                @NonNull String name3) {
-            final Color c = Color.of(color);
-            put(name1, c);
-            put(name2, c);
-            put(name3, c);
-            return this;
-        }
-
-        @NonNull
-        protected ColorHashMap add(@ColorInt int color, String... names) {
-            final Color c = Color.of(color);
-            for (String name : names) {
-                put(name, c);
+    protected open class Color protected constructor(@field:ColorInt @param:ColorInt val color: Int) {
+        companion object {
+            fun of(@ColorInt color: Int): Color {
+                return Color(color)
             }
-            return this;
+        }
+    }
+
+    protected class ColorHashMap : HashMap<String?, Color?>() {
+        fun add(@ColorInt color: Int, name: String?): ColorHashMap {
+            put(name, Color.Companion.of(color))
+            return this
+        }
+
+        fun add(
+            @ColorInt color: Int, name1: String, name2: String
+        ): ColorHashMap {
+            val c: Color = Color.Companion.of(color)
+            put(name1, c)
+            put(name2, c)
+            return this
+        }
+
+        fun add(
+            @ColorInt color: Int, name1: String, name2: String, name3: String
+        ): ColorHashMap {
+            val c: Color = Color.Companion.of(color)
+            put(name1, c)
+            put(name2, c)
+            put(name3, c)
+            return this
+        }
+
+        fun add(@ColorInt color: Int, vararg names: String?): ColorHashMap {
+            val c: Color = Color.Companion.of(color)
+            for (name in names) {
+                put(name, c)
+            }
+            return this
+        }
+    }
+
+    companion object {
+        @ColorInt
+        protected fun applyAlpha(
+            @IntRange(from = 0, to = 255) alpha: Int, @ColorInt color: Int
+        ): Int {
+            return (color and 0x00FFFFFF) or (alpha shl 24)
+        }
+
+        @JvmStatic
+        @ColorInt
+        protected fun applyAlpha(
+            @FloatRange(from = 0.0, to = 1.0) alpha: Float, @ColorInt color: Int
+        ): Int {
+            return applyAlpha((255 * alpha + .5f).toInt(), color)
+        }
+
+        @JvmStatic
+        protected fun isOfType(expected: String, type: String, alias: String?): Boolean {
+            return expected == type || expected == alias
         }
     }
 }

@@ -1,25 +1,21 @@
-package io.noties.markwon.syntax;
+package io.noties.markwon.syntax
 
-import android.text.SpannableStringBuilder;
+import android.text.SpannableStringBuilder
+import androidx.annotation.ColorInt
+import io.noties.prism4j.Prism4j
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-
-import io.noties.prism4j.Prism4j;
-
-public interface Prism4jTheme {
+interface Prism4jTheme {
+    @ColorInt
+    fun background(): Int
 
     @ColorInt
-    int background();
+    fun textColor(): Int
 
-    @ColorInt
-    int textColor();
-
-    void apply(
-            @NonNull String language,
-            @NonNull Prism4j.Syntax syntax,
-            @NonNull SpannableStringBuilder builder,
-            int start,
-            int end
-    );
+    fun apply(
+        language: String,
+        syntax: Prism4j.Syntax,
+        builder: SpannableStringBuilder,
+        start: Int,
+        end: Int
+    )
 }
