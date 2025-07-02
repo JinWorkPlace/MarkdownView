@@ -1,42 +1,36 @@
-package io.noties.markwon.utils;
+package io.noties.markwon.utils
 
-import android.graphics.Canvas;
-import android.text.Layout;
-import android.text.Spanned;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-
-import io.noties.markwon.core.spans.TextLayoutSpan;
-import io.noties.markwon.core.spans.TextViewSpan;
+import android.graphics.Canvas
+import android.text.Spanned
+import io.noties.markwon.core.spans.TextLayoutSpan
+import io.noties.markwon.core.spans.TextViewSpan
 
 /**
  * @since 4.4.0
  */
-public abstract class SpanUtils {
-
-    public static int width(@NonNull Canvas canvas, @NonNull CharSequence cs) {
+object SpanUtils {
+    fun width(canvas: Canvas, cs: CharSequence): Int {
         // Layout
         // TextView
         // canvas
 
-        if (cs instanceof Spanned) {
-            final Spanned spanned = (Spanned) cs;
+        if (cs is Spanned) {
+            val spanned = cs
 
             // if we are displayed with layout information -> use it
-            final Layout layout = TextLayoutSpan.layoutOf(spanned);
+            val layout = TextLayoutSpan.layoutOf(spanned)
             if (layout != null) {
-                return layout.getWidth();
+                return layout.width
             }
 
             // if we have TextView -> obtain width from it (exclude padding)
-            final TextView textView = TextViewSpan.textViewOf(spanned);
+            val textView = TextViewSpan.textViewOf(spanned)
             if (textView != null) {
-                return textView.getWidth() - textView.getPaddingLeft() - textView.getPaddingRight();
+                return textView.width - textView.paddingLeft - textView.paddingRight
             }
         }
 
         // else just use canvas width
-        return canvas.getWidth();
+        return canvas.width
     }
 }

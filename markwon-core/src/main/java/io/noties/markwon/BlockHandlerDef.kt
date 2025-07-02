@@ -1,23 +1,20 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import androidx.annotation.NonNull;
-
-import org.commonmark.node.Node;
+import io.noties.markwon.MarkwonVisitor.BlockHandler
+import org.commonmark.node.Node
 
 /**
  * @since 4.3.0
  */
-public class BlockHandlerDef implements MarkwonVisitor.BlockHandler {
-    @Override
-    public void blockStart(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
-        visitor.ensureNewLine();
+class BlockHandlerDef : BlockHandler {
+    override fun blockStart(visitor: MarkwonVisitor, node: Node) {
+        visitor.ensureNewLine()
     }
 
-    @Override
-    public void blockEnd(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
+    override fun blockEnd(visitor: MarkwonVisitor, node: Node) {
         if (visitor.hasNext(node)) {
-            visitor.ensureNewLine();
-            visitor.forceNewLine();
+            visitor.ensureNewLine()
+            visitor.forceNewLine()
         }
     }
 }

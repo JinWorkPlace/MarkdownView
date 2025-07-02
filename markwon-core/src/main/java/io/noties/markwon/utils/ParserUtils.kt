@@ -1,25 +1,19 @@
-package io.noties.markwon.utils;
+package io.noties.markwon.utils
 
-import androidx.annotation.NonNull;
-
-import org.commonmark.node.Node;
+import org.commonmark.node.Node
 
 /**
  * @since 4.6.0
  */
-public abstract class ParserUtils {
-
-    public static void moveChildren(@NonNull Node to, @NonNull Node from) {
-        Node next = from.getNext();
-        Node temp;
+object ParserUtils {
+    fun moveChildren(to: Node, from: Node) {
+        var next = from.next
+        var temp: Node?
         while (next != null) {
             // appendChild would unlink passed node (thus making next info un-available)
-            temp = next.getNext();
-            to.appendChild(next);
-            next = temp;
+            temp = next.next
+            to.appendChild(next)
+            next = temp
         }
-    }
-
-    private ParserUtils() {
     }
 }

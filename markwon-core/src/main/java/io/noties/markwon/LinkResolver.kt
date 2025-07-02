@@ -1,14 +1,13 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import android.view.View;
-
-import androidx.annotation.NonNull;
+import android.view.View
 
 /**
  * @see LinkResolverDef
- * @see MarkwonConfiguration.Builder#linkResolver(LinkResolver)
+ *
+ * @see MarkwonConfiguration.Builder.linkResolver
  * @since 4.0.0
  */
-public interface LinkResolver {
-    void resolve(@NonNull View view, @NonNull String link);
+interface LinkResolver {
+    fun resolve(view: View, link: String)
 }

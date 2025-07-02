@@ -1,17 +1,13 @@
-package io.noties.markwon.utils;
+package io.noties.markwon.utils
 
-import android.text.Spanned;
+import android.text.Spanned
 
-public abstract class LeadingMarginUtils {
-
-    public static boolean selfStart(int start, CharSequence text, Object span) {
-        return text instanceof Spanned && ((Spanned) text).getSpanStart(span) == start;
+object LeadingMarginUtils {
+    fun selfStart(start: Int, text: CharSequence?, span: Any?): Boolean {
+        return text is Spanned && text.getSpanStart(span) == start
     }
 
-    public static boolean selfEnd(int end, CharSequence text, Object span) {
-        return text instanceof Spanned && ((Spanned) text).getSpanEnd(span) == end;
-    }
-
-    private LeadingMarginUtils() {
+    fun selfEnd(end: Int, text: CharSequence?, span: Any?): Boolean {
+        return text is Spanned && text.getSpanEnd(span) == end
     }
 }

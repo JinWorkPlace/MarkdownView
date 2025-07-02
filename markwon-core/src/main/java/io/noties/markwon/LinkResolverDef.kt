@@ -1,45 +1,41 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.provider.Browser;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.View;
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.provider.Browser
+import android.text.TextUtils
+import android.util.Log
+import android.view.View
+import androidx.core.net.toUri
 
-import androidx.annotation.NonNull;
-
-public class LinkResolverDef implements LinkResolver {
-
-    // @since 4.3.0
-    private static final String DEFAULT_SCHEME = "https";
-
-    @Override
-    public void resolve(@NonNull View view, @NonNull String link) {
-        final Uri uri = parseLink(link);
-        final Context context = view.getContext();
-        final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        intent.putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
+class LinkResolverDef : LinkResolver {
+    override fun resolve(view: View, link: String) {
+        val uri: Uri = parseLink(link)
+        val context = view.context
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        intent.putExtra(Browser.EXTRA_APPLICATION_ID, context.packageName)
         try {
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w("LinkResolverDef", "Actvity was not found for the link: '" + link + "'");
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Log.w("LinkResolverDef", "Actvity was not found for the link: '$link'")
+            Log.e("LinkResolverDef", e.message, e)
         }
     }
 
-    /**
-     * @since 4.3.0
-     */
-    @NonNull
-    private static Uri parseLink(@NonNull String link) {
-        final Uri uri = Uri.parse(link);
-        if (TextUtils.isEmpty(uri.getScheme())) {
-            return uri.buildUpon()
-                    .scheme(DEFAULT_SCHEME)
-                    .build();
+    companion object {
+        // @since 4.3.0
+        private const val DEFAULT_SCHEME = "https"
+
+        /**
+         * @since 4.3.0
+         */
+        private fun parseLink(link: String): Uri {
+            val uri = link.toUri()
+            if (TextUtils.isEmpty(uri.scheme)) {
+                return uri.buildUpon().scheme(DEFAULT_SCHEME).build()
+            }
+            return uri
         }
-        return uri;
     }
 }

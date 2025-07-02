@@ -1,19 +1,10 @@
-package io.noties.markwon.utils;
+package io.noties.markwon.utils
 
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Drawable
 
-import androidx.annotation.NonNull;
-
-/**
- * @deprecated Please use {@link io.noties.markwon.image.DrawableUtils}
- */
-@Deprecated
-public abstract class DrawableUtils {
-
-    public static void intrinsicBounds(@NonNull Drawable drawable) {
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-    }
-
-    private DrawableUtils() {
+@Deprecated("Please use {@link io.noties.markwon.image.DrawableUtils}")
+object DrawableUtils {
+    fun intrinsicBounds(drawable: Drawable) {
+        drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
     }
 }

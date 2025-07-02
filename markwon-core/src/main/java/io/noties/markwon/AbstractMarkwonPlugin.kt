@@ -1,77 +1,51 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import android.text.Spanned;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-
-import io.noties.markwon.core.MarkwonTheme;
+import android.text.Spanned
+import android.widget.TextView
+import io.noties.markwon.core.MarkwonTheme
+import org.commonmark.node.Node
+import org.commonmark.parser.Parser
 
 /**
- * Class that extends {@link MarkwonPlugin} with all methods implemented (empty body)
+ * Class that extends [MarkwonPlugin] with all methods implemented (empty body)
  * for easier plugin implementation. Only required methods can be overriden
  *
  * @see MarkwonPlugin
+ *
  * @since 3.0.0
  */
-public abstract class AbstractMarkwonPlugin implements MarkwonPlugin {
-
-    @Override
-    public void configure(@NonNull Registry registry) {
-
+abstract class AbstractMarkwonPlugin : MarkwonPlugin {
+    override fun configure(registry: MarkwonPlugin.Registry) {
     }
 
-    @Override
-    public void configureParser(@NonNull Parser.Builder builder) {
-
+    override fun configureParser(builder: Parser.Builder) {
     }
 
-    @Override
-    public void configureTheme(@NonNull MarkwonTheme.Builder builder) {
-
+    override fun configureTheme(builder: MarkwonTheme.Builder) {
     }
 
-    @Override
-    public void configureConfiguration(@NonNull MarkwonConfiguration.Builder builder) {
-
+    override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
     }
 
-    @Override
-    public void configureVisitor(@NonNull MarkwonVisitor.Builder builder) {
-
+    override fun configureVisitor(builder: MarkwonVisitor.Builder) {
     }
 
-    @Override
-    public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
-
+    override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
     }
 
-    @NonNull
-    @Override
-    public String processMarkdown(@NonNull String markdown) {
-        return markdown;
+    override fun processMarkdown(markdown: String): String {
+        return markdown
     }
 
-    @Override
-    public void beforeRender(@NonNull Node node) {
-
+    override fun beforeRender(node: Node) {
     }
 
-    @Override
-    public void afterRender(@NonNull Node node, @NonNull MarkwonVisitor visitor) {
-
+    override fun afterRender(node: Node, visitor: MarkwonVisitor) {
     }
 
-    @Override
-    public void beforeSetText(@NonNull TextView textView, @NonNull Spanned markdown) {
-
+    override fun beforeSetText(textView: TextView, markdown: Spanned) {
     }
 
-    @Override
-    public void afterSetText(@NonNull TextView textView) {
-
+    override fun afterSetText(textView: TextView) {
     }
 }

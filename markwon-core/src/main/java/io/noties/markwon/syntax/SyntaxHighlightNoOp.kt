@@ -1,12 +1,7 @@
-package io.noties.markwon.syntax;
+package io.noties.markwon.syntax
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-public class SyntaxHighlightNoOp implements SyntaxHighlight {
-    @NonNull
-    @Override
-    public CharSequence highlight(@Nullable String info, @NonNull String code) {
-        return code;
+class SyntaxHighlightNoOp : SyntaxHighlight {
+    override fun highlight(info: String?, code: String): CharSequence {
+        return code
     }
 }
