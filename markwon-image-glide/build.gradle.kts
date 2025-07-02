@@ -37,5 +37,5 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     implementation(project(":markwon-core"))
-    implementation(libs.glide)
+    api(libs.glide)
 }

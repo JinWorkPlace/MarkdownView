@@ -328,9 +328,7 @@ public class SpannableBuilder implements Appendable, CharSequence {
         // we must identify already reversed Spanned...
         // and (!) iterate backwards when adding (to preserve order)
 
-        if (cs instanceof Spanned) {
-
-            final Spanned spanned = (Spanned) cs;
+        if (cs instanceof Spanned spanned) {
             final boolean reversed = spanned instanceof SpannableStringBuilderReversed;
 
             final Object[] spans = spanned.getSpans(0, spanned.length(), Object.class);

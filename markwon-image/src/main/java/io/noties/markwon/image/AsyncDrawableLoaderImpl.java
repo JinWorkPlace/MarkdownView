@@ -82,7 +82,7 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
             @Override
             public void run() {
 
-                final String destination = asyncDrawable.getDestination();
+                final String destination = asyncDrawable.destination;
 
                 final Uri uri = Uri.parse(destination);
 

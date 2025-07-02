@@ -81,7 +81,7 @@ abstract class Markwon {
      * @return a list of registered [MarkwonPlugin]
      * @since 4.1.0
      */
-    abstract val plugins: MutableList<out MarkwonPlugin?>
+    abstract val plugins: MutableList<out MarkwonPlugin>
 
     abstract fun configuration(): MarkwonConfiguration
 
@@ -133,7 +133,7 @@ abstract class Markwon {
 
         fun usePlugin(plugin: MarkwonPlugin): Builder
 
-        fun usePlugins(plugins: Iterable<MarkwonPlugin?>): Builder
+        fun usePlugins(plugins: Iterable<MarkwonPlugin>): Builder
 
         /**
          * Control if small chunks of non-finished markdown sentences (for example, a single `*` character)

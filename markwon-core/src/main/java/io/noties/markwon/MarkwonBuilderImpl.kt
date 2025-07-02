@@ -1,123 +1,100 @@
-package io.noties.markwon;
+package io.noties.markwon
 
-import android.content.Context;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-
-import org.commonmark.parser.Parser;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import io.noties.markwon.core.MarkwonTheme;
+import android.content.Context
+import android.widget.TextView.BufferType
+import io.noties.markwon.Markwon.TextSetter
+import io.noties.markwon.core.MarkwonTheme
+import org.commonmark.parser.Parser
+import java.util.Collections
 
 /**
  * @since 3.0.0
  */
-class MarkwonBuilderImpl implements Markwon.Builder {
+internal class MarkwonBuilderImpl(private val context: Context) : Markwon.Builder {
+    private val plugins: MutableList<MarkwonPlugin> = ArrayList(3)
 
-    private final Context context;
+    private var bufferType = BufferType.SPANNABLE
 
-    private final List<MarkwonPlugin> plugins = new ArrayList<>(3);
-
-    private TextView.BufferType bufferType = TextView.BufferType.SPANNABLE;
-
-    private Markwon.TextSetter textSetter;
+    private var textSetter: TextSetter? = null
 
     // @since 4.4.0
-    private boolean fallbackToRawInputWhenEmpty = true;
+    private var fallbackToRawInputWhenEmpty = true
 
-    MarkwonBuilderImpl(@NonNull Context context) {
-        this.context = context;
+    override fun bufferType(bufferType: BufferType): Markwon.Builder {
+        this.bufferType = bufferType
+        return this
     }
 
-    @NonNull
-    @Override
-    public Markwon.Builder bufferType(@NonNull TextView.BufferType bufferType) {
-        this.bufferType = bufferType;
-        return this;
+    override fun textSetter(textSetter: TextSetter): Markwon.Builder {
+        this.textSetter = textSetter
+        return this
     }
 
-    @NonNull
-    @Override
-    public Markwon.Builder textSetter(@NonNull Markwon.TextSetter textSetter) {
-        this.textSetter = textSetter;
-        return this;
+    override fun usePlugin(plugin: MarkwonPlugin): Markwon.Builder {
+        plugins.add(plugin)
+        return this
     }
 
-    @NonNull
-    @Override
-    public Markwon.Builder usePlugin(@NonNull MarkwonPlugin plugin) {
-        plugins.add(plugin);
-        return this;
-    }
+    override fun usePlugins(plugins: Iterable<MarkwonPlugin>): Markwon.Builder {
+        val iterator: Iterator<MarkwonPlugin> = plugins.iterator()
 
-    @NonNull
-    @Override
-    public Markwon.Builder usePlugins(@NonNull Iterable<? extends MarkwonPlugin> plugins) {
-
-        final Iterator<? extends MarkwonPlugin> iterator = plugins.iterator();
-
-        MarkwonPlugin plugin;
+        var plugin: MarkwonPlugin
 
         while (iterator.hasNext()) {
-            plugin = iterator.next();
-            if (plugin == null) {
-                throw new NullPointerException();
-            }
-            this.plugins.add(plugin);
+            plugin = iterator.next()
+            this.plugins.add(plugin)
         }
 
-        return this;
+        return this
     }
 
-    @NonNull
-    @Override
-    public Markwon.Builder fallbackToRawInputWhenEmpty(boolean fallbackToRawInputWhenEmpty) {
-        this.fallbackToRawInputWhenEmpty = fallbackToRawInputWhenEmpty;
-        return this;
+    override fun fallbackToRawInputWhenEmpty(fallbackToRawInputWhenEmpty: Boolean): Markwon.Builder {
+        this.fallbackToRawInputWhenEmpty = fallbackToRawInputWhenEmpty
+        return this
     }
 
-    @NonNull
-    @Override
-    public Markwon build() {
-
-        if (plugins.isEmpty()) {
-            throw new IllegalStateException("No plugins were added to this builder. Use #usePlugin " + "method to add them");
-        }
+    override fun build(): Markwon {
+        check(!plugins.isEmpty()) { "No plugins were added to this builder. Use #usePlugin " + "method to add them" }
 
         // please note that this method must not modify supplied collection
         // if nothing should be done -> the same collection can be returned
-        final List<MarkwonPlugin> plugins = preparePlugins(this.plugins);
+        val plugins: MutableList<MarkwonPlugin> = preparePlugins(this.plugins)
 
-        final Parser.Builder parserBuilder = new Parser.Builder();
-        final MarkwonTheme.Builder themeBuilder = MarkwonTheme.builderWithDefaults(context);
-        final MarkwonConfiguration.Builder configurationBuilder = new MarkwonConfiguration.Builder();
-        final MarkwonVisitor.Builder visitorBuilder = new MarkwonVisitorImpl.BuilderImpl();
-        final MarkwonSpansFactory.Builder spanFactoryBuilder = new MarkwonSpansFactoryImpl.BuilderImpl();
+        val parserBuilder = Parser.Builder()
+        val themeBuilder = MarkwonTheme.builderWithDefaults(context)
+        val configurationBuilder = MarkwonConfiguration.Builder()
+        val visitorBuilder: MarkwonVisitor.Builder = MarkwonVisitorImpl.BuilderImpl()
+        val spanFactoryBuilder: MarkwonSpansFactory.Builder = MarkwonSpansFactoryImpl.BuilderImpl()
 
-        for (MarkwonPlugin plugin : plugins) {
-            plugin.configureParser(parserBuilder);
-            plugin.configureTheme(themeBuilder);
-            plugin.configureConfiguration(configurationBuilder);
-            plugin.configureVisitor(visitorBuilder);
-            plugin.configureSpansFactory(spanFactoryBuilder);
+        for (plugin in plugins) {
+            plugin.configureParser(parserBuilder)
+            plugin.configureTheme(themeBuilder)
+            plugin.configureConfiguration(configurationBuilder)
+            plugin.configureVisitor(visitorBuilder)
+            plugin.configureSpansFactory(spanFactoryBuilder)
         }
 
-        final MarkwonConfiguration configuration = configurationBuilder.build(themeBuilder.build(), spanFactoryBuilder.build());
+        val configuration =
+            configurationBuilder.build(themeBuilder.build(), spanFactoryBuilder.build())
 
         // @since 4.1.1
         // @since 4.1.2 - do not reuse render-props (each render call should have own render-props)
-        final MarkwonVisitorFactory visitorFactory = MarkwonVisitorFactory.create(visitorBuilder, configuration);
+        val visitorFactory = MarkwonVisitorFactory.create(visitorBuilder, configuration)
 
-        return new MarkwonImpl(bufferType, textSetter, parserBuilder.build(), visitorFactory, configuration, Collections.unmodifiableList(plugins), fallbackToRawInputWhenEmpty);
+        return MarkwonImpl(
+            bufferType,
+            textSetter,
+            parserBuilder.build(),
+            visitorFactory,
+            configuration,
+            Collections.unmodifiableList(plugins),
+            fallbackToRawInputWhenEmpty
+        )
     }
 
-    @NonNull
-    private static List<MarkwonPlugin> preparePlugins(@NonNull List<MarkwonPlugin> plugins) {
-        return new RegistryImpl(plugins).process();
+    companion object {
+        private fun preparePlugins(plugins: MutableList<MarkwonPlugin>): MutableList<MarkwonPlugin> {
+            return RegistryImpl(plugins).process()
+        }
     }
 }

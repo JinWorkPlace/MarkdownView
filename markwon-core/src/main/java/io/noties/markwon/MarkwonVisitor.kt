@@ -15,7 +15,7 @@ interface MarkwonVisitor : Visitor {
     /**
      * @see Builder.on
      */
-    interface NodeVisitor<N : Node> {
+    fun interface NodeVisitor<N : Node> {
         fun visit(visitor: MarkwonVisitor, n: N)
     }
 

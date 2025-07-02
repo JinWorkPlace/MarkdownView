@@ -61,7 +61,7 @@ class Prop<T> internal constructor(private val name: String) {
         }
 
         @JvmStatic
-        fun <T> of(name: String): Prop<T?> {
+        fun <T> of(name: String): Prop<T> {
             return Prop(name)
         }
     }
