@@ -1,193 +1,151 @@
-package io.noties.markwon.image.coil;
+package io.noties.markwon.image.coil
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.text.Spanned;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.commonmark.node.Image;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import coil.Coil;
-import coil.ImageLoader;
-import coil.request.Disposable;
-import coil.request.ImageRequest;
-import coil.target.Target;
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.MarkwonSpansFactory;
-import io.noties.markwon.image.AsyncDrawable;
-import io.noties.markwon.image.AsyncDrawableLoader;
-import io.noties.markwon.image.AsyncDrawableScheduler;
-import io.noties.markwon.image.DrawableUtils;
-import io.noties.markwon.image.ImageSpanFactory;
+import android.content.Context
+import android.graphics.drawable.Drawable
+import android.text.Spanned
+import android.widget.TextView
+import coil.Coil.imageLoader
+import coil.ImageLoader
+import coil.request.Disposable
+import coil.request.ImageRequest
+import coil.target.Target
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.MarkwonSpansFactory
+import io.noties.markwon.image.AsyncDrawable
+import io.noties.markwon.image.AsyncDrawableLoader
+import io.noties.markwon.image.AsyncDrawableScheduler
+import io.noties.markwon.image.DrawableUtils
+import io.noties.markwon.image.ImageSpanFactory
+import org.commonmark.node.Image
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * @author Tyler Wong
  * @since 4.2.0
  */
-public class CoilImagesPlugin extends AbstractMarkwonPlugin {
+class CoilImagesPlugin internal constructor(
+    coilStore: CoilStore, imageLoader: ImageLoader
+) : AbstractMarkwonPlugin() {
+    interface CoilStore {
+        fun load(drawable: AsyncDrawable): ImageRequest
 
-    public interface CoilStore {
-
-        @NonNull
-        ImageRequest load(@NonNull AsyncDrawable drawable);
-
-        void cancel(@NonNull Disposable disposable);
+        fun cancel(disposable: Disposable)
     }
 
-    @NonNull
-    public static CoilImagesPlugin create(@NonNull final Context context) {
-        return create(new CoilStore() {
-            @NonNull
-            @Override
-            public ImageRequest load(@NonNull AsyncDrawable drawable) {
-                return new ImageRequest.Builder(context).data(drawable.getDestination()).build();
-            }
+    private val coilAsyncDrawableLoader: CoilAsyncDrawableLoader =
+        CoilAsyncDrawableLoader(coilStore, imageLoader)
 
-            @Override
-            public void cancel(@NonNull Disposable disposable) {
-                disposable.dispose();
-            }
-        }, Coil.imageLoader(context));
+    override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
+        builder.setFactory<Image>(Image::class.java, ImageSpanFactory())
     }
 
-    @NonNull
-    public static CoilImagesPlugin create(@NonNull final Context context, @NonNull final ImageLoader imageLoader) {
-        return create(new CoilStore() {
-            @NonNull
-            @Override
-            public ImageRequest load(@NonNull AsyncDrawable drawable) {
-                return new ImageRequest.Builder(context).data(drawable.getDestination()).build();
-            }
-
-            @Override
-            public void cancel(@NonNull Disposable disposable) {
-                disposable.dispose();
-            }
-        }, imageLoader);
+    override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+        builder.asyncDrawableLoader(coilAsyncDrawableLoader)
     }
 
-    @NonNull
-    public static CoilImagesPlugin create(@NonNull final CoilStore coilStore, @NonNull final ImageLoader imageLoader) {
-        return new CoilImagesPlugin(coilStore, imageLoader);
+    override fun beforeSetText(textView: TextView, markdown: Spanned) {
+        AsyncDrawableScheduler.unschedule(textView)
     }
 
-    private final CoilAsyncDrawableLoader coilAsyncDrawableLoader;
-
-    @SuppressWarnings("WeakerAccess")
-    CoilImagesPlugin(@NonNull CoilStore coilStore, @NonNull ImageLoader imageLoader) {
-        this.coilAsyncDrawableLoader = new CoilAsyncDrawableLoader(coilStore, imageLoader);
+    override fun afterSetText(textView: TextView) {
+        AsyncDrawableScheduler.schedule(textView)
     }
 
-    @Override
-    public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
-        builder.setFactory(Image.class, new ImageSpanFactory());
-    }
+    private class CoilAsyncDrawableLoader(
+        private val coilStore: CoilStore, private val imageLoader: ImageLoader
+    ) : AsyncDrawableLoader() {
+        private val cache: MutableMap<AsyncDrawable, Disposable> =
+            HashMap<AsyncDrawable, Disposable>(2)
 
-    @Override
-    public void configureConfiguration(@NonNull MarkwonConfiguration.Builder builder) {
-        builder.asyncDrawableLoader(coilAsyncDrawableLoader);
-    }
-
-    @Override
-    public void beforeSetText(@NonNull TextView textView, @NonNull Spanned markdown) {
-        AsyncDrawableScheduler.unschedule(textView);
-    }
-
-    @Override
-    public void afterSetText(@NonNull TextView textView) {
-        AsyncDrawableScheduler.schedule(textView);
-    }
-
-    private static class CoilAsyncDrawableLoader extends AsyncDrawableLoader {
-
-        private final CoilStore coilStore;
-        private final ImageLoader imageLoader;
-        private final Map<AsyncDrawable, Disposable> cache = new HashMap<>(2);
-
-        CoilAsyncDrawableLoader(@NonNull CoilStore coilStore, @NonNull ImageLoader imageLoader) {
-            this.coilStore = coilStore;
-            this.imageLoader = imageLoader;
-        }
-
-        @Override
-        public void load(@NonNull AsyncDrawable drawable) {
-            final AtomicBoolean loaded = new AtomicBoolean(false);
-            final Target target = new AsyncDrawableTarget(drawable, loaded);
-            final ImageRequest request = coilStore.load(drawable).newBuilder().target(target).build();
+        override fun load(drawable: AsyncDrawable) {
+            val loaded = AtomicBoolean(false)
+            val target: Target = AsyncDrawableTarget(drawable, loaded)
+            val request = coilStore.load(drawable).newBuilder().target(target).build()
             // @since 4.5.1 execute can return result _before_ disposable is created,
             //  thus `execute` would finish before we put disposable in cache (and thus result is
             //  not delivered)
-            final Disposable disposable = imageLoader.enqueue(request);
+            val disposable = imageLoader.enqueue(request)
             // if flag was not set, then job is running (else - finished before we got here)
             if (!loaded.get()) {
                 // mark flag
-                loaded.set(true);
-                cache.put(drawable, disposable);
+                loaded.set(true)
+                cache.put(drawable, disposable)
             }
         }
 
-        @Override
-        public void cancel(@NonNull AsyncDrawable drawable) {
-            final Disposable disposable = cache.remove(drawable);
+        override fun cancel(drawable: AsyncDrawable) {
+            val disposable = cache.remove(drawable)
             if (disposable != null) {
-                coilStore.cancel(disposable);
+                coilStore.cancel(disposable)
             }
         }
 
-        @Nullable
-        @Override
-        public Drawable placeholder(@NonNull AsyncDrawable drawable) {
-            return null;
+        override fun placeholder(drawable: AsyncDrawable): Drawable? {
+            return null
         }
 
-        private class AsyncDrawableTarget implements Target {
-
-            private final AsyncDrawable drawable;
-            private final AtomicBoolean loaded;
-
-            private AsyncDrawableTarget(@NonNull AsyncDrawable drawable, @NonNull AtomicBoolean loaded) {
-                this.drawable = drawable;
-                this.loaded = loaded;
-            }
-
-            @Override
-            public void onSuccess(@NonNull Drawable loadedDrawable) {
+        private inner class AsyncDrawableTarget(
+            private val drawable: AsyncDrawable,
+            private val loaded: AtomicBoolean
+        ) : Target {
+            override fun onSuccess(result: Drawable) {
                 // @since 4.5.1 check finished flag (result can be delivered _before_ disposable is created)
                 if (cache.remove(drawable) != null || !loaded.get()) {
                     // mark
-                    loaded.set(true);
-                    if (drawable.isAttached()) {
-                        DrawableUtils.applyIntrinsicBoundsIfEmpty(loadedDrawable);
-                        drawable.setResult(loadedDrawable);
+                    loaded.set(true)
+                    if (drawable.isAttached) {
+                        DrawableUtils.applyIntrinsicBoundsIfEmpty(result)
+                        drawable.setResult(result)
                     }
                 }
             }
 
-            @Override
-            public void onStart(@Nullable Drawable placeholder) {
-                if (placeholder != null && drawable.isAttached()) {
-                    DrawableUtils.applyIntrinsicBoundsIfEmpty(placeholder);
-                    drawable.setResult(placeholder);
+            override fun onStart(placeholder: Drawable?) {
+                if (placeholder != null && drawable.isAttached) {
+                    DrawableUtils.applyIntrinsicBoundsIfEmpty(placeholder)
+                    drawable.setResult(placeholder)
                 }
             }
 
-            @Override
-            public void onError(@Nullable Drawable errorDrawable) {
+            override fun onError(error: Drawable?) {
                 if (cache.remove(drawable) != null) {
-                    if (errorDrawable != null && drawable.isAttached()) {
-                        DrawableUtils.applyIntrinsicBoundsIfEmpty(errorDrawable);
-                        drawable.setResult(errorDrawable);
+                    if (error != null && drawable.isAttached) {
+                        DrawableUtils.applyIntrinsicBoundsIfEmpty(error)
+                        drawable.setResult(error)
                     }
                 }
             }
+        }
+    }
+
+    companion object {
+        fun create(context: Context): CoilImagesPlugin {
+            return create(object : CoilStore {
+                override fun load(drawable: AsyncDrawable): ImageRequest {
+                    return ImageRequest.Builder(context).data(drawable.destination).build()
+                }
+
+                override fun cancel(disposable: Disposable) {
+                    disposable.dispose()
+                }
+            }, imageLoader(context))
+        }
+
+        fun create(context: Context, imageLoader: ImageLoader): CoilImagesPlugin {
+            return create(object : CoilStore {
+                override fun load(drawable: AsyncDrawable): ImageRequest {
+                    return ImageRequest.Builder(context).data(drawable.destination).build()
+                }
+
+                override fun cancel(disposable: Disposable) {
+                    disposable.dispose()
+                }
+            }, imageLoader)
+        }
+
+        fun create(coilStore: CoilStore, imageLoader: ImageLoader): CoilImagesPlugin {
+            return CoilImagesPlugin(coilStore, imageLoader)
         }
     }
 }
