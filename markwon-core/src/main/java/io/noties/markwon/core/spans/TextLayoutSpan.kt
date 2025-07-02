@@ -1,70 +1,54 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.text.Layout;
-import android.text.Spannable;
-import android.text.Spanned;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.lang.ref.WeakReference;
+import android.text.Layout
+import android.text.Spannable
+import android.text.Spanned
+import java.lang.ref.WeakReference
 
 /**
  * @since 4.4.0
  */
-public class TextLayoutSpan {
+class TextLayoutSpan internal constructor(layout: Layout) {
+    private val reference: WeakReference<Layout> = WeakReference<Layout>(layout)
 
-    /**
-     * @see #applyTo(Spannable, Layout)
-     */
-    @Nullable
-    public static Layout layoutOf(@NonNull CharSequence cs) {
-        if (cs instanceof Spanned) {
-            return layoutOf((Spanned) cs);
-        }
-        return null;
+    fun layout(): Layout? {
+        return reference.get()
     }
 
-    @Nullable
-    public static Layout layoutOf(@NonNull Spanned spanned) {
-        final TextLayoutSpan[] spans = spanned.getSpans(
-                0,
-                spanned.length(),
-                TextLayoutSpan.class
-        );
-        return spans != null && spans.length > 0
-                ? spans[0].layout()
-                : null;
-    }
-
-    public static void applyTo(@NonNull Spannable spannable, @NonNull Layout layout) {
-
-        // remove all current ones (only one should be present)
-        final TextLayoutSpan[] spans = spannable.getSpans(0, spannable.length(), TextLayoutSpan.class);
-        if (spans != null) {
-            for (TextLayoutSpan span : spans) {
-                spannable.removeSpan(span);
+    companion object {
+        /**
+         * @see .applyTo
+         */
+        fun layoutOf(cs: CharSequence): Layout? {
+            if (cs is Spanned) {
+                return Companion.layoutOf(cs)
             }
+            return null
         }
 
-        final TextLayoutSpan span = new TextLayoutSpan(layout);
-        spannable.setSpan(
-                span,
-                0,
-                spannable.length(),
-                Spanned.SPAN_INCLUSIVE_INCLUSIVE
-        );
-    }
+        @JvmStatic
+        fun layoutOf(spanned: Spanned): Layout? {
+            val spans = spanned.getSpans(
+                0, spanned.length, TextLayoutSpan::class.java
+            )
+            return if (spans != null && spans.size > 0) spans[0]!!.layout()
+            else null
+        }
 
-    private final WeakReference<Layout> reference;
+        fun applyTo(spannable: Spannable, layout: Layout) {
+            // remove all current ones (only one should be present)
 
-    @SuppressWarnings("WeakerAccess")
-    TextLayoutSpan(@NonNull Layout layout) {
-        this.reference = new WeakReference<>(layout);
-    }
+            val spans = spannable.getSpans(0, spannable.length, TextLayoutSpan::class.java)
+            if (spans != null) {
+                for (span in spans) {
+                    spannable.removeSpan(span)
+                }
+            }
 
-    @Nullable
-    public Layout layout() {
-        return reference.get();
+            val span = TextLayoutSpan(layout)
+            spannable.setSpan(
+                span, 0, spannable.length, Spanned.SPAN_INCLUSIVE_INCLUSIVE
+            )
+        }
     }
 }

@@ -1,64 +1,52 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.text.Spannable;
-import android.text.Spanned;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.lang.ref.WeakReference;
+import android.text.Spannable
+import android.text.Spanned
+import android.widget.TextView
+import java.lang.ref.WeakReference
 
 /**
- * A special span that allows to obtain {@code TextView} in which spans are displayed
+ * A special span that allows to obtain `TextView` in which spans are displayed
  *
  * @since 4.4.0
  */
-public class TextViewSpan {
+class TextViewSpan(textView: TextView) {
+    private val reference: WeakReference<TextView> = WeakReference<TextView>(textView)
 
-    @Nullable
-    public static TextView textViewOf(@NonNull CharSequence cs) {
-        if (cs instanceof Spanned) {
-            return textViewOf((Spanned) cs);
-        }
-        return null;
+    fun textView(): TextView? {
+        return reference.get()
     }
 
-    @Nullable
-    public static TextView textViewOf(@NonNull Spanned spanned) {
-        final TextViewSpan[] spans = spanned.getSpans(0, spanned.length(), TextViewSpan.class);
-        return spans != null && spans.length > 0
-                ? spans[0].textView()
-                : null;
-    }
-
-    public static void applyTo(@NonNull Spannable spannable, @NonNull TextView textView) {
-
-        final TextViewSpan[] spans = spannable.getSpans(0, spannable.length(), TextViewSpan.class);
-        if (spans != null) {
-            for (TextViewSpan span : spans) {
-                spannable.removeSpan(span);
+    companion object {
+        fun textViewOf(cs: CharSequence): TextView? {
+            if (cs is Spanned) {
+                return Companion.textViewOf(cs)
             }
+            return null
         }
 
-        final TextViewSpan span = new TextViewSpan(textView);
-        // `SPAN_INCLUSIVE_INCLUSIVE` to persist in case of possible text change (deletion, etc)
-        spannable.setSpan(
-                span,
-                0,
-                spannable.length(),
-                Spanned.SPAN_INCLUSIVE_INCLUSIVE
-        );
-    }
+        @JvmStatic
+        fun textViewOf(spanned: Spanned): TextView? {
+            val spans = spanned.getSpans(0, spanned.length, TextViewSpan::class.java)
+            return if (spans != null && spans.size > 0) spans[0]!!.textView()
+            else null
+        }
 
-    private final WeakReference<TextView> reference;
+        @JvmStatic
+        fun applyTo(spannable: Spannable, textView: TextView) {
+            val spans =
+                spannable.getSpans(0, spannable.length, TextViewSpan::class.java)
+            if (spans != null) {
+                for (span in spans) {
+                    spannable.removeSpan(span)
+                }
+            }
 
-    public TextViewSpan(@NonNull TextView textView) {
-        this.reference = new WeakReference<>(textView);
-    }
-
-    @Nullable
-    public TextView textView() {
-        return reference.get();
+            val span = TextViewSpan(textView)
+            // `SPAN_INCLUSIVE_INCLUSIVE` to persist in case of possible text change (deletion, etc)
+            spannable.setSpan(
+                span, 0, spannable.length, Spanned.SPAN_INCLUSIVE_INCLUSIVE
+            )
+        }
     }
 }

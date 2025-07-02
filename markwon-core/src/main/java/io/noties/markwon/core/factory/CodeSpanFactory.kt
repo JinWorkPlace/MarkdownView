@@ -1,17 +1,12 @@
-package io.noties.markwon.core.factory;
+package io.noties.markwon.core.factory
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.RenderProps
+import io.noties.markwon.SpanFactory
+import io.noties.markwon.core.spans.CodeSpan
 
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.RenderProps;
-import io.noties.markwon.SpanFactory;
-import io.noties.markwon.core.spans.CodeSpan;
-
-public class CodeSpanFactory implements SpanFactory {
-    @Nullable
-    @Override
-    public Object getSpans(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps props) {
-        return new CodeSpan(configuration.theme());
+class CodeSpanFactory : SpanFactory {
+    override fun getSpans(configuration: MarkwonConfiguration, props: RenderProps): CodeSpan {
+        return CodeSpan(configuration.theme())
     }
 }

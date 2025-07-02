@@ -1,67 +1,69 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.text.Layout;
-import android.text.TextPaint;
-import android.text.style.LeadingMarginSpan;
-import android.text.style.MetricAffectingSpan;
-
-import androidx.annotation.NonNull;
-
-import io.noties.markwon.core.MarkwonTheme;
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.text.Layout
+import android.text.TextPaint
+import android.text.style.LeadingMarginSpan
+import android.text.style.MetricAffectingSpan
+import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.core.spans.ObjectsPool.paint
+import io.noties.markwon.core.spans.ObjectsPool.rect
 
 /**
  * @since 3.0.0 split inline and block spans
  */
-public class CodeBlockSpan extends MetricAffectingSpan implements LeadingMarginSpan {
+class CodeBlockSpan(
+    private val theme: MarkwonTheme
+) : MetricAffectingSpan(), LeadingMarginSpan {
+    private val rect = rect()
+    private val paint = paint()
 
-    private final MarkwonTheme theme;
-    private final Rect rect = ObjectsPool.rect();
-    private final Paint paint = ObjectsPool.paint();
-
-    public CodeBlockSpan(@NonNull MarkwonTheme theme) {
-        this.theme = theme;
+    override fun updateMeasureState(p: TextPaint) {
+        apply(p)
     }
 
-    @Override
-    public void updateMeasureState(TextPaint p) {
-        apply(p);
+    override fun updateDrawState(ds: TextPaint) {
+        apply(ds)
     }
 
-    @Override
-    public void updateDrawState(TextPaint ds) {
-        apply(ds);
+    private fun apply(p: TextPaint) {
+        theme.applyCodeBlockTextStyle(p)
     }
 
-    private void apply(TextPaint p) {
-        theme.applyCodeBlockTextStyle(p);
+    override fun getLeadingMargin(first: Boolean): Int {
+        return theme.getCodeBlockMargin()
     }
 
-    @Override
-    public int getLeadingMargin(boolean first) {
-        return theme.getCodeBlockMargin();
-    }
+    override fun drawLeadingMargin(
+        c: Canvas,
+        p: Paint,
+        x: Int,
+        dir: Int,
+        top: Int,
+        baseline: Int,
+        bottom: Int,
+        text: CharSequence?,
+        start: Int,
+        end: Int,
+        first: Boolean,
+        layout: Layout?
+    ) {
+        paint.style = Paint.Style.FILL
+        paint.color = theme.getCodeBlockBackgroundColor(p)
 
-    @Override
-    public void drawLeadingMargin(Canvas c, Paint p, int x, int dir, int top, int baseline, int bottom, CharSequence text, int start, int end, boolean first, Layout layout) {
-
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(theme.getCodeBlockBackgroundColor(p));
-
-        final int left;
-        final int right;
+        val left: Int
+        val right: Int
         if (dir > 0) {
-            left = x;
-            right = c.getWidth();
+            left = x
+            right = c.width
         } else {
-            left = x - c.getWidth();
-            right = x;
+            left = x - c.width
+            right = x
         }
 
-        rect.set(left, top, right, bottom);
+        rect.set(left, top, right, bottom)
 
-        c.drawRect(rect, paint);
+        c.drawRect(rect, paint)
     }
 }

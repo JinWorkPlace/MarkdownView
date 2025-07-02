@@ -1,35 +1,25 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.text.TextPaint;
-import android.text.style.MetricAffectingSpan;
-
-import androidx.annotation.NonNull;
-
-import io.noties.markwon.core.MarkwonTheme;
+import android.text.TextPaint
+import android.text.style.MetricAffectingSpan
+import io.noties.markwon.core.MarkwonTheme
 
 /**
  * @since 3.0.0 split inline and block spans
  */
-public class CodeSpan extends MetricAffectingSpan {
-
-    private final MarkwonTheme theme;
-
-    public CodeSpan(@NonNull MarkwonTheme theme) {
-        this.theme = theme;
+data class CodeSpan(
+    private val theme: MarkwonTheme
+) : MetricAffectingSpan() {
+    override fun updateMeasureState(p: TextPaint) {
+        apply(p)
     }
 
-    @Override
-    public void updateMeasureState(TextPaint p) {
-        apply(p);
+    override fun updateDrawState(ds: TextPaint) {
+        apply(ds)
+        ds.bgColor = theme.getCodeBackgroundColor(ds)
     }
 
-    @Override
-    public void updateDrawState(TextPaint ds) {
-        apply(ds);
-        ds.bgColor = theme.getCodeBackgroundColor(ds);
-    }
-
-    private void apply(TextPaint p) {
-        theme.applyCodeTextStyle(p);
+    private fun apply(p: TextPaint) {
+        theme.applyCodeTextStyle(p)
     }
 }

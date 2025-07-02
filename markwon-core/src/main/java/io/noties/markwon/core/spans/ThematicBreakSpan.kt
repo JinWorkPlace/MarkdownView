@@ -1,52 +1,54 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.text.Layout;
-import android.text.style.LeadingMarginSpan;
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.text.Layout
+import android.text.style.LeadingMarginSpan
+import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.core.spans.ObjectsPool.paint
+import io.noties.markwon.core.spans.ObjectsPool.rect
 
-import androidx.annotation.NonNull;
+class ThematicBreakSpan(private val theme: MarkwonTheme) : LeadingMarginSpan {
+    private val rect = rect()
+    private val paint = paint()
 
-import io.noties.markwon.core.MarkwonTheme;
-
-public class ThematicBreakSpan implements LeadingMarginSpan {
-
-    private final MarkwonTheme theme;
-    private final Rect rect = ObjectsPool.rect();
-    private final Paint paint = ObjectsPool.paint();
-
-    public ThematicBreakSpan(@NonNull MarkwonTheme theme) {
-        this.theme = theme;
+    override fun getLeadingMargin(first: Boolean): Int {
+        return 0
     }
 
-    @Override
-    public int getLeadingMargin(boolean first) {
-        return 0;
-    }
+    override fun drawLeadingMargin(
+        c: Canvas,
+        p: Paint?,
+        x: Int,
+        dir: Int,
+        top: Int,
+        baseline: Int,
+        bottom: Int,
+        text: CharSequence?,
+        start: Int,
+        end: Int,
+        first: Boolean,
+        layout: Layout?
+    ) {
+        val middle = top + ((bottom - top) / 2)
 
-    @Override
-    public void drawLeadingMargin(Canvas c, Paint p, int x, int dir, int top, int baseline, int bottom, CharSequence text, int start, int end, boolean first, Layout layout) {
+        paint.set(p)
+        theme.applyThematicBreakStyle(paint)
 
-        final int middle = top + ((bottom - top) / 2);
+        val height = (paint.strokeWidth + .5f).toInt()
+        val halfHeight = (height / 2f + .5f).toInt()
 
-        paint.set(p);
-        theme.applyThematicBreakStyle(paint);
-
-        final int height = (int) (paint.getStrokeWidth() + .5F);
-        final int halfHeight = (int) (height / 2.F + .5F);
-
-        final int left;
-        final int right;
+        val left: Int
+        val right: Int
         if (dir > 0) {
-            left = x;
-            right = c.getWidth();
+            left = x
+            right = c.width
         } else {
-            left = x - c.getWidth();
-            right = x;
+            left = x - c.width
+            right = x
         }
 
-        rect.set(left, middle - halfHeight, right, middle + halfHeight);
-        c.drawRect(rect, paint);
+        rect.set(left, middle - halfHeight, right, middle + halfHeight)
+        c.drawRect(rect, paint)
     }
 }

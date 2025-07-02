@@ -1,45 +1,24 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.text.TextPaint;
-import android.text.style.URLSpan;
-import android.view.View;
+import android.text.TextPaint
+import android.text.style.URLSpan
+import android.view.View
+import io.noties.markwon.LinkResolver
+import io.noties.markwon.core.MarkwonTheme
 
-import androidx.annotation.NonNull;
-
-import io.noties.markwon.LinkResolver;
-import io.noties.markwon.core.MarkwonTheme;
-
-public class LinkSpan extends URLSpan {
-
-    private final MarkwonTheme theme;
-    private final String link;
-    private final LinkResolver resolver;
-
-    public LinkSpan(
-            @NonNull MarkwonTheme theme,
-            @NonNull String link,
-            @NonNull LinkResolver resolver) {
-        super(link);
-        this.theme = theme;
-        this.link = link;
-        this.resolver = resolver;
-    }
-
-    @Override
-    public void onClick(View widget) {
-        resolver.resolve(widget, link);
-    }
-
-    @Override
-    public void updateDrawState(@NonNull TextPaint ds) {
-        theme.applyLinkStyle(ds);
-    }
-
+class LinkSpan(
+    private val theme: MarkwonTheme,
     /**
      * @since 4.2.0
      */
-    @NonNull
-    public String getLink() {
-        return link;
+    val link: String,
+    private val resolver: LinkResolver
+) : URLSpan(link) {
+    override fun onClick(widget: View) {
+        resolver.resolve(widget, link)
+    }
+
+    override fun updateDrawState(ds: TextPaint) {
+        theme.applyLinkStyle(ds)
     }
 }

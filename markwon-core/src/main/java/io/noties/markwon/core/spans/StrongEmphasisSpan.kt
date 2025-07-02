@@ -1,17 +1,14 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.text.TextPaint;
-import android.text.style.MetricAffectingSpan;
+import android.text.TextPaint
+import android.text.style.MetricAffectingSpan
 
-public class StrongEmphasisSpan extends MetricAffectingSpan {
-
-    @Override
-    public void updateMeasureState(TextPaint p) {
-        p.setFakeBoldText(true);
+class StrongEmphasisSpan : MetricAffectingSpan() {
+    override fun updateMeasureState(p: TextPaint) {
+        p.isFakeBoldText = true
     }
 
-    @Override
-    public void updateDrawState(TextPaint tp) {
-        tp.setFakeBoldText(true);
+    override fun updateDrawState(tp: TextPaint) {
+        tp.isFakeBoldText = true
     }
 }

@@ -1,86 +1,66 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.annotation.SuppressLint;
-import android.graphics.Typeface;
-import android.text.TextPaint;
-import android.text.style.MetricAffectingSpan;
-
-import androidx.annotation.NonNull;
+import android.annotation.SuppressLint
+import android.graphics.Typeface
+import android.text.TextPaint
+import android.text.style.MetricAffectingSpan
 
 /**
  * A span implementation that allow applying custom Typeface. Although it is
  * not used directly by the library, it\'s helpful for customizations.
- * <p>
+ *
+ *
  * Please note that this implementation does not validate current paint state
- * and won\'t be updating/modifying supplied Typeface unless {@code mergeStyles} is specified
+ * and won\'t be updating/modifying supplied Typeface unless `mergeStyles` is specified
  *
  * @since 3.0.0
  */
-public class CustomTypefaceSpan extends MetricAffectingSpan {
+class CustomTypefaceSpan internal constructor(
+    private val typeface: Typeface, private val mergeStyles: Boolean
+) : MetricAffectingSpan() {
+    @Deprecated(
+        """4.6.1 use {{@link #create(Typeface)}}
+      or {@link #create(Typeface, boolean)} factory method"""
+    )
+    constructor(typeface: Typeface) : this(typeface, false)
 
-    @NonNull
-    public static CustomTypefaceSpan create(@NonNull Typeface typeface) {
-        return create(typeface, false);
+
+    override fun updateMeasureState(paint: TextPaint) {
+        updatePaint(paint)
     }
 
-    /**
-     * <strong>NB!</strong> in order to <em>merge</em> typeface styles, supplied typeface must be
-     * able to be created via {@code Typeface.create(Typeface, int)} method. This would mean that bundled fonts
-     * inside {@code assets} folder would be able to display styles properly.
-     *
-     * @param mergeStyles control if typeface styles must be merged, for example, if
-     *                    this span (bold) is contained by other span (italic),
-     *                    {@code mergeStyles=true} would result in bold-italic
-     * @since 4.6.1
-     */
-    @NonNull
-    public static CustomTypefaceSpan create(@NonNull Typeface typeface, boolean mergeStyles) {
-        return new CustomTypefaceSpan(typeface, mergeStyles);
+    override fun updateDrawState(paint: TextPaint) {
+        updatePaint(paint)
     }
 
-    private final Typeface typeface;
-
-    private final boolean mergeStyles;
-
-    /**
-     * @deprecated 4.6.1 use {{@link #create(Typeface)}}
-     * or {@link #create(Typeface, boolean)} factory method
-     */
-    @Deprecated
-    public CustomTypefaceSpan(@NonNull Typeface typeface) {
-        this(typeface, false);
-    }
-
-    // @since 4.6.1
-    CustomTypefaceSpan(@NonNull Typeface typeface, boolean mergeStyles) {
-        this.typeface = typeface;
-        this.mergeStyles = mergeStyles;
-    }
-
-
-    @Override
-    public void updateMeasureState(@NonNull TextPaint paint) {
-        updatePaint(paint);
-    }
-
-    @Override
-    public void updateDrawState(@NonNull TextPaint paint) {
-        updatePaint(paint);
-    }
-
-    private void updatePaint(@NonNull TextPaint paint) {
-        final Typeface oldTypeface = paint.getTypeface();
-        if (!mergeStyles ||
-                oldTypeface == null ||
-                oldTypeface.getStyle() == Typeface.NORMAL) {
-            paint.setTypeface(typeface);
+    private fun updatePaint(paint: TextPaint) {
+        val oldTypeface = paint.typeface
+        if (!mergeStyles || oldTypeface == null || oldTypeface.style == Typeface.NORMAL) {
+            paint.typeface = typeface
         } else {
-            final int oldStyle = oldTypeface.getStyle();
+            val oldStyle = oldTypeface.style
 
-            @SuppressLint("WrongConstant") final int want = oldStyle | typeface.getStyle();
-            final Typeface styledTypeface = Typeface.create(typeface, want);
+            @SuppressLint("WrongConstant") val want = oldStyle or typeface.style
+            val styledTypeface = Typeface.create(typeface, want)
 
-            paint.setTypeface(styledTypeface);
+            paint.typeface = styledTypeface
+        }
+    }
+
+    companion object {
+        /**
+         * **NB!** in order to *merge* typeface styles, supplied typeface must be
+         * able to be created via `Typeface.create(Typeface, int)` method. This would mean that bundled fonts
+         * inside `assets` folder would be able to display styles properly.
+         *
+         * @param mergeStyles control if typeface styles must be merged, for example, if
+         * this span (bold) is contained by other span (italic),
+         * `mergeStyles=true` would result in bold-italic
+         * @since 4.6.1
+         */
+        @JvmOverloads
+        fun create(typeface: Typeface, mergeStyles: Boolean = false): CustomTypefaceSpan {
+            return CustomTypefaceSpan(typeface, mergeStyles)
         }
     }
 }

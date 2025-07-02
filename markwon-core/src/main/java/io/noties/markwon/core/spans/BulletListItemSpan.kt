@@ -1,137 +1,127 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.os.Build;
-import android.text.Layout;
-import android.text.style.LeadingMarginSpan;
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.RectF
+import android.os.Build
+import android.text.Layout
+import android.text.style.LeadingMarginSpan
+import androidx.annotation.IntRange
+import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.utils.LeadingMarginUtils
+import kotlin.math.max
+import kotlin.math.min
 
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
+class BulletListItemSpan(
+    private val theme: MarkwonTheme, @param:IntRange(from = 0) private val level: Int
+) : LeadingMarginSpan {
+    private val paint: Paint = ObjectsPool.paint()
+    private val circle: RectF = ObjectsPool.rectF()
+    private val rectangle: Rect = ObjectsPool.rect()
 
-import io.noties.markwon.core.MarkwonTheme;
-import io.noties.markwon.utils.LeadingMarginUtils;
-
-public class BulletListItemSpan implements LeadingMarginSpan {
-
-    private static final boolean IS_NOUGAT;
-
-    static {
-        final int sdk = Build.VERSION.SDK_INT;
-        IS_NOUGAT = Build.VERSION_CODES.N == sdk || Build.VERSION_CODES.N_MR1 == sdk;
+    override fun getLeadingMargin(first: Boolean): Int {
+        return theme.getBlockMargin()
     }
 
-    private MarkwonTheme theme;
-
-    private final Paint paint = ObjectsPool.paint();
-    private final RectF circle = ObjectsPool.rectF();
-    private final Rect rectangle = ObjectsPool.rect();
-
-    private final int level;
-
-    public BulletListItemSpan(
-            @NonNull MarkwonTheme theme,
-            @IntRange(from = 0) int level) {
-        this.theme = theme;
-        this.level = level;
-    }
-
-    @Override
-    public int getLeadingMargin(boolean first) {
-        return theme.getBlockMargin();
-    }
-
-    @Override
-    public void drawLeadingMargin(Canvas c, Paint p, int x, int dir, int top, int baseline, int bottom, CharSequence text, int start, int end, boolean first, Layout layout) {
-
+    override fun drawLeadingMargin(
+        c: Canvas,
+        p: Paint?,
+        x: Int,
+        dir: Int,
+        top: Int,
+        baseline: Int,
+        bottom: Int,
+        text: CharSequence?,
+        start: Int,
+        end: Int,
+        first: Boolean,
+        layout: Layout
+    ) {
         // if there was a line break, we don't need to draw anything
-        if (!first
-                || !LeadingMarginUtils.selfStart(start, text, this)) {
-            return;
+
+        if (!first || !LeadingMarginUtils.selfStart(start, text, this)) {
+            return
         }
 
-        paint.set(p);
+        paint.set(p)
 
-        theme.applyListItemStyle(paint);
+        theme.applyListItemStyle(paint)
 
-        final int save = c.save();
+        val save = c.save()
         try {
-
-            final int width = theme.getBlockMargin();
+            val width = theme.getBlockMargin()
 
             // @since 1.0.6 we no longer rely on (bottom-top) calculation in order to detect line height
             // it lead to bad rendering as first & last lines received different results even
             // if text size is the same (first line received greater amount and bottom line -> less)
-            final int textLineHeight = (int) (paint.descent() - paint.ascent() + .5F);
+            val textLineHeight = (paint.descent() - paint.ascent() + .5f).toInt()
 
-            final int side = theme.getBulletWidth(textLineHeight);
+            val side = theme.getBulletWidth(textLineHeight)
 
-            final int marginLeft = (width - side) / 2;
+            val marginLeft = (width - side) / 2
 
             // in order to support RTL
-            final int l;
-            final int r;
-            {
+            val l: Int
+            val r: Int
+            run {
                 // @since 4.2.1 to correctly position bullet
                 // when nested inside other LeadingMarginSpans (sorry, Nougat)
                 if (IS_NOUGAT) {
-
                     // @since 2.0.2
                     // There is a bug in Android Nougat, when this span receives an `x` that
                     // doesn't correspond to what it should be (text is placed correctly though).
                     // Let's make this a general rule -> manually calculate difference between expected/actual
                     // and add this difference to resulting left/right values. If everything goes well
                     // we do not encounter a bug -> this `diff` value will be 0
-                    final int diff;
-                    if (dir < 0) {
-                        // rtl
-                        diff = x - (layout.getWidth() - (width * level));
+                    val diff: Int = if (dir < 0) {
+                        x - (layout.width - (width * level))
                     } else {
-                        diff = (width * level) - x;
+                        (width * level) - x
                     }
 
-                    final int left = x + (dir * marginLeft);
-                    final int right = left + (dir * side);
-                    l = Math.min(left, right) + (dir * diff);
-                    r = Math.max(left, right) + (dir * diff);
-
+                    val left = x + (dir * marginLeft)
+                    val right = left + (dir * side)
+                    l = min(left, right) + (dir * diff)
+                    r = max(left, right) + (dir * diff)
                 } else {
-                    if (dir > 0) {
-                        l = x + marginLeft;
+                    l = if (dir > 0) {
+                        x + marginLeft
                     } else {
-                        l = x - width + marginLeft;
+                        x - width + marginLeft
                     }
-                    r = l + side;
+                    r = l + side
                 }
             }
 
-            final int t = baseline + (int) ((paint.descent() + paint.ascent()) / 2.F + .5F) - (side / 2);
-            final int b = t + side;
+            val t = baseline + ((paint.descent() + paint.ascent()) / 2f + .5f).toInt() - (side / 2)
+            val b = t + side
 
-            if (level == 0
-                    || level == 1) {
+            if (level == 0 || level == 1) {
+                circle.set(l.toFloat(), t.toFloat(), r.toFloat(), b.toFloat())
 
-                circle.set(l, t, r, b);
+                val style = if (level == 0) Paint.Style.FILL else Paint.Style.STROKE
+                paint.style = style
 
-                final Paint.Style style = level == 0
-                        ? Paint.Style.FILL
-                        : Paint.Style.STROKE;
-                paint.setStyle(style);
-
-                c.drawOval(circle, paint);
+                c.drawOval(circle, paint)
             } else {
+                rectangle.set(l, t, r, b)
 
-                rectangle.set(l, t, r, b);
+                paint.style = Paint.Style.FILL
 
-                paint.setStyle(Paint.Style.FILL);
-
-                c.drawRect(rectangle, paint);
+                c.drawRect(rectangle, paint)
             }
-
         } finally {
-            c.restoreToCount(save);
+            c.restoreToCount(save)
+        }
+    }
+
+    companion object {
+        private val IS_NOUGAT: Boolean
+
+        init {
+            val sdk = Build.VERSION.SDK_INT
+            IS_NOUGAT = Build.VERSION_CODES.N == sdk || Build.VERSION_CODES.N_MR1 == sdk
         }
     }
 }

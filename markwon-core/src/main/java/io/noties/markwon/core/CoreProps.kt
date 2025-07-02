@@ -1,34 +1,37 @@
-package io.noties.markwon.core;
+package io.noties.markwon.core
 
-import io.noties.markwon.Prop;
+import io.noties.markwon.Prop
 
 /**
  * @since 3.0.0
  */
-public abstract class CoreProps {
+object CoreProps {
+    @JvmField
+    val LIST_ITEM_TYPE: Prop<ListItemType?> = Prop.of<ListItemType?>("list-item-type")
 
-    public static final Prop<ListItemType> LIST_ITEM_TYPE = Prop.of("list-item-type");
+    @JvmField
+    val BULLET_LIST_ITEM_LEVEL: Prop<Int?> = Prop.of<Int?>("bullet-list-item-level")
 
-    public static final Prop<Integer> BULLET_LIST_ITEM_LEVEL = Prop.of("bullet-list-item-level");
+    @JvmField
+    val ORDERED_LIST_ITEM_NUMBER: Prop<Int?> = Prop.of<Int?>("ordered-list-item-number")
 
-    public static final Prop<Integer> ORDERED_LIST_ITEM_NUMBER = Prop.of("ordered-list-item-number");
+    @JvmField
+    val HEADING_LEVEL: Prop<Int?> = Prop.of<Int?>("heading-level")
 
-    public static final Prop<Integer> HEADING_LEVEL = Prop.of("heading-level");
+    @JvmField
+    val LINK_DESTINATION: Prop<String?> = Prop.of<String?>("link-destination")
 
-    public static final Prop<String> LINK_DESTINATION = Prop.of("link-destination");
-
-    public static final Prop<Boolean> PARAGRAPH_IS_IN_TIGHT_LIST = Prop.of("paragraph-is-in-tight-list");
+    @JvmField
+    val PARAGRAPH_IS_IN_TIGHT_LIST: Prop<Boolean?> = Prop.of<Boolean?>("paragraph-is-in-tight-list")
 
     /**
      * @since 4.1.1
      */
-    public static final Prop<String> CODE_BLOCK_INFO = Prop.of("code-block-info");
+    @JvmField
+    val CODE_BLOCK_INFO: Prop<String?> = Prop.of<String?>("code-block-info")
 
-    public enum ListItemType {
+    enum class ListItemType {
         BULLET,
         ORDERED
-    }
-
-    private CoreProps() {
     }
 }

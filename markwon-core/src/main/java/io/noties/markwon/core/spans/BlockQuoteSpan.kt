@@ -1,62 +1,55 @@
-package io.noties.markwon.core.spans;
+package io.noties.markwon.core.spans
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.text.Layout;
-import android.text.style.LeadingMarginSpan;
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.text.Layout
+import android.text.style.LeadingMarginSpan
+import io.noties.markwon.core.MarkwonTheme
+import kotlin.math.max
+import kotlin.math.min
 
-import androidx.annotation.NonNull;
+data class BlockQuoteSpan(
+    private val theme: MarkwonTheme
+) : LeadingMarginSpan {
+    private val rect: Rect = ObjectsPool.rect()
+    private val paint: Paint = ObjectsPool.paint()
 
-import io.noties.markwon.core.MarkwonTheme;
-
-public class BlockQuoteSpan implements LeadingMarginSpan {
-
-    private final MarkwonTheme theme;
-    private final Rect rect = ObjectsPool.rect();
-    private final Paint paint = ObjectsPool.paint();
-
-    public BlockQuoteSpan(@NonNull MarkwonTheme theme) {
-        this.theme = theme;
+    override fun getLeadingMargin(first: Boolean): Int {
+        return theme.getBlockMargin()
     }
 
-    @Override
-    public int getLeadingMargin(boolean first) {
-        return theme.getBlockMargin();
-    }
+    override fun drawLeadingMargin(
+        c: Canvas,
+        p: Paint?,
+        x: Int,
+        dir: Int,
+        top: Int,
+        baseline: Int,
+        bottom: Int,
+        text: CharSequence?,
+        start: Int,
+        end: Int,
+        first: Boolean,
+        layout: Layout?
+    ) {
+        val width = theme.getBlockQuoteWidth()
 
-    @Override
-    public void drawLeadingMargin(
-            Canvas c,
-            Paint p,
-            int x,
-            int dir,
-            int top,
-            int baseline,
-            int bottom,
-            CharSequence text,
-            int start,
-            int end,
-            boolean first,
-            Layout layout) {
+        paint.set(p)
 
-        final int width = theme.getBlockQuoteWidth();
+        theme.applyBlockQuoteStyle(paint)
 
-        paint.set(p);
-
-        theme.applyBlockQuoteStyle(paint);
-
-        final int left;
-        final int right;
-        {
-            final int l = x + (dir * width);
-            final int r = l + (dir * width);
-            left = Math.min(l, r);
-            right = Math.max(l, r);
+        val left: Int
+        val right: Int
+        run {
+            val l = x + (dir * width)
+            val r = l + (dir * width)
+            left = min(l, r)
+            right = max(l, r)
         }
 
-        rect.set(left, top, right, bottom);
+        rect.set(left, top, right, bottom)
 
-        c.drawRect(rect, paint);
+        c.drawRect(rect, paint)
     }
 }
