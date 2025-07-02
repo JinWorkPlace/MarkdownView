@@ -1,86 +1,70 @@
-package io.noties.markwon.ext.tables;
+package io.noties.markwon.ext.tables
 
-import android.text.Spanned;
-import android.text.TextUtils;
-import android.view.View;
-import android.widget.TextView;
+import android.text.Spanned
+import android.text.TextUtils
+import android.view.View
+import android.view.View.OnAttachStateChangeListener
+import android.widget.TextView
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-abstract class TableRowsScheduler {
-
-    static void schedule(@NonNull final TextView view) {
-        final Object[] spans = extract(view);
-        if (spans != null
-                && spans.length > 0) {
-
+internal object TableRowsScheduler {
+    @JvmStatic
+    fun schedule(view: TextView) {
+        val spans = extract(view)
+        if (spans != null && spans.isNotEmpty()) {
             if (view.getTag(R.id.markwon_tables_scheduler) == null) {
-                final View.OnAttachStateChangeListener listener = new View.OnAttachStateChangeListener() {
-                    @Override
-                    public void onViewAttachedToWindow(View v) {
-
+                val listener: OnAttachStateChangeListener = object : OnAttachStateChangeListener {
+                    override fun onViewAttachedToWindow(v: View) {
                     }
 
-                    @Override
-                    public void onViewDetachedFromWindow(View v) {
-                        unschedule(view);
-                        view.removeOnAttachStateChangeListener(this);
-                        view.setTag(R.id.markwon_tables_scheduler, null);
+                    override fun onViewDetachedFromWindow(v: View) {
+                        unschedule(view)
+                        view.removeOnAttachStateChangeListener(this)
+                        view.setTag(R.id.markwon_tables_scheduler, null)
                     }
-                };
-                view.addOnAttachStateChangeListener(listener);
-                view.setTag(R.id.markwon_tables_scheduler, listener);
+                }
+                view.addOnAttachStateChangeListener(listener)
+                view.setTag(R.id.markwon_tables_scheduler, listener)
             }
 
-            final TableRowSpan.Invalidator invalidator = new TableRowSpan.Invalidator() {
-
+            val invalidator: TableRowSpan.Invalidator = object : TableRowSpan.Invalidator {
                 // @since 4.1.0
                 // let's stack-up invalidation calls (so invalidation happens,
                 // but not with each table-row-span draw call)
-                final Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        view.setText(view.getText());
-                    }
-                };
+                val runnable: Runnable = Runnable { view.text = view.getText() }
 
-                @Override
-                public void invalidate() {
+                override fun invalidate() {
                     // @since 4.1.0 post invalidation (combine multiple calls)
-                    view.removeCallbacks(runnable);
-                    view.post(runnable);
+                    view.removeCallbacks(runnable)
+                    view.post(runnable)
                 }
-            };
+            }
 
-            for (Object span : spans) {
-                ((TableRowSpan) span).invalidator(invalidator);
+            for (span in spans) {
+                span.invalidator(invalidator)
             }
         }
     }
 
-    static void unschedule(@NonNull TextView view) {
-        final Object[] spans = extract(view);
+    @JvmStatic
+    fun unschedule(view: TextView) {
+        val spans = extract(view)
         if (spans != null
-                && spans.length > 0) {
-            for (Object span : spans) {
-                ((TableRowSpan) span).invalidator(null);
+            && spans.isNotEmpty()
+        ) {
+            for (span in spans) {
+                span.invalidator(null)
             }
         }
     }
 
-    @Nullable
-    private static Object[] extract(@NonNull TextView view) {
-        final Object[] out;
-        final CharSequence text = view.getText();
-        if (!TextUtils.isEmpty(text) && text instanceof Spanned) {
-            out = ((Spanned) text).getSpans(0, text.length(), TableRowSpan.class);
+    private fun extract(view: TextView): Array<TableRowSpan>? {
+        val out: Array<TableRowSpan>?
+        val text = view.getText()
+        out = if (!TextUtils.isEmpty(text) && text is Spanned) {
+            text.getSpans(0, text.length, TableRowSpan::class.java)
         } else {
-            out = null;
+            null
         }
-        return out;
-    }
-
-    private TableRowsScheduler() {
+        return out
     }
 }

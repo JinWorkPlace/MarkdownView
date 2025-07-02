@@ -1,210 +1,162 @@
-package io.noties.markwon.ext.tables;
+package io.noties.markwon.ext.tables
 
-import android.text.Spanned;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.commonmark.ext.gfm.tables.TableBlock;
-import org.commonmark.ext.gfm.tables.TableCell;
-import org.commonmark.ext.gfm.tables.TableHead;
-import org.commonmark.ext.gfm.tables.TableRow;
-import org.commonmark.node.AbstractVisitor;
-import org.commonmark.node.CustomNode;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import io.noties.markwon.Markwon;
+import android.text.Spanned
+import io.noties.markwon.Markwon
+import org.commonmark.ext.gfm.tables.TableBlock
+import org.commonmark.ext.gfm.tables.TableCell
+import org.commonmark.ext.gfm.tables.TableHead
+import org.commonmark.ext.gfm.tables.TableRow
+import org.commonmark.node.AbstractVisitor
+import org.commonmark.node.CustomNode
 
 /**
- * A class to parse <code>TableBlock</code> and return a data-structure that is not dependent
+ * A class to parse `TableBlock` and return a data-structure that is not dependent
  * on commonmark-java table extension. Can be useful when rendering tables require special
  * handling (multiple views, specific table view) for example when used with `markwon-recycler` artifact
  *
- * @see #parse(Markwon, TableBlock)
+ * @see .parse
  * @since 3.0.0
  */
-public class Table {
-
-    /**
-     * Factory method to obtain an instance of {@link Table}
-     *
-     * @param markwon    Markwon
-     * @param tableBlock TableBlock to parse
-     * @return parsed {@link Table} or null
-     */
-    @Nullable
-    public static Table parse(@NonNull Markwon markwon, @NonNull TableBlock tableBlock) {
-
-        final Table table;
-
-        final ParseVisitor visitor = new ParseVisitor(markwon);
-        tableBlock.accept(visitor);
-        final List<Row> rows = visitor.rows();
-
-        if (rows == null) {
-            table = null;
-        } else {
-            table = new Table(rows);
+class Table(private val rows: MutableList<Row>) {
+    class Row(
+        private val isHeader: Boolean,
+        private val columns: MutableList<Column>
+    ) {
+        fun header(): Boolean {
+            return isHeader
         }
 
-        return table;
-    }
-
-    public static class Row {
-
-        private final boolean isHeader;
-        private final List<Column> columns;
-
-        public Row(
-                boolean isHeader,
-                @NonNull List<Column> columns) {
-            this.isHeader = isHeader;
-            this.columns = columns;
+        fun columns(): MutableList<Column> {
+            return columns
         }
 
-        public boolean header() {
-            return isHeader;
-        }
-
-        @NonNull
-        public List<Column> columns() {
-            return columns;
-        }
-
-        @Override
-        public String toString() {
+        override fun toString(): String {
             return "Row{" +
                     "isHeader=" + isHeader +
                     ", columns=" + columns +
-                    '}';
+                    '}'
         }
     }
 
-    public static class Column {
-
-        private final Alignment alignment;
-        private final Spanned content;
-
-        public Column(@NonNull Alignment alignment, @NonNull Spanned content) {
-            this.alignment = alignment;
-            this.content = content;
+    class Column(private val alignment: Alignment, private val content: Spanned) {
+        fun alignment(): Alignment {
+            return alignment
         }
 
-        @NonNull
-        public Alignment alignment() {
-            return alignment;
+        fun content(): Spanned {
+            return content
         }
 
-        @NonNull
-        public Spanned content() {
-            return content;
-        }
-
-        @Override
-        public String toString() {
+        override fun toString(): String {
             return "Column{" +
                     "alignment=" + alignment +
                     ", content=" + content +
-                    '}';
+                    '}'
         }
     }
 
-    public enum Alignment {
+    enum class Alignment {
         LEFT,
         CENTER,
         RIGHT
     }
 
-    private final List<Row> rows;
-
-    public Table(@NonNull List<Row> rows) {
-        this.rows = rows;
+    fun rows(): MutableList<Row> {
+        return rows
     }
 
-    @NonNull
-    public List<Row> rows() {
-        return rows;
-    }
-
-    @Override
-    public String toString() {
+    override fun toString(): String {
         return "Table{" +
                 "rows=" + rows +
-                '}';
+                '}'
     }
 
-    static class ParseVisitor extends AbstractVisitor {
+    internal class ParseVisitor(private val markwon: Markwon) : AbstractVisitor() {
+        private var rows: MutableList<Row>? = null
 
-        private final Markwon markwon;
+        private var pendingRow: MutableList<Column>? = null
+        private var pendingRowIsHeader = false
 
-        private List<Row> rows;
-
-        private List<Column> pendingRow;
-        private boolean pendingRowIsHeader;
-
-        ParseVisitor(@NonNull Markwon markwon) {
-            this.markwon = markwon;
+        fun rows(): MutableList<Row>? {
+            return rows
         }
 
-        @Nullable
-        public List<Row> rows() {
-            return rows;
-        }
-
-        @Override
-        public void visit(CustomNode customNode) {
-
-            if (customNode instanceof TableCell) {
-
-                final TableCell cell = (TableCell) customNode;
+        override fun visit(customNode: CustomNode?) {
+            if (customNode is TableCell) {
+                val cell = customNode
 
                 if (pendingRow == null) {
-                    pendingRow = new ArrayList<>(2);
+                    pendingRow = ArrayList(2)
                 }
 
-                pendingRow.add(new Column(alignment(cell.getAlignment()), markwon.render(cell)));
-                pendingRowIsHeader = cell.isHeader();
+                pendingRow!!.add(Column(alignment(cell.alignment), markwon.render(cell)))
+                pendingRowIsHeader = cell.isHeader
 
-                return;
+                return
             }
 
-            if (customNode instanceof TableHead
-                    || customNode instanceof TableRow) {
-
-                visitChildren(customNode);
+            if (customNode is TableHead
+                || customNode is TableRow
+            ) {
+                visitChildren(customNode)
 
                 // this can happen, ignore such row
-                if (pendingRow != null && pendingRow.size() > 0) {
+                pendingRow?.let {
+                    if (it.isNotEmpty()) {
+                        if (rows == null) {
+                            rows = ArrayList(2)
+                        }
 
-                    if (rows == null) {
-                        rows = new ArrayList<>(2);
+                        rows!!.add(Row(pendingRowIsHeader, it))
                     }
-
-                    rows.add(new Row(pendingRowIsHeader, pendingRow));
                 }
 
-                pendingRow = null;
-                pendingRowIsHeader = false;
+                pendingRow = null
+                pendingRowIsHeader = false
 
-                return;
+                return
             }
 
-            visitChildren(customNode);
+            visitChildren(customNode)
         }
 
-        @NonNull
-        private static Alignment alignment(@NonNull TableCell.Alignment alignment) {
-            final Alignment out;
-            if (TableCell.Alignment.RIGHT == alignment) {
-                out = Alignment.RIGHT;
-            } else if (TableCell.Alignment.CENTER == alignment) {
-                out = Alignment.CENTER;
-            } else {
-                out = Alignment.LEFT;
+        companion object {
+            private fun alignment(alignment: TableCell.Alignment): Alignment {
+                val out: Alignment = if (TableCell.Alignment.RIGHT == alignment) {
+                    Alignment.RIGHT
+                } else if (TableCell.Alignment.CENTER == alignment) {
+                    Alignment.CENTER
+                } else {
+                    Alignment.LEFT
+                }
+                return out
             }
-            return out;
+        }
+    }
+
+    companion object {
+        /**
+         * Factory method to obtain an instance of [Table]
+         *
+         * @param markdown    Markwon
+         * @param tableBlock TableBlock to parse
+         * @return parsed [Table] or null
+         */
+        @JvmStatic
+        fun parse(markwon: Markwon, tableBlock: TableBlock): Table? {
+            val table: Table?
+
+            val visitor = ParseVisitor(markwon)
+            tableBlock.accept(visitor)
+            val rows = visitor.rows()
+
+            table = if (rows == null) {
+                null
+            } else {
+                Table(rows)
+            }
+
+            return table
         }
     }
 }

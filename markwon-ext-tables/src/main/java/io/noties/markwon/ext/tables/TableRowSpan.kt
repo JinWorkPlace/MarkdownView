@@ -1,202 +1,159 @@
-package io.noties.markwon.ext.tables;
+package io.noties.markwon.ext.tables
 
-import android.annotation.SuppressLint;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.text.Layout;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.text.style.ReplacementSpan;
+import android.annotation.SuppressLint
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Paint.FontMetricsInt
+import android.graphics.Rect
+import android.graphics.drawable.Drawable
+import android.text.Layout
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.StaticLayout
+import android.text.TextPaint
+import android.text.style.ReplacementSpan
+import androidx.annotation.IntDef
+import androidx.annotation.IntRange
+import io.noties.markwon.core.spans.TextLayoutSpan
+import io.noties.markwon.image.AsyncDrawableSpan
+import io.noties.markwon.utils.LeadingMarginUtils
+import io.noties.markwon.utils.SpanUtils
 
-import androidx.annotation.IntDef;
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+open class TableRowSpan(
+    private val theme: TableTheme,
+    private val cells: MutableList<Cell>,
+    private val header: Boolean,
+    private val odd: Boolean
+) : ReplacementSpan() {
+    @IntDef(value = [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT])
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class Alignment
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
-
-import io.noties.markwon.core.spans.TextLayoutSpan;
-import io.noties.markwon.image.AsyncDrawable;
-import io.noties.markwon.image.AsyncDrawableSpan;
-import io.noties.markwon.utils.LeadingMarginUtils;
-import io.noties.markwon.utils.SpanUtils;
-
-public class TableRowSpan extends ReplacementSpan {
-
-    public static final int ALIGN_LEFT = 0;
-    public static final int ALIGN_CENTER = 1;
-    public static final int ALIGN_RIGHT = 2;
-
-    @IntDef(value = {ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Alignment {
+    interface Invalidator {
+        fun invalidate()
     }
 
-    public interface Invalidator {
-        void invalidate();
-    }
-
-    public static class Cell {
-
-        final int alignment;
-        final CharSequence text;
-
-        public Cell(@Alignment int alignment, CharSequence text) {
-            this.alignment = alignment;
-            this.text = text;
-        }
-
+    class Cell(@param:Alignment val alignment: Int, val text: CharSequence?) {
         @Alignment
-        public int alignment() {
-            return alignment;
+        fun alignment(): Int {
+            return alignment
         }
 
-        public CharSequence text() {
-            return text;
+        fun text(): CharSequence? {
+            return text
         }
 
-        @NonNull
-        @Override
-        public String toString() {
+        override fun toString(): String {
             return "Cell{" +
                     "alignment=" + alignment +
                     ", text=" + text +
-                    '}';
+                    '}'
         }
     }
 
-    private final TableTheme theme;
-    private final List<Cell> cells;
-    private final List<Layout> layouts;
-    private final TextPaint textPaint;
-    private final boolean header;
-    private final boolean odd;
+    private val layouts: MutableList<Layout> = ArrayList<Layout>(cells.size)
+    private val textPaint: TextPaint = TextPaint()
 
-    private final Rect rect = new Rect();
-    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private val rect = Rect()
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    private int width;
-    private int height;
-    private Invalidator invalidator;
+    private var width = 0
+    private var height = 0
+    private var invalidator: Invalidator? = null
 
-    public TableRowSpan(
-            @NonNull TableTheme theme,
-            @NonNull List<Cell> cells,
-            boolean header,
-            boolean odd) {
-        this.theme = theme;
-        this.cells = cells;
-        this.layouts = new ArrayList<>(cells.size());
-        this.textPaint = new TextPaint();
-        this.header = header;
-        this.odd = odd;
-    }
-
-    @Override
-    public int getSize(
-            @NonNull Paint paint,
-            CharSequence text,
-            @IntRange(from = 0) int start,
-            @IntRange(from = 0) int end,
-            @Nullable Paint.FontMetricsInt fm) {
-
+    override fun getSize(
+        paint: Paint,
+        text: CharSequence?,
+        @IntRange(from = 0) start: Int,
+        @IntRange(from = 0) end: Int,
+        fm: FontMetricsInt?
+    ): Int {
         // it's our absolute requirement to have width of the canvas here... because, well, it changes
         // the way we draw text. So, if we do not know the width of canvas we cannot correctly measure our text
 
-        if (layouts.size() > 0) {
-
+        if (layouts.isNotEmpty()) {
             if (fm != null) {
-
-                int max = 0;
-                for (Layout layout : layouts) {
-                    final int height = layout.getHeight();
+                var max = 0
+                for (layout in layouts) {
+                    val height = layout.height
                     if (height > max) {
-                        max = height;
+                        max = height
                     }
                 }
 
                 // we store actual height
-                height = max;
+                height = max
 
                 // but apply height with padding
-                final int padding = theme.tableCellPadding() * 2;
+                val padding = theme.tableCellPadding() * 2
 
-                fm.ascent = -(max + padding);
-                fm.descent = 0;
+                fm.ascent = -(max + padding)
+                fm.descent = 0
 
-                fm.top = fm.ascent;
-                fm.bottom = 0;
+                fm.top = fm.ascent
+                fm.bottom = 0
             }
         }
 
-        return width;
+        return width
     }
 
-    @Override
-    public void draw(
-            @NonNull Canvas canvas,
-            CharSequence text,
-            @IntRange(from = 0) int start,
-            @IntRange(from = 0) int end,
-            float x,
-            int top,
-            int y,
-            int bottom,
-            @NonNull Paint p) {
-
-        final int spanWidth = SpanUtils.width(canvas, text);
+    override fun draw(
+        canvas: Canvas,
+        text: CharSequence,
+        @IntRange(from = 0) start: Int,
+        @IntRange(from = 0) end: Int,
+        x: Float,
+        top: Int,
+        y: Int,
+        bottom: Int,
+        p: Paint
+    ) {
+        val spanWidth = SpanUtils.width(canvas, text)
         if (recreateLayouts(spanWidth)) {
-            width = spanWidth;
+            width = spanWidth
             // @since 4.3.1 it's important to cast to TextPaint in order to display links, etc
-            if (p instanceof TextPaint) {
+            if (p is TextPaint) {
                 // there must be a reason why this method receives Paint instead of TextPaint...
-                textPaint.set((TextPaint) p);
+                textPaint.set(p)
             } else {
-                textPaint.set(p);
+                textPaint.set(p)
             }
-            makeNewLayouts();
+            makeNewLayouts()
         }
 
-        int maxHeight = 0;
+        var maxHeight = 0
 
-        final int padding = theme.tableCellPadding();
+        val padding = theme.tableCellPadding()
 
-        final int size = layouts.size();
+        val size = layouts.size
 
-        final int w = cellWidth(size);
+        val w = cellWidth(size)
 
         // @since 4.6.0 roundingDiff to offset last vertical border
-        final int roundingDiff = w - (width / size);
+        val roundingDiff = w - (width / size)
 
         // @since 1.1.1
         // draw backgrounds
-        {
+        run {
             if (header) {
-                theme.applyTableHeaderRowStyle(paint);
+                theme.applyTableHeaderRowStyle(paint)
             } else if (odd) {
-                theme.applyTableOddRowStyle(paint);
+                theme.applyTableOddRowStyle(paint)
             } else {
                 // even
-                theme.applyTableEvenRowStyle(paint);
+                theme.applyTableEvenRowStyle(paint)
             }
-
             // if present (0 is transparent)
-            if (paint.getColor() != 0) {
-                final int save = canvas.save();
+            if (paint.color != 0) {
+                val save = canvas.save()
                 try {
-                    rect.set(0, 0, width, bottom - top);
-                    canvas.translate(x, top);
-                    canvas.drawRect(rect, paint);
+                    rect.set(0, 0, width, bottom - top)
+                    canvas.translate(x, top.toFloat())
+                    canvas.drawRect(rect, paint)
                 } finally {
-                    canvas.restoreToCount(save);
+                    canvas.restoreToCount(save)
                 }
             }
         }
@@ -204,182 +161,173 @@ public class TableRowSpan extends ReplacementSpan {
         // @since 1.1.1 reset after applying background color
         // as background changes color attribute and if not specific tableBorderColor
         // is specified then after this row all borders will have color of this row (plus alpha)
-        paint.set(p);
-        theme.applyTableBorderStyle(paint);
+        paint.set(p)
+        theme.applyTableBorderStyle(paint)
 
-        final int borderWidth = theme.tableBorderWidth(paint);
-        final boolean drawBorder = borderWidth > 0;
+        val borderWidth = theme.tableBorderWidth(paint)
+        val drawBorder = borderWidth > 0
 
         // why divided by 4 gives a more or less good result is still not clear (shouldn't it be 2?)
-        final int heightDiff = (bottom - top - height) / 4;
+        val heightDiff = (bottom - top - height) / 4
 
         // required for borderTop calculation
-        final boolean isFirstTableRow;
+        val isFirstTableRow: Boolean
 
         // @since 4.3.1
         if (drawBorder) {
-            boolean first = false;
+            var first = false
             // only if first draw the line
-            {
-                final Spanned spanned = (Spanned) text;
-                final TableSpan[] spans = spanned.getSpans(start, end, TableSpan.class);
-                if (spans != null && spans.length > 0) {
-                    final TableSpan span = spans[0];
+            run {
+                val spanned = text as Spanned
+                val spans = spanned.getSpans(start, end, TableSpan::class.java)
+                if (spans != null && spans.size > 0) {
+                    val span = spans[0]
                     if (LeadingMarginUtils.selfStart(start, text, span)) {
-                        first = true;
-                        rect.set((int) x, top, width, top + borderWidth);
-                        canvas.drawRect(rect, paint);
+                        first = true
+                        rect.set(x.toInt(), top, width, top + borderWidth)
+                        canvas.drawRect(rect, paint)
                     }
                 }
             }
 
             // draw the line at the bottom
-            rect.set((int) x, bottom - borderWidth, width, bottom);
-            canvas.drawRect(rect, paint);
+            rect.set(x.toInt(), bottom - borderWidth, width, bottom)
+            canvas.drawRect(rect, paint)
 
-            isFirstTableRow = first;
+            isFirstTableRow = first
         } else {
-            isFirstTableRow = false;
+            isFirstTableRow = false
         }
 
-        final int borderWidthHalf = borderWidth / 2;
+        val borderWidthHalf = borderWidth / 2
 
         // to NOT overlap borders inset top and bottom
-        final int borderTop = isFirstTableRow ? borderWidth : 0;
-        final int borderBottom = bottom - top - borderWidth;
+        val borderTop = if (isFirstTableRow) borderWidth else 0
+        val borderBottom = bottom - top - borderWidth
 
-        Layout layout;
-        for (int i = 0; i < size; i++) {
-            layout = layouts.get(i);
-            final int save = canvas.save();
+        var layout: Layout
+        for (i in 0..<size) {
+            layout = layouts[i]
+            val save = canvas.save()
             try {
-
-                canvas.translate(x + (i * w), top);
+                canvas.translate(x + (i * w), top.toFloat())
 
                 // @since 4.3.1
                 if (drawBorder) {
                     // first vertical border will have full width (it cannot exceed canvas)
                     if (i == 0) {
-                        rect.set(0, borderTop, borderWidth, borderBottom);
+                        rect.set(0, borderTop, borderWidth, borderBottom)
                     } else {
-                        rect.set(-borderWidthHalf, borderTop, borderWidthHalf, borderBottom);
+                        rect.set(-borderWidthHalf, borderTop, borderWidthHalf, borderBottom)
                     }
 
-                    canvas.drawRect(rect, paint);
+                    canvas.drawRect(rect, paint)
 
                     if (i == (size - 1)) {
                         // @since 4.6.0 subtract rounding offset for the last vertical divider
                         rect.set(
-                                w - borderWidth - roundingDiff,
-                                borderTop,
-                                w - roundingDiff,
-                                borderBottom
-                        );
-                        canvas.drawRect(rect, paint);
+                            w - borderWidth - roundingDiff,
+                            borderTop,
+                            w - roundingDiff,
+                            borderBottom
+                        )
+                        canvas.drawRect(rect, paint)
                     }
                 }
 
-                canvas.translate(padding, padding + heightDiff);
-                layout.draw(canvas);
+                canvas.translate(padding.toFloat(), (padding + heightDiff).toFloat())
+                layout.draw(canvas)
 
-                if (layout.getHeight() > maxHeight) {
-                    maxHeight = layout.getHeight();
+                if (layout.height > maxHeight) {
+                    maxHeight = layout.height
                 }
-
             } finally {
-                canvas.restoreToCount(save);
+                canvas.restoreToCount(save)
             }
         }
 
         if (height != maxHeight) {
             if (invalidator != null) {
-                invalidator.invalidate();
+                invalidator!!.invalidate()
             }
         }
     }
 
-    private boolean recreateLayouts(int newWidth) {
-        return width != newWidth;
+    private fun recreateLayouts(newWidth: Int): Boolean {
+        return width != newWidth
     }
 
-    private void makeNewLayouts() {
+    private fun makeNewLayouts() {
+        textPaint.isFakeBoldText = header
 
-        textPaint.setFakeBoldText(header);
+        val columns = cells.size
+        val padding = theme.tableCellPadding() * 2
+        val w = cellWidth(columns) - padding
 
-        final int columns = cells.size();
-        final int padding = theme.tableCellPadding() * 2;
-        final int w = cellWidth(columns) - padding;
+        this.layouts.clear()
 
-        this.layouts.clear();
-
-        for (int i = 0, size = cells.size(); i < size; i++) {
-            makeLayout(i, w, cells.get(i));
+        var i = 0
+        val size = cells.size
+        while (i < size) {
+            makeLayout(i, w, cells[i])
+            i++
         }
     }
 
-    private void makeLayout(final int index, final int width, @NonNull final Cell cell) {
-
-        final Runnable recreate = new Runnable() {
-            @Override
-            public void run() {
-                final Invalidator invalidator = TableRowSpan.this.invalidator;
-                if (invalidator != null) {
-                    layouts.remove(index);
-                    makeLayout(index, width, cell);
-                    invalidator.invalidate();
-                }
+    private fun makeLayout(index: Int, width: Int, cell: Cell) {
+        val recreate = Runnable {
+            val invalidator = this@TableRowSpan.invalidator
+            if (invalidator != null) {
+                layouts.removeAt(index)
+                makeLayout(index, width, cell)
+                invalidator.invalidate()
             }
-        };
-
-        final Spannable spannable;
-
-        if (cell.text instanceof Spannable) {
-            spannable = (Spannable) cell.text;
-        } else {
-            spannable = new SpannableString(cell.text);
         }
 
-        final Layout layout = new StaticLayout(
-                spannable,
-                textPaint,
-                width,
-                alignment(cell.alignment),
-                1.0F,
-                0.0F,
-                false
-        );
+        val spannable: Spannable = cell.text as? Spannable ?: SpannableString(cell.text)
+
+        val layout: Layout = StaticLayout(
+            spannable,
+            textPaint,
+            width,
+            alignment(cell.alignment),
+            1.0f,
+            0.0f,
+            false
+        )
 
         // @since 4.4.0
-        TextLayoutSpan.applyTo(spannable, layout);
+        TextLayoutSpan.applyTo(spannable, layout)
 
         // @since 4.4.0
-        scheduleAsyncDrawables(spannable, recreate);
+        scheduleAsyncDrawables(spannable, recreate)
 
-        layouts.add(index, layout);
+        layouts.add(index, layout)
     }
 
-    private void scheduleAsyncDrawables(@NonNull Spannable spannable, @NonNull final Runnable recreate) {
-
-        final AsyncDrawableSpan[] spans = spannable.getSpans(0, spannable.length(), AsyncDrawableSpan.class);
+    private fun scheduleAsyncDrawables(spannable: Spannable, recreate: Runnable) {
+        val spans = spannable.getSpans(
+            0,
+            spannable.length,
+            AsyncDrawableSpan::class.java
+        )
         if (spans != null
-                && spans.length > 0) {
-
-            for (AsyncDrawableSpan span : spans) {
-
-                final AsyncDrawable drawable = span.getDrawable();
+            && spans.size > 0
+        ) {
+            for (span in spans) {
+                val drawable = span.drawable
 
                 // it is absolutely crucial to check if drawable is already attached,
                 //  otherwise we would end up with a loop
-                if (drawable.isAttached()) {
-                    continue;
+                if (drawable.isAttached) {
+                    continue
                 }
 
-                drawable.setCallback2(new CallbackAdapter() {
-                    @Override
-                    public void invalidateDrawable(@NonNull Drawable who) {
-                        recreate.run();
+                drawable.setCallback2(object : CallbackAdapter() {
+                    override fun invalidateDrawable(who: Drawable) {
+                        recreate.run()
                     }
-                });
+                })
             }
         }
     }
@@ -389,64 +337,56 @@ public class TableRowSpan extends ReplacementSpan {
      *
      * @since 4.6.0
      */
-    @Nullable
-    public Layout findLayoutForHorizontalOffset(int x) {
-        final int size = layouts.size();
-        final int w = cellWidth(size);
-        final int i = x / w;
+    fun findLayoutForHorizontalOffset(x: Int): Layout? {
+        val size = layouts.size
+        val w = cellWidth(size)
+        val i = x / w
         if (i >= size) {
-            return null;
+            return null
         }
-        return layouts.get(i);
+        return layouts[i]
     }
 
     /**
      * @since 4.6.0
      */
-    public int cellWidth() {
-        return cellWidth(layouts.size());
+    fun cellWidth(): Int {
+        return cellWidth(layouts.size)
     }
 
     // @since 4.6.0
-    protected int cellWidth(int size) {
-        return (int) (1F * width / size + 0.5F);
+    protected fun cellWidth(size: Int): Int {
+        return (1f * width / size + 0.5f).toInt()
     }
 
-    @SuppressLint("SwitchIntDef")
-    private static Layout.Alignment alignment(@Alignment int alignment) {
-        final Layout.Alignment out;
-        switch (alignment) {
-            case ALIGN_CENTER:
-                out = Layout.Alignment.ALIGN_CENTER;
-                break;
-            case ALIGN_RIGHT:
-                out = Layout.Alignment.ALIGN_OPPOSITE;
-                break;
-            default:
-                out = Layout.Alignment.ALIGN_NORMAL;
-                break;
-        }
-        return out;
+    fun invalidator(invalidator: Invalidator?) {
+        this.invalidator = invalidator
     }
 
-    public void invalidator(@Nullable Invalidator invalidator) {
-        this.invalidator = invalidator;
+    private abstract class CallbackAdapter : Drawable.Callback {
+        override fun invalidateDrawable(who: Drawable) {
+        }
+
+        override fun scheduleDrawable(who: Drawable, what: Runnable, `when`: Long) {
+        }
+
+        override fun unscheduleDrawable(who: Drawable, what: Runnable) {
+        }
     }
 
-    private static abstract class CallbackAdapter implements Drawable.Callback {
-        @Override
-        public void invalidateDrawable(@NonNull Drawable who) {
+    companion object {
+        const val ALIGN_LEFT: Int = 0
+        const val ALIGN_CENTER: Int = 1
+        const val ALIGN_RIGHT: Int = 2
 
-        }
-
-        @Override
-        public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
-
-        }
-
-        @Override
-        public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
-
+        @SuppressLint("SwitchIntDef")
+        private fun alignment(@Alignment alignment: Int): Layout.Alignment {
+            val out: Layout.Alignment = when (alignment) {
+                ALIGN_CENTER -> Layout.Alignment.ALIGN_CENTER
+                ALIGN_RIGHT -> Layout.Alignment.ALIGN_OPPOSITE
+                else -> Layout.Alignment.ALIGN_NORMAL
+            }
+            return out
         }
     }
 }

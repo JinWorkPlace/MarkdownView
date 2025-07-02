@@ -1,187 +1,175 @@
-package io.noties.markwon.ext.tables;
+package io.noties.markwon.ext.tables
 
-import android.content.Context;
-import android.graphics.Paint;
+import android.content.Context
+import android.graphics.Paint
+import androidx.annotation.ColorInt
+import androidx.annotation.Px
+import io.noties.markwon.utils.ColorUtils
+import io.noties.markwon.utils.Dip
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Px;
-
-import io.noties.markwon.utils.ColorUtils;
-import io.noties.markwon.utils.Dip;
-
-@SuppressWarnings("WeakerAccess")
-public class TableTheme {
-
-    @NonNull
-    public static TableTheme create(@NonNull Context context) {
-        return buildWithDefaults(context).build();
-    }
-
-    @NonNull
-    public static Builder buildWithDefaults(@NonNull Context context) {
-        final Dip dip = Dip.create(context);
-        return emptyBuilder()
-                .tableCellPadding(dip.toPx(4))
-                .tableBorderWidth(dip.toPx(1));
-    }
-
-    @NonNull
-    public static Builder emptyBuilder() {
-        return new Builder();
-    }
-
-
-    protected static final int TABLE_BORDER_DEF_ALPHA = 75;
-
-    protected static final int TABLE_ODD_ROW_DEF_ALPHA = 22;
-
+open class TableTheme protected constructor(builder: Builder) {
     // by default 0
-    protected final int tableCellPadding;
+    @JvmField
+    protected val tableCellPadding: Int
 
     // by default paint.color * TABLE_BORDER_DEF_ALPHA
-    protected final int tableBorderColor;
+    @JvmField
+    protected val tableBorderColor: Int
 
-    protected final int tableBorderWidth;
+    @JvmField
+    protected val tableBorderWidth: Int
 
     // by default paint.color * TABLE_ODD_ROW_DEF_ALPHA
-    protected final int tableOddRowBackgroundColor;
+    @JvmField
+    protected val tableOddRowBackgroundColor: Int
 
     // @since 1.1.1
     // by default no background
-    protected final int tableEvenRowBackgroundColor;
+    @JvmField
+    protected val tableEvenRowBackgroundColor: Int
 
     // @since 1.1.1
     // by default no background
-    protected final int tableHeaderRowBackgroundColor;
+    @JvmField
+    protected val tableHeaderRowBackgroundColor: Int
 
-    protected TableTheme(@NonNull Builder builder) {
-        this.tableCellPadding = builder.tableCellPadding;
-        this.tableBorderColor = builder.tableBorderColor;
-        this.tableBorderWidth = builder.tableBorderWidth;
-        this.tableOddRowBackgroundColor = builder.tableOddRowBackgroundColor;
-        this.tableEvenRowBackgroundColor = builder.tableEvenRowBackgroundColor;
-        this.tableHeaderRowBackgroundColor = builder.tableHeaderRowBackgroundColor;
+    init {
+        this.tableCellPadding = builder.tableCellPadding
+        this.tableBorderColor = builder.tableBorderColor
+        this.tableBorderWidth = builder.tableBorderWidth
+        this.tableOddRowBackgroundColor = builder.tableOddRowBackgroundColor
+        this.tableEvenRowBackgroundColor = builder.tableEvenRowBackgroundColor
+        this.tableHeaderRowBackgroundColor = builder.tableHeaderRowBackgroundColor
     }
 
     /**
      * @since 3.0.0
      */
-    @NonNull
-    public Builder asBuilder() {
-        return new Builder()
-                .tableCellPadding(tableCellPadding)
-                .tableBorderColor(tableBorderColor)
-                .tableBorderWidth(tableBorderWidth)
-                .tableOddRowBackgroundColor(tableOddRowBackgroundColor)
-                .tableEvenRowBackgroundColor(tableEvenRowBackgroundColor)
-                .tableHeaderRowBackgroundColor(tableHeaderRowBackgroundColor);
+    fun asBuilder(): Builder {
+        return Builder()
+            .tableCellPadding(tableCellPadding)
+            .tableBorderColor(tableBorderColor)
+            .tableBorderWidth(tableBorderWidth)
+            .tableOddRowBackgroundColor(tableOddRowBackgroundColor)
+            .tableEvenRowBackgroundColor(tableEvenRowBackgroundColor)
+            .tableHeaderRowBackgroundColor(tableHeaderRowBackgroundColor)
     }
 
-    public int tableCellPadding() {
-        return tableCellPadding;
+    open fun tableCellPadding(): Int {
+        return tableCellPadding
     }
 
-    public int tableBorderWidth(@NonNull Paint paint) {
-        final int out;
-        if (tableBorderWidth == -1) {
-            out = (int) (paint.getStrokeWidth() + .5F);
+    open fun tableBorderWidth(paint: Paint): Int {
+        val out: Int = if (tableBorderWidth == -1) {
+            (paint.strokeWidth + .5f).toInt()
         } else {
-            out = tableBorderWidth;
+            tableBorderWidth
         }
-        return out;
+        return out
     }
 
-    public void applyTableBorderStyle(@NonNull Paint paint) {
-
-        final int color;
-        if (tableBorderColor == 0) {
-            color = ColorUtils.applyAlpha(paint.getColor(), TABLE_BORDER_DEF_ALPHA);
+    fun applyTableBorderStyle(paint: Paint) {
+        val color: Int = if (tableBorderColor == 0) {
+            ColorUtils.applyAlpha(paint.color, TABLE_BORDER_DEF_ALPHA)
         } else {
-            color = tableBorderColor;
+            tableBorderColor
         }
 
-        paint.setColor(color);
+        paint.setColor(color)
         // @since 4.3.1 before it was STROKE... change to FILL as we draw border differently
-        paint.setStyle(Paint.Style.FILL);
+        paint.style = Paint.Style.FILL
     }
 
-    public void applyTableOddRowStyle(@NonNull Paint paint) {
-        final int color;
-        if (tableOddRowBackgroundColor == 0) {
-            color = ColorUtils.applyAlpha(paint.getColor(), TABLE_ODD_ROW_DEF_ALPHA);
+    fun applyTableOddRowStyle(paint: Paint) {
+        val color: Int = if (tableOddRowBackgroundColor == 0) {
+            ColorUtils.applyAlpha(paint.color, TABLE_ODD_ROW_DEF_ALPHA)
         } else {
-            color = tableOddRowBackgroundColor;
+            tableOddRowBackgroundColor
         }
-        paint.setColor(color);
-        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(color)
+        paint.style = Paint.Style.FILL
     }
 
     /**
      * @since 1.1.1
      */
-    public void applyTableEvenRowStyle(@NonNull Paint paint) {
+    fun applyTableEvenRowStyle(paint: Paint) {
         // by default to background to even row
-        paint.setColor(tableEvenRowBackgroundColor);
-        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(tableEvenRowBackgroundColor)
+        paint.style = Paint.Style.FILL
     }
 
     /**
      * @since 1.1.1
      */
-    public void applyTableHeaderRowStyle(@NonNull Paint paint) {
-        paint.setColor(tableHeaderRowBackgroundColor);
-        paint.setStyle(Paint.Style.FILL);
+    fun applyTableHeaderRowStyle(paint: Paint) {
+        paint.setColor(tableHeaderRowBackgroundColor)
+        paint.style = Paint.Style.FILL
     }
 
-    public static class Builder {
+    class Builder {
+        var tableCellPadding = 0
+        var tableBorderColor = 0
+        var tableBorderWidth = -1
+        var tableOddRowBackgroundColor = 0
+        var tableEvenRowBackgroundColor = 0 // @since 1.1.1
+        var tableHeaderRowBackgroundColor = 0 // @since 1.1.1
 
-        private int tableCellPadding;
-        private int tableBorderColor;
-        private int tableBorderWidth = -1;
-        private int tableOddRowBackgroundColor;
-        private int tableEvenRowBackgroundColor; // @since 1.1.1
-        private int tableHeaderRowBackgroundColor; // @since 1.1.1
-
-        @NonNull
-        public Builder tableCellPadding(@Px int tableCellPadding) {
-            this.tableCellPadding = tableCellPadding;
-            return this;
+        fun tableCellPadding(@Px tableCellPadding: Int): Builder {
+            this.tableCellPadding = tableCellPadding
+            return this
         }
 
-        @NonNull
-        public Builder tableBorderColor(@ColorInt int tableBorderColor) {
-            this.tableBorderColor = tableBorderColor;
-            return this;
+        fun tableBorderColor(@ColorInt tableBorderColor: Int): Builder {
+            this.tableBorderColor = tableBorderColor
+            return this
         }
 
-        @NonNull
-        public Builder tableBorderWidth(@Px int tableBorderWidth) {
-            this.tableBorderWidth = tableBorderWidth;
-            return this;
+        fun tableBorderWidth(@Px tableBorderWidth: Int): Builder {
+            this.tableBorderWidth = tableBorderWidth
+            return this
         }
 
-        @NonNull
-        public Builder tableOddRowBackgroundColor(@ColorInt int tableOddRowBackgroundColor) {
-            this.tableOddRowBackgroundColor = tableOddRowBackgroundColor;
-            return this;
+        fun tableOddRowBackgroundColor(@ColorInt tableOddRowBackgroundColor: Int): Builder {
+            this.tableOddRowBackgroundColor = tableOddRowBackgroundColor
+            return this
         }
 
-        @NonNull
-        public Builder tableEvenRowBackgroundColor(@ColorInt int tableEvenRowBackgroundColor) {
-            this.tableEvenRowBackgroundColor = tableEvenRowBackgroundColor;
-            return this;
+        fun tableEvenRowBackgroundColor(@ColorInt tableEvenRowBackgroundColor: Int): Builder {
+            this.tableEvenRowBackgroundColor = tableEvenRowBackgroundColor
+            return this
         }
 
-        @NonNull
-        public Builder tableHeaderRowBackgroundColor(@ColorInt int tableHeaderRowBackgroundColor) {
-            this.tableHeaderRowBackgroundColor = tableHeaderRowBackgroundColor;
-            return this;
+        fun tableHeaderRowBackgroundColor(@ColorInt tableHeaderRowBackgroundColor: Int): Builder {
+            this.tableHeaderRowBackgroundColor = tableHeaderRowBackgroundColor
+            return this
         }
 
-        @NonNull
-        public TableTheme build() {
-            return new TableTheme(this);
+        fun build(): TableTheme {
+            return TableTheme(this)
         }
+    }
+
+    companion object {
+        @JvmStatic
+        fun create(context: Context): TableTheme {
+            return buildWithDefaults(context).build()
+        }
+
+        fun buildWithDefaults(context: Context): Builder {
+            val dip = Dip.create(context)
+            return emptyBuilder()
+                .tableCellPadding(dip.toPx(4))
+                .tableBorderWidth(dip.toPx(1))
+        }
+
+        fun emptyBuilder(): Builder {
+            return Builder()
+        }
+
+
+        protected const val TABLE_BORDER_DEF_ALPHA: Int = 75
+
+        protected const val TABLE_ODD_ROW_DEF_ALPHA: Int = 22
     }
 }
