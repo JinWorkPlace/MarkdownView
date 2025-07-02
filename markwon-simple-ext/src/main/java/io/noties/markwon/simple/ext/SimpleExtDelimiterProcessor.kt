@@ -1,70 +1,49 @@
-package io.noties.markwon.simple.ext;
+package io.noties.markwon.simple.ext
 
-import androidx.annotation.NonNull;
-
-import org.commonmark.node.Node;
-import org.commonmark.node.Text;
-import org.commonmark.parser.delimiter.DelimiterProcessor;
-import org.commonmark.parser.delimiter.DelimiterRun;
-
-import io.noties.markwon.SpanFactory;
+import io.noties.markwon.SpanFactory
+import org.commonmark.node.Node
+import org.commonmark.node.Text
+import org.commonmark.parser.delimiter.DelimiterProcessor
+import org.commonmark.parser.delimiter.DelimiterRun
 
 // @since 4.0.0
-class SimpleExtDelimiterProcessor implements DelimiterProcessor {
-
-    private final char open;
-    private final char close;
-    private final int length;
-    private final SpanFactory spanFactory;
-
-    SimpleExtDelimiterProcessor(
-            char open,
-            char close,
-            int length,
-            @NonNull SpanFactory spanFactory) {
-        this.open = open;
-        this.close = close;
-        this.length = length;
-        this.spanFactory = spanFactory;
+internal data class SimpleExtDelimiterProcessor(
+    private val open: Char,
+    private val close: Char,
+    private val length: Int,
+    private val spanFactory: SpanFactory
+) : DelimiterProcessor {
+    override fun getOpeningCharacter(): Char {
+        return open
     }
 
-    @Override
-    public char getOpeningCharacter() {
-        return open;
+    override fun getClosingCharacter(): Char {
+        return close
     }
 
-    @Override
-    public char getClosingCharacter() {
-        return close;
+    override fun getMinLength(): Int {
+        return length
     }
 
-    @Override
-    public int getMinLength() {
-        return length;
-    }
-
-    @Override
-    public int getDelimiterUse(DelimiterRun opener, DelimiterRun closer) {
+    override fun getDelimiterUse(opener: DelimiterRun, closer: DelimiterRun): Int {
         if (opener.length() >= length && closer.length() >= length) {
-            return length;
+            return length
         }
-        return 0;
+        return 0
     }
 
-    @Override
-    public void process(Text opener, Text closer, int delimiterUse) {
+    override fun process(opener: Text, closer: Text?, delimiterUse: Int) {
+        val node: Node = SimpleExtNode(spanFactory)
 
-        final Node node = new SimpleExtNode(spanFactory);
-
-        Node tmp = opener.getNext();
-        Node next;
+        var tmp = opener.next
+        var next: Node?
 
         while (tmp != null && tmp != closer) {
-            next = tmp.getNext();
-            node.appendChild(tmp);
-            tmp = next;
+            next = tmp.next
+            node.appendChild(tmp)
+            tmp = next
         }
 
-        opener.insertAfter(node);
+        opener.insertAfter(node)
     }
 }
