@@ -558,7 +558,7 @@ public class AsyncDrawableLoaderImplTest {
     @NonNull
     private static AsyncDrawable asyncDrawable(@NonNull String destination) {
         final AsyncDrawable drawable = mock(AsyncDrawable.class);
-        when(drawable.getDestination()).thenReturn(destination);
+        when(drawable.destination).thenReturn(destination);
         when(drawable.isAttached()).thenReturn(true);
         return drawable;
     }

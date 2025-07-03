@@ -15,14 +15,10 @@ public final class Tokeniser {
     // Some illegal character escapes are parsed by browsers as windows-1252 instead. See issue #1034
     // https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state
     static final int win1252ExtensionsStart = 0x80;
-    static final int[] win1252Extensions = new int[] {
+    static final int[] win1252Extensions = new int[]{
             // we could build this manually, but Windows-1252 is not a standard java charset so that could break on
             // some platforms - this table is verified with a test
-            0x20AC, 0x0081, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
-            0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x008D, 0x017D, 0x008F,
-            0x0090, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
-            0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x009D, 0x017E, 0x0178,
-    };
+            0x20AC, 0x0081, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x008D, 0x017D, 0x008F, 0x0090, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014, 0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x009D, 0x017E, 0x0178,};
 
     static {
         Arrays.sort(notCharRefCharsSorted);
@@ -35,7 +31,7 @@ public final class Tokeniser {
     private Token emitPending; // the token we are about to emit on next read
     private boolean isEmitPending = false;
     private String charsString = null; // characters pending an emit. Will fall to charsBuilder if more than one
-    private StringBuilder charsBuilder = new StringBuilder(1024); // buffers characters to output as one token, if more than one emit per read
+    private final StringBuilder charsBuilder = new StringBuilder(1024); // buffers characters to output as one token, if more than one emit per read
     StringBuilder dataBuffer = new StringBuilder(1024); // buffers data looking for </script>
 
     Token.Tag tagPending; // tag we are building up
@@ -52,8 +48,7 @@ public final class Tokeniser {
     }
 
     public Token read() {
-        while (!isEmitPending)
-            state.read(this, reader);
+        while (!isEmitPending) state.read(this, reader);
 
         // if emit is pending, a non-character token was found: return any chars in buffer, and leave token for next read:
         if (charsBuilder.length() > 0) {
@@ -82,8 +77,7 @@ public final class Tokeniser {
             lastStartTag = startTag.tagName;
         } else if (token.type == Token.TokenType.EndTag) {
             Token.EndTag endTag = (Token.EndTag) token;
-            if (endTag.attributes != null)
-                error("Attributes incorrectly present on end tag");
+            if (endTag.attributes != null) error("Attributes incorrectly present on end tag");
         }
     }
 
@@ -92,8 +86,7 @@ public final class Tokeniser {
         // does not set isEmitPending; read checks that
         if (charsString == null) {
             charsString = str;
-        }
-        else {
+        } else {
             if (charsBuilder.length() == 0) { // switching to string builder as more than one emit before read
                 charsBuilder.append(charsString);
             }
@@ -128,13 +121,12 @@ public final class Tokeniser {
 
     final private int[] codepointHolder = new int[1]; // holder to not have to keep creating arrays
     final private int[] multipointHolder = new int[2];
+
     int[] consumeCharacterReference(Character additionalAllowedCharacter, boolean inAttribute) {
-        if (reader.isEmpty())
-            return null;
+        if (reader.isEmpty()) return null;
         if (additionalAllowedCharacter != null && additionalAllowedCharacter == reader.current())
             return null;
-        if (reader.matchesAnySorted(notCharRefCharsSorted))
-            return null;
+        if (reader.matchesAnySorted(notCharRefCharsSorted)) return null;
 
         final int[] codeRef = codepointHolder;
         reader.mark();
@@ -194,7 +186,7 @@ public final class Tokeniser {
             if (numChars == 1) {
                 codeRef[0] = multipointHolder[0];
                 return codeRef;
-            } else if (numChars ==2) {
+            } else if (numChars == 2) {
                 return multipointHolder;
             } else {
                 Validate.fail("Unexpected characters returned for " + nameRef);
@@ -257,15 +249,11 @@ public final class Tokeniser {
     }
 
     void error(String errorMsg) {
-        if (errors.canAddError())
-            errors.add(new ParseError(reader.pos(), errorMsg));
+        if (errors.canAddError()) errors.add(new ParseError(reader.pos(), errorMsg));
     }
 
     boolean currentNodeInHtmlNS() {
-        // todo: implement namespaces correctly
         return true;
-        // Element currentNode = currentNode();
-        // return currentNode != null && currentNode.namespace().equals("HTML");
     }
 
 //    /**

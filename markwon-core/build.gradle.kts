@@ -32,11 +32,9 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-
-    api(libs.androidx.annotations)
+    implementation(libs.androidx.annotations)
     api(libs.commonmark)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.junit)

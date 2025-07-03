@@ -157,19 +157,7 @@ public class HtmlPlugin extends AbstractMarkwonPlugin {
 
     @Override
     public void configureVisitor(@NonNull MarkwonVisitor.Builder builder) {
-        builder
-                .on(HtmlBlock.class, new MarkwonVisitor.NodeVisitor<HtmlBlock>() {
-                    @Override
-                    public void visit(@NonNull MarkwonVisitor visitor, @NonNull HtmlBlock htmlBlock) {
-                        visitHtml(visitor, htmlBlock.getLiteral());
-                    }
-                })
-                .on(HtmlInline.class, new MarkwonVisitor.NodeVisitor<HtmlInline>() {
-                    @Override
-                    public void visit(@NonNull MarkwonVisitor visitor, @NonNull HtmlInline htmlInline) {
-                        visitHtml(visitor, htmlInline.getLiteral());
-                    }
-                });
+        builder.on(HtmlBlock.class, (visitor, htmlBlock) -> visitHtml(visitor, htmlBlock.getLiteral())).on(HtmlInline.class, (visitor, htmlInline) -> visitHtml(visitor, htmlInline.getLiteral()));
     }
 
     private void visitHtml(@NonNull MarkwonVisitor visitor, @Nullable String html) {

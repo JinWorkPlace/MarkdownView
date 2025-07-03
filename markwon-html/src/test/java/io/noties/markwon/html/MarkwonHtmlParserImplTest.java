@@ -126,7 +126,7 @@ public class MarkwonHtmlParserImplTest {
 
         for (HtmlTag.Inline inline : inlines) {
             assertEquals(inline.name(), inline.start(), inline.end());
-            assertTrue(inline.name(), inline.isEmpty());
+            assertTrue(inline.name(), inline.isEmpty);
             assertTrue(set.remove(inline.name()));
         }
 
@@ -185,7 +185,7 @@ public class MarkwonHtmlParserImplTest {
 
         for (HtmlTag.Block block : blocks) {
             assertEquals(block.name(), block.start(), block.end());
-            assertTrue(block.name(), block.isEmpty());
+            assertTrue(block.name(), block.isEmpty);
             assertTrue(set.remove(block.name()));
         }
 
@@ -243,7 +243,7 @@ public class MarkwonHtmlParserImplTest {
         }
 
         for (HtmlTag.Block block : blocks) {
-            assertTrue(block.name(), block.isEmpty());
+            assertTrue(block.name(), block.isEmpty);
             assertTrue(set.remove(block.name()));
         }
 
@@ -663,7 +663,7 @@ public class MarkwonHtmlParserImplTest {
             public void apply(@NonNull List<HtmlTag.Inline> inlines) {
                 assertEquals(4, inlines.size());
                 for (HtmlTag.Inline inline : inlines) {
-                    assertTrue(inline.isClosed());
+                    assertTrue(inline.isClosed);
                     assertEquals(end, inline.end());
                 }
             }
@@ -673,7 +673,7 @@ public class MarkwonHtmlParserImplTest {
         with(blockTagsAction.tags.get(0), new Action<HtmlTag.Block>() {
             @Override
             public void apply(@NonNull HtmlTag.Block block) {
-                assertTrue(block.isClosed());
+                assertTrue(block.isClosed);
                 assertEquals(end, block.end());
             }
         });
@@ -701,7 +701,7 @@ public class MarkwonHtmlParserImplTest {
             public void apply(@NonNull List<HtmlTag.Inline> inlines) {
                 assertEquals(4, inlines.size());
                 for (HtmlTag.Inline inline : inlines) {
-                    assertFalse(inline.isClosed());
+                    assertFalse(inline.isClosed);
                     assertEquals(HtmlTag.NO_END, inline.end());
                 }
             }
@@ -712,7 +712,7 @@ public class MarkwonHtmlParserImplTest {
         with(blockTagsAction.tags.get(0), new Action<HtmlTag.Block>() {
             @Override
             public void apply(@NonNull HtmlTag.Block block) {
-                assertFalse(block.isClosed());
+                assertFalse(block.isClosed);
                 assertEquals(HtmlTag.NO_END, block.end());
             }
         });

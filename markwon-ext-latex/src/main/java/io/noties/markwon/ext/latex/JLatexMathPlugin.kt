@@ -284,13 +284,13 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
                                 // as before
                                 Log.e(
                                     "JLatexMathPlugin",
-                                    "Error displaying latex: `" + drawable.getDestination() + "`",
+                                    "Error displaying latex: `" + drawable.destination + "`",
                                     t
                                 )
                             } else {
                                 // just call `getDestination` without casts and checks
                                 val errorDrawable = errorHandler.handleError(
-                                    drawable.getDestination(), t
+                                    drawable.destination, t
                                 )
                                 if (errorDrawable != null) {
                                     DrawableUtils.applyIntrinsicBoundsIfEmpty(errorDrawable)
@@ -335,7 +335,7 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
 
         // @since 4.3.0
         private fun createBlockDrawable(drawable: JLatextAsyncDrawable): JLatexMathDrawable {
-            val latex = drawable.getDestination()
+            val latex = drawable.destination
 
             val theme = config.theme
 
@@ -363,7 +363,7 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
 
         // @since 4.3.0
         private fun createInlineDrawable(drawable: JLatextAsyncDrawable): JLatexMathDrawable {
-            val latex = drawable.getDestination()
+            val latex = drawable.destination
 
             val theme = config.theme
 

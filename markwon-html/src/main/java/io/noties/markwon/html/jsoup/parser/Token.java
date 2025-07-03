@@ -1,11 +1,11 @@
 package io.noties.markwon.html.jsoup.parser;
 
+import static io.noties.markwon.html.jsoup.helper.Normalizer.lowerCase;
+
 import androidx.annotation.NonNull;
 
 import io.noties.markwon.html.jsoup.helper.Validate;
 import io.noties.markwon.html.jsoup.nodes.Attributes;
-
-import static io.noties.markwon.html.jsoup.helper.Normalizer.lowerCase;
 
 /**
  * Parse tokens for the Tokeniser.
@@ -81,7 +81,7 @@ public abstract class Token {
         public String tagName;
         public String normalName; // lc version of tag name, for case insensitive tree build
         private String pendingAttributeName; // attribute names are generally caught in one hop, not accumulated
-        private StringBuilder pendingAttributeValue = new StringBuilder(); // but values are accumulated, from e.g. & in hrefs
+        private final StringBuilder pendingAttributeValue = new StringBuilder(); // but values are accumulated, from e.g. & in hrefs
         private String pendingAttributeValueS; // try to get attr vals in one shot, vs Builder
         private boolean hasEmptyAttributeValue = false; // distinguish boolean attribute from empty string value
         private boolean hasPendingAttributeValue = false;
@@ -242,6 +242,7 @@ public abstract class Token {
             return this;
         }
 
+        @NonNull
         @Override
         public String toString() {
             if (attributes != null && attributes.size() > 0)
@@ -256,6 +257,7 @@ public abstract class Token {
             super(TokenType.EndTag);
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "</" + name() + ">";
@@ -281,6 +283,7 @@ public abstract class Token {
             return data.toString();
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "<!--" + getData() + "-->";
@@ -309,6 +312,7 @@ public abstract class Token {
             return data;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return getData();
@@ -321,6 +325,7 @@ public abstract class Token {
             this.data(data);
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "<![CDATA[" + getData() + "]]>";

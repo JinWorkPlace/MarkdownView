@@ -37,12 +37,7 @@ public class AsyncDrawable extends Drawable {
     /**
      * @since 1.0.1
      */
-    public AsyncDrawable(
-            @NonNull String destination,
-            @NonNull AsyncDrawableLoader loader,
-            @NonNull ImageSizeResolver imageSizeResolver,
-            @Nullable ImageSize imageSize
-    ) {
+    public AsyncDrawable(@NonNull String destination, @NonNull AsyncDrawableLoader loader, @NonNull ImageSizeResolver imageSizeResolver, @Nullable ImageSize imageSize) {
         this.destination = destination;
         this.loader = loader;
         this.imageSizeResolver = imageSizeResolver;
@@ -119,9 +114,7 @@ public class AsyncDrawable extends Drawable {
         // @since 4.2.1
         //  wrap callback so invalidation happens to this AsyncDrawable instance
         //  and not for wrapped result/placeholder
-        this.callback = cb == null
-                ? null
-                : new WrappedCallback(cb);
+        this.callback = cb == null ? null : new WrappedCallback(cb);
 
         super.setCallback(cb);
 
@@ -131,8 +124,7 @@ public class AsyncDrawable extends Drawable {
             // as we have a placeholder now, it's important to check it our placeholder
             // has a proper callback at this point. This is not required in most cases,
             // as placeholder should be static, but if it's not -> it can operate as usual
-            if (result != null
-                    && result.getCallback() == null) {
+            if (result != null && result.getCallback() == null) {
                 result.setCallback(callback);
             }
 
@@ -157,8 +149,7 @@ public class AsyncDrawable extends Drawable {
                 result.setCallback(null);
 
                 // let's additionally stop if it Animatable
-                if (result instanceof Animatable) {
-                    final Animatable animatable = (Animatable) result;
+                if (result instanceof Animatable animatable) {
                     final boolean isPlaying = wasPlayingBefore = animatable.isRunning();
                     if (isPlaying) {
                         animatable.stop();
@@ -386,14 +377,7 @@ public class AsyncDrawable extends Drawable {
     @NonNull
     @Override
     public String toString() {
-        return "AsyncDrawable{" +
-                "destination='" + destination + '\'' +
-                ", imageSize=" + imageSize +
-                ", result=" + result +
-                ", canvasWidth=" + canvasWidth +
-                ", textSize=" + textSize +
-                ", waitingForDimensions=" + waitingForDimensions +
-                '}';
+        return "AsyncDrawable{" + "destination='" + destination + '\'' + ", imageSize=" + imageSize + ", result=" + result + ", canvasWidth=" + canvasWidth + ", textSize=" + textSize + ", waitingForDimensions=" + waitingForDimensions + '}';
     }
 
     // @since 4.2.1

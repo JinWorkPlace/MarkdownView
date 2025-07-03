@@ -48,9 +48,7 @@ public class SpannableBuilder implements Appendable, CharSequence {
     // @since 2.0.1 package-private visibility for testing
     @VisibleForTesting
     static boolean isPositionValid(int length, int start, int end) {
-        return end > start
-                && start >= 0
-                && end <= length;
+        return end > start && start >= 0 && end <= length;
     }
 
 
@@ -158,6 +156,7 @@ public class SpannableBuilder implements Appendable, CharSequence {
     /**
      * @since 2.0.0 to follow CharSequence interface
      */
+    @NonNull
     @Override
     public CharSequence subSequence(int start, int end) {
 
@@ -189,12 +188,7 @@ public class SpannableBuilder implements Appendable, CharSequence {
                 s = Math.max(0, span.start - start);
                 e = Math.min(length, s + (span.end - span.start));
 
-                builder.setSpan(
-                        span.what,
-                        s,
-                        e,
-                        span.flags
-                );
+                builder.setSpan(span.what, s, e, span.flags);
             }
             out = builder;
         }
@@ -224,8 +218,7 @@ public class SpannableBuilder implements Appendable, CharSequence {
         }
 
         // all requested
-        if (start == 0
-                && length == end) {
+        if (start == 0 && length == end) {
             // but also copy (do not allow external modification)
             final List<Span> list = new ArrayList<>(spans);
             Collections.reverse(list);
@@ -242,10 +235,7 @@ public class SpannableBuilder implements Appendable, CharSequence {
             // we must execute 2 checks: if overlap with specified range or fully include it
             // if span.start is >= range.start -> check if it's before range.end
             // if span.end is <= end -> check if it's after range.start
-            if (
-                    (span.start >= start && span.start < end)
-                            || (span.end <= end && span.end > start)
-                            || (span.start < start && span.end > end)) {
+            if ((span.start >= start && span.start < end) || (span.end <= end && span.end > start) || (span.start < start && span.end > end)) {
                 list.add(span);
             }
         }
@@ -339,38 +329,24 @@ public class SpannableBuilder implements Appendable, CharSequence {
         // we must identify already reversed Spanned...
         // and (!) iterate backwards when adding (to preserve order)
 
-        if (cs instanceof Spanned) {
-
-            final Spanned spanned = (Spanned) cs;
+        if (cs instanceof Spanned spanned) {
             final boolean reversed = spanned instanceof SpannableStringBuilderReversed;
 
             final Object[] spans = spanned.getSpans(0, spanned.length(), Object.class);
-            final int length = spans != null
-                    ? spans.length
-                    : 0;
+            final int length = spans != null ? spans.length : 0;
 
             if (length > 0) {
                 if (reversed) {
                     Object o;
                     for (int i = length - 1; i >= 0; i--) {
                         o = spans[i];
-                        setSpan(
-                                o,
-                                index + spanned.getSpanStart(o),
-                                index + spanned.getSpanEnd(o),
-                                spanned.getSpanFlags(o)
-                        );
+                        setSpan(o, index + spanned.getSpanStart(o), index + spanned.getSpanEnd(o), spanned.getSpanFlags(o));
                     }
                 } else {
                     Object o;
                     for (int i = 0; i < length; i++) {
                         o = spans[i];
-                        setSpan(
-                                o,
-                                index + spanned.getSpanStart(o),
-                                index + spanned.getSpanEnd(o),
-                                spanned.getSpanFlags(o)
-                        );
+                        setSpan(o, index + spanned.getSpanStart(o), index + spanned.getSpanEnd(o), spanned.getSpanFlags(o));
                     }
                 }
             }
@@ -407,11 +383,7 @@ public class SpannableBuilder implements Appendable, CharSequence {
     /**
      * @since 3.0.1
      */
-    private static void setSpansInternal(
-            @NonNull SpannableBuilder builder,
-            @Nullable Object spans,
-            int start,
-            int end) {
+    private static void setSpansInternal(@NonNull SpannableBuilder builder, @Nullable Object spans, int start, int end) {
         if (spans != null) {
             if (spans.getClass().isArray()) {
                 for (Object o : ((Object[]) spans)) {

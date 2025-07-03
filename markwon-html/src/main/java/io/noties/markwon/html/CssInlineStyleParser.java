@@ -26,11 +26,9 @@ public abstract class CssInlineStyleParser {
             return new CssIterable(inlineStyle);
         }
 
-        private static class CssIterable implements Iterable<CssProperty> {
+        private record CssIterable(String input) implements Iterable<CssProperty> {
 
-            private final String input;
-
-            CssIterable(@NonNull String input) {
+            private CssIterable(@NonNull String input) {
                 this.input = input;
             }
 
@@ -150,8 +148,7 @@ public abstract class CssInlineStyleParser {
                     }
 
                     // here we must additionally check for EOF (we might be tracking value here)
-                    if (key != null
-                            && builder.length() > 0) {
+                    if (key != null && builder.length() > 0) {
                         value = builder.toString().trim();
                         cssProperty.set(key, value);
                         index = length;
@@ -163,8 +160,7 @@ public abstract class CssInlineStyleParser {
                 }
 
                 private boolean hasValues(@Nullable String key, @Nullable String value) {
-                    return !TextUtils.isEmpty(key)
-                            && !TextUtils.isEmpty(value);
+                    return !TextUtils.isEmpty(key) && !TextUtils.isEmpty(value);
                 }
             }
         }

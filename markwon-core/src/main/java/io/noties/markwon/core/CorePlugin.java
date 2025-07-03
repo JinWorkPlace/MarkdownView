@@ -101,15 +101,7 @@ public class CorePlugin extends AbstractMarkwonPlugin {
      */
     @NonNull
     public static Set<Class<? extends Block>> enabledBlockTypes() {
-        return new HashSet<>(Arrays.asList(
-                BlockQuote.class,
-                Heading.class,
-                FencedCodeBlock.class,
-                HtmlBlock.class,
-                ThematicBreak.class,
-                ListBlock.class,
-                IndentedCodeBlock.class
-        ));
+        return new HashSet<>(Arrays.asList(BlockQuote.class, Heading.class, FencedCodeBlock.class, HtmlBlock.class, ThematicBreak.class, ListBlock.class, IndentedCodeBlock.class));
     }
 
     // @since 4.0.0
@@ -171,17 +163,7 @@ public class CorePlugin extends AbstractMarkwonPlugin {
         // reuse this one for both code-blocks (indent & fenced)
         final CodeBlockSpanFactory codeBlockSpanFactory = new CodeBlockSpanFactory();
 
-        builder
-                .setFactory(StrongEmphasis.class, new StrongEmphasisSpanFactory())
-                .setFactory(Emphasis.class, new EmphasisSpanFactory())
-                .setFactory(BlockQuote.class, new BlockQuoteSpanFactory())
-                .setFactory(Code.class, new CodeSpanFactory())
-                .setFactory(FencedCodeBlock.class, codeBlockSpanFactory)
-                .setFactory(IndentedCodeBlock.class, codeBlockSpanFactory)
-                .setFactory(ListItem.class, new ListItemSpanFactory())
-                .setFactory(Heading.class, new HeadingSpanFactory())
-                .setFactory(Link.class, new LinkSpanFactory())
-                .setFactory(ThematicBreak.class, new ThematicBreakSpanFactory());
+        builder.setFactory(StrongEmphasis.class, new StrongEmphasisSpanFactory()).setFactory(Emphasis.class, new EmphasisSpanFactory()).setFactory(BlockQuote.class, new BlockQuoteSpanFactory()).setFactory(Code.class, new CodeSpanFactory()).setFactory(FencedCodeBlock.class, codeBlockSpanFactory).setFactory(IndentedCodeBlock.class, codeBlockSpanFactory).setFactory(ListItem.class, new ListItemSpanFactory()).setFactory(Heading.class, new HeadingSpanFactory()).setFactory(Link.class, new LinkSpanFactory()).setFactory(ThematicBreak.class, new ThematicBreakSpanFactory());
     }
 
     @Override
@@ -190,8 +172,7 @@ public class CorePlugin extends AbstractMarkwonPlugin {
 
         // @since 4.4.0
         // we do not break API compatibility, instead we introduce the `instance of` check
-        if (markdown instanceof Spannable) {
-            final Spannable spannable = (Spannable) markdown;
+        if (markdown instanceof Spannable spannable) {
             TextViewSpan.applyTo(spannable, textView);
         }
     }
@@ -208,163 +189,124 @@ public class CorePlugin extends AbstractMarkwonPlugin {
     }
 
     private void text(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(Text.class, new MarkwonVisitor.NodeVisitor<Text>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull Text text) {
+        builder.on(Text.class, (visitor, text) -> {
 
-                final String literal = text.getLiteral();
+            final String literal = text.getLiteral();
 
-                visitor.builder().append(literal);
+            visitor.builder().append(literal);
 
-                // @since 4.0.0
-                if (!onTextAddedListeners.isEmpty()) {
-                    // calculate the start position
-                    final int length = visitor.length() - literal.length();
-                    for (OnTextAddedListener onTextAddedListener : onTextAddedListeners) {
-                        onTextAddedListener.onTextAdded(visitor, literal, length);
-                    }
+            // @since 4.0.0
+            if (!onTextAddedListeners.isEmpty()) {
+                // calculate the start position
+                final int length = visitor.length() - literal.length();
+                for (OnTextAddedListener onTextAddedListener : onTextAddedListeners) {
+                    onTextAddedListener.onTextAdded(visitor, literal, length);
                 }
             }
         });
     }
 
     private static void strongEmphasis(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(StrongEmphasis.class, new MarkwonVisitor.NodeVisitor<StrongEmphasis>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull StrongEmphasis strongEmphasis) {
-                final int length = visitor.length();
-                visitor.visitChildren(strongEmphasis);
-                visitor.setSpansForNodeOptional(strongEmphasis, length);
-            }
+        builder.on(StrongEmphasis.class, (visitor, strongEmphasis) -> {
+            final int length = visitor.length();
+            visitor.visitChildren(strongEmphasis);
+            visitor.setSpansForNodeOptional(strongEmphasis, length);
         });
     }
 
     private static void emphasis(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(Emphasis.class, new MarkwonVisitor.NodeVisitor<Emphasis>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull Emphasis emphasis) {
-                final int length = visitor.length();
-                visitor.visitChildren(emphasis);
-                visitor.setSpansForNodeOptional(emphasis, length);
-            }
+        builder.on(Emphasis.class, (visitor, emphasis) -> {
+            final int length = visitor.length();
+            visitor.visitChildren(emphasis);
+            visitor.setSpansForNodeOptional(emphasis, length);
         });
     }
 
     private static void blockQuote(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(BlockQuote.class, new MarkwonVisitor.NodeVisitor<BlockQuote>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull BlockQuote blockQuote) {
+        builder.on(BlockQuote.class, (visitor, blockQuote) -> {
 
-                visitor.blockStart(blockQuote);
+            visitor.blockStart(blockQuote);
 
-                final int length = visitor.length();
+            final int length = visitor.length();
 
-                visitor.visitChildren(blockQuote);
-                visitor.setSpansForNodeOptional(blockQuote, length);
+            visitor.visitChildren(blockQuote);
+            visitor.setSpansForNodeOptional(blockQuote, length);
 
-                visitor.blockEnd(blockQuote);
-            }
+            visitor.blockEnd(blockQuote);
         });
     }
 
     private static void code(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(Code.class, new MarkwonVisitor.NodeVisitor<Code>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull Code code) {
+        builder.on(Code.class, (visitor, code) -> {
 
-                final int length = visitor.length();
+            final int length = visitor.length();
 
-                // NB, in order to provide a _padding_ feeling code is wrapped inside two unbreakable spaces
-                // unfortunately we cannot use this for multiline code as we cannot control where a new line break will be inserted
-                visitor.builder()
-                        .append('\u00a0')
-                        .append(code.getLiteral())
-                        .append('\u00a0');
+            // NB, in order to provide a _padding_ feeling code is wrapped inside two unbreakable spaces
+            // unfortunately we cannot use this for multiline code as we cannot control where a new line break will be inserted
+            visitor.builder().append('\u00a0').append(code.getLiteral()).append('\u00a0');
 
-                visitor.setSpansForNodeOptional(code, length);
-            }
+            visitor.setSpansForNodeOptional(code, length);
         });
     }
 
     private static void fencedCodeBlock(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(FencedCodeBlock.class, new MarkwonVisitor.NodeVisitor<FencedCodeBlock>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull FencedCodeBlock fencedCodeBlock) {
-                visitCodeBlock(visitor, fencedCodeBlock.getInfo(), fencedCodeBlock.getLiteral(), fencedCodeBlock);
-            }
-        });
+        builder.on(FencedCodeBlock.class, (visitor, fencedCodeBlock) -> visitCodeBlock(visitor, fencedCodeBlock.getInfo(), fencedCodeBlock.getLiteral(), fencedCodeBlock));
     }
 
     private static void indentedCodeBlock(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(IndentedCodeBlock.class, new MarkwonVisitor.NodeVisitor<IndentedCodeBlock>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull IndentedCodeBlock indentedCodeBlock) {
-                visitCodeBlock(visitor, null, indentedCodeBlock.getLiteral(), indentedCodeBlock);
-            }
-        });
+        builder.on(IndentedCodeBlock.class, (visitor, indentedCodeBlock) -> visitCodeBlock(visitor, null, indentedCodeBlock.getLiteral(), indentedCodeBlock));
     }
 
     // @since 4.0.0
     // his method is moved from ImagesPlugin. Alternative implementations must set SpanFactory
     // for Image node in order for this visitor to function
     private static void image(MarkwonVisitor.Builder builder) {
-        builder.on(Image.class, new MarkwonVisitor.NodeVisitor<Image>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull Image image) {
+        builder.on(Image.class, (visitor, image) -> {
 
-                // if there is no image spanFactory, ignore
-                final SpanFactory spanFactory = visitor.configuration().spansFactory().get(Image.class);
-                if (spanFactory == null) {
-                    visitor.visitChildren(image);
-                    return;
-                }
-
-                final int length = visitor.length();
-
+            // if there is no image spanFactory, ignore
+            final SpanFactory spanFactory = visitor.configuration().spansFactory().get(Image.class);
+            if (spanFactory == null) {
                 visitor.visitChildren(image);
-
-                // we must check if anything _was_ added, as we need at least one char to render
-                if (length == visitor.length()) {
-                    visitor.builder().append('\uFFFC');
-                }
-
-                final MarkwonConfiguration configuration = visitor.configuration();
-
-                final Node parent = image.getParent();
-                final boolean link = parent instanceof Link;
-
-                final String destination = configuration
-                        .imageDestinationProcessor()
-                        .process(image.getDestination());
-
-                final RenderProps props = visitor.renderProps();
-
-                // apply image properties
-                // Please note that we explicitly set IMAGE_SIZE to null as we do not clear
-                // properties after we applied span (we could though)
-                ImageProps.DESTINATION.set(props, destination);
-                ImageProps.REPLACEMENT_TEXT_IS_LINK.set(props, link);
-                ImageProps.IMAGE_SIZE.set(props, null);
-
-                visitor.setSpans(length, spanFactory.getSpans(configuration, props));
+                return;
             }
+
+            final int length = visitor.length();
+
+            visitor.visitChildren(image);
+
+            // we must check if anything _was_ added, as we need at least one char to render
+            if (length == visitor.length()) {
+                visitor.builder().append('\uFFFC');
+            }
+
+            final MarkwonConfiguration configuration = visitor.configuration();
+
+            final Node parent = image.getParent();
+            final boolean link = parent instanceof Link;
+
+            final String destination = configuration.imageDestinationProcessor().process(image.getDestination());
+
+            final RenderProps props = visitor.renderProps();
+
+            // apply image properties
+            // Please note that we explicitly set IMAGE_SIZE to null as we do not clear
+            // properties after we applied span (we could though)
+            ImageProps.DESTINATION.set(props, destination);
+            ImageProps.REPLACEMENT_TEXT_IS_LINK.set(props, link);
+            ImageProps.IMAGE_SIZE.set(props, null);
+
+            visitor.setSpans(length, spanFactory.getSpans(configuration, props));
         });
     }
 
     @VisibleForTesting
-    static void visitCodeBlock(
-            @NonNull MarkwonVisitor visitor,
-            @Nullable String info,
-            @NonNull String code,
-            @NonNull Node node) {
+    static void visitCodeBlock(@NonNull MarkwonVisitor visitor, @Nullable String info, @NonNull String code, @NonNull Node node) {
 
         visitor.blockStart(node);
 
         final int length = visitor.length();
 
-        visitor.builder()
-                .append('\u00a0').append('\n')
-                .append(visitor.configuration().syntaxHighlight().highlight(info, code));
+        visitor.builder().append('\u00a0').append('\n').append(visitor.configuration().syntaxHighlight().highlight(info, code));
 
         visitor.ensureNewLine();
 
@@ -387,39 +329,35 @@ public class CorePlugin extends AbstractMarkwonPlugin {
     }
 
     private static void listItem(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(ListItem.class, new MarkwonVisitor.NodeVisitor<ListItem>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull ListItem listItem) {
+        builder.on(ListItem.class, (visitor, listItem) -> {
 
-                final int length = visitor.length();
+            final int length = visitor.length();
 
-                // it's important to visit children before applying render props (
-                // we can have nested children, who are list items also, thus they will
-                // override out props (if we set them before visiting children)
-                visitor.visitChildren(listItem);
+            // it's important to visit children before applying render props (
+            // we can have nested children, who are list items also, thus they will
+            // override out props (if we set them before visiting children)
+            visitor.visitChildren(listItem);
 
-                final Node parent = listItem.getParent();
-                if (parent instanceof OrderedList) {
+            final Node parent = listItem.getParent();
+            if (parent instanceof OrderedList orderedList) {
 
-                    final int start = ((OrderedList) parent).getStartNumber();
+                final int start = orderedList.getStartNumber();
 
-                    CoreProps.LIST_ITEM_TYPE.set(visitor.renderProps(), CoreProps.ListItemType.ORDERED);
-                    CoreProps.ORDERED_LIST_ITEM_NUMBER.set(visitor.renderProps(), start);
+                CoreProps.LIST_ITEM_TYPE.set(visitor.renderProps(), CoreProps.ListItemType.ORDERED);
+                CoreProps.ORDERED_LIST_ITEM_NUMBER.set(visitor.renderProps(), start);
 
-                    // after we have visited the children increment start number
-                    final OrderedList orderedList = (OrderedList) parent;
-                    orderedList.setStartNumber(orderedList.getStartNumber() + 1);
+                // after we have visited the children increment start number
+                orderedList.setStartNumber(orderedList.getStartNumber() + 1);
 
-                } else {
-                    CoreProps.LIST_ITEM_TYPE.set(visitor.renderProps(), CoreProps.ListItemType.BULLET);
-                    CoreProps.BULLET_LIST_ITEM_LEVEL.set(visitor.renderProps(), listLevel(listItem));
-                }
+            } else {
+                CoreProps.LIST_ITEM_TYPE.set(visitor.renderProps(), CoreProps.ListItemType.BULLET);
+                CoreProps.BULLET_LIST_ITEM_LEVEL.set(visitor.renderProps(), listLevel(listItem));
+            }
 
-                visitor.setSpansForNodeOptional(listItem, length);
+            visitor.setSpansForNodeOptional(listItem, length);
 
-                if (visitor.hasNext(listItem)) {
-                    visitor.ensureNewLine();
-                }
+            if (visitor.hasNext(listItem)) {
+                visitor.ensureNewLine();
             }
         });
     }
@@ -437,83 +375,64 @@ public class CorePlugin extends AbstractMarkwonPlugin {
     }
 
     private static void thematicBreak(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(ThematicBreak.class, new MarkwonVisitor.NodeVisitor<ThematicBreak>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull ThematicBreak thematicBreak) {
+        builder.on(ThematicBreak.class, (visitor, thematicBreak) -> {
 
-                visitor.blockStart(thematicBreak);
+            visitor.blockStart(thematicBreak);
 
-                final int length = visitor.length();
+            final int length = visitor.length();
 
-                // without space it won't render
-                visitor.builder().append('\u00a0');
+            // without space it won't render
+            visitor.builder().append('\u00a0');
 
-                visitor.setSpansForNodeOptional(thematicBreak, length);
+            visitor.setSpansForNodeOptional(thematicBreak, length);
 
-                visitor.blockEnd(thematicBreak);
-            }
+            visitor.blockEnd(thematicBreak);
         });
     }
 
     private static void heading(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(Heading.class, new MarkwonVisitor.NodeVisitor<Heading>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull Heading heading) {
+        builder.on(Heading.class, (visitor, heading) -> {
 
-                visitor.blockStart(heading);
+            visitor.blockStart(heading);
 
-                final int length = visitor.length();
-                visitor.visitChildren(heading);
+            final int length = visitor.length();
+            visitor.visitChildren(heading);
 
-                CoreProps.HEADING_LEVEL.set(visitor.renderProps(), heading.getLevel());
+            CoreProps.HEADING_LEVEL.set(visitor.renderProps(), heading.getLevel());
 
-                visitor.setSpansForNodeOptional(heading, length);
+            visitor.setSpansForNodeOptional(heading, length);
 
-                visitor.blockEnd(heading);
-            }
+            visitor.blockEnd(heading);
         });
     }
 
     private static void softLineBreak(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(SoftLineBreak.class, new MarkwonVisitor.NodeVisitor<SoftLineBreak>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull SoftLineBreak softLineBreak) {
-                visitor.builder().append(' ');
-            }
-        });
+        builder.on(SoftLineBreak.class, (visitor, softLineBreak) -> visitor.builder().append(' '));
     }
 
     private static void hardLineBreak(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(HardLineBreak.class, new MarkwonVisitor.NodeVisitor<HardLineBreak>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull HardLineBreak hardLineBreak) {
-                visitor.ensureNewLine();
-            }
-        });
+        builder.on(HardLineBreak.class, (visitor, hardLineBreak) -> visitor.ensureNewLine());
     }
 
     private static void paragraph(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(Paragraph.class, new MarkwonVisitor.NodeVisitor<Paragraph>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull Paragraph paragraph) {
+        builder.on(Paragraph.class, (visitor, paragraph) -> {
 
-                final boolean inTightList = isInTightList(paragraph);
+            final boolean inTightList = isInTightList(paragraph);
 
-                if (!inTightList) {
-                    visitor.blockStart(paragraph);
-                }
+            if (!inTightList) {
+                visitor.blockStart(paragraph);
+            }
 
-                final int length = visitor.length();
-                visitor.visitChildren(paragraph);
+            final int length = visitor.length();
+            visitor.visitChildren(paragraph);
 
-                CoreProps.PARAGRAPH_IS_IN_TIGHT_LIST.set(visitor.renderProps(), inTightList);
+            CoreProps.PARAGRAPH_IS_IN_TIGHT_LIST.set(visitor.renderProps(), inTightList);
 
-                // @since 1.1.1 apply paragraph span
-                visitor.setSpansForNodeOptional(paragraph, length);
+            // @since 1.1.1 apply paragraph span
+            visitor.setSpansForNodeOptional(paragraph, length);
 
-                if (!inTightList) {
-                    visitor.blockEnd(paragraph);
-                }
+            if (!inTightList) {
+                visitor.blockEnd(paragraph);
             }
         });
     }
@@ -522,8 +441,7 @@ public class CorePlugin extends AbstractMarkwonPlugin {
         final Node parent = paragraph.getParent();
         if (parent != null) {
             final Node gramps = parent.getParent();
-            if (gramps instanceof ListBlock) {
-                ListBlock list = (ListBlock) gramps;
+            if (gramps instanceof ListBlock list) {
                 return list.isTight();
             }
         }
@@ -531,19 +449,16 @@ public class CorePlugin extends AbstractMarkwonPlugin {
     }
 
     private static void link(@NonNull MarkwonVisitor.Builder builder) {
-        builder.on(Link.class, new MarkwonVisitor.NodeVisitor<Link>() {
-            @Override
-            public void visit(@NonNull MarkwonVisitor visitor, @NonNull Link link) {
+        builder.on(Link.class, (visitor, link) -> {
 
-                final int length = visitor.length();
-                visitor.visitChildren(link);
+            final int length = visitor.length();
+            visitor.visitChildren(link);
 
-                final String destination = link.getDestination();
+            final String destination = link.getDestination();
 
-                CoreProps.LINK_DESTINATION.set(visitor.renderProps(), destination);
+            CoreProps.LINK_DESTINATION.set(visitor.renderProps(), destination);
 
-                visitor.setSpansForNodeOptional(link, length);
-            }
+            visitor.setSpansForNodeOptional(link, length);
         });
     }
 }

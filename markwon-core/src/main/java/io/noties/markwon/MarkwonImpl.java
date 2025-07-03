@@ -33,15 +33,7 @@ class MarkwonImpl extends Markwon {
     // @since 4.4.0
     private final boolean fallbackToRawInputWhenEmpty;
 
-    MarkwonImpl(
-            @NonNull TextView.BufferType bufferType,
-            @Nullable TextSetter textSetter,
-            @NonNull Parser parser,
-            @NonNull MarkwonVisitorFactory visitorFactory,
-            @NonNull MarkwonConfiguration configuration,
-            @NonNull List<MarkwonPlugin> plugins,
-            boolean fallbackToRawInputWhenEmpty
-    ) {
+    MarkwonImpl(@NonNull TextView.BufferType bufferType, @Nullable TextSetter textSetter, @NonNull Parser parser, @NonNull MarkwonVisitorFactory visitorFactory, @NonNull MarkwonConfiguration configuration, @NonNull List<MarkwonPlugin> plugins, boolean fallbackToRawInputWhenEmpty) {
         this.bufferType = bufferType;
         this.textSetter = textSetter;
         this.parser = parser;
@@ -98,9 +90,7 @@ class MarkwonImpl extends Markwon {
 
         // @since 4.4.0
         // if spanned is empty, we are configured to use raw input and input is not empty
-        if (TextUtils.isEmpty(spanned)
-                && fallbackToRawInputWhenEmpty
-                && !TextUtils.isEmpty(input)) {
+        if (TextUtils.isEmpty(spanned) && fallbackToRawInputWhenEmpty && !TextUtils.isEmpty(input)) {
             // let's use SpannableStringBuilder in order to keep backward-compatibility
             return new SpannableStringBuilder(input);
         }
@@ -165,8 +155,7 @@ class MarkwonImpl extends Markwon {
     public <P extends MarkwonPlugin> P requirePlugin(@NonNull Class<P> type) {
         final P plugin = getPlugin(type);
         if (plugin == null) {
-            throw new IllegalStateException(String.format(Locale.US, "Requested plugin `%s` is not " +
-                    "registered with this Markwon instance", type.getName()));
+            throw new IllegalStateException(String.format(Locale.US, "Requested plugin `%s` is not " + "registered with this Markwon instance", type.getName()));
         }
         return plugin;
     }

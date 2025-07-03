@@ -56,7 +56,7 @@ public class GlideImagesPlugin extends AbstractMarkwonPlugin {
             @NonNull
             @Override
             public RequestBuilder<Drawable> load(@NonNull AsyncDrawable drawable) {
-                return requestManager.load(drawable.getDestination());
+                return requestManager.load(drawable.destination);
             }
 
             @Override

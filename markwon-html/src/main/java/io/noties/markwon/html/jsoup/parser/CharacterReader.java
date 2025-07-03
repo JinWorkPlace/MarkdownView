@@ -1,5 +1,7 @@
 package io.noties.markwon.html.jsoup.parser;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -66,7 +68,7 @@ public final class CharacterReader {
                 readerPos += bufPos;
                 bufPos = 0;
                 bufMark = 0;
-                bufSplitPoint = bufLength > readAheadLimit ? readAheadLimit : bufLength;
+                bufSplitPoint = Math.min(bufLength, readAheadLimit);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -211,12 +213,11 @@ public final class CharacterReader {
         bufferUp();
         final int start = bufPos;
         final int remaining = bufLength;
-        final char[] val = charBuf;
 
         OUTER:
         while (bufPos < remaining) {
             for (char c : chars) {
-                if (val[bufPos] == c)
+                if (charBuf[bufPos] == c)
                     break OUTER;
             }
             bufPos++;
@@ -229,10 +230,9 @@ public final class CharacterReader {
         bufferUp();
         final int start = bufPos;
         final int remaining = bufLength;
-        final char[] val = charBuf;
 
         while (bufPos < remaining) {
-            if (Arrays.binarySearch(chars, val[bufPos]) >= 0)
+            if (Arrays.binarySearch(chars, charBuf[bufPos]) >= 0)
                 break;
             bufPos++;
         }
@@ -245,10 +245,9 @@ public final class CharacterReader {
         bufferUp();
         final int start = bufPos;
         final int remaining = bufLength;
-        final char[] val = charBuf;
 
         while (bufPos < remaining) {
-            final char c = val[bufPos];
+            final char c = charBuf[bufPos];
             if (c == '&' || c == '<' || c == TokeniserState.nullChar)
                 break;
             bufPos++;
@@ -262,10 +261,9 @@ public final class CharacterReader {
         bufferUp();
         final int start = bufPos;
         final int remaining = bufLength;
-        final char[] val = charBuf;
 
         while (bufPos < remaining) {
-            final char c = val[bufPos];
+            final char c = charBuf[bufPos];
             if (c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == ' ' || c == '/' || c == '>' || c == TokeniserState.nullChar)
                 break;
             bufPos++;
@@ -432,6 +430,7 @@ public final class CharacterReader {
         return (nextIndexOf(loScan) > -1) || (nextIndexOf(hiScan) > -1);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return new String(charBuf, bufPos, bufLength - bufPos);
