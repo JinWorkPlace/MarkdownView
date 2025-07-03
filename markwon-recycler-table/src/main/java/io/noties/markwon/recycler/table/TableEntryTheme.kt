@@ -14,7 +14,7 @@ import io.noties.markwon.utils.ColorUtils
  *
  * @since 3.0.0
  */
-open class TableEntryTheme protected constructor(builder: Builder) : TableTheme(builder) {
+class TableEntryTheme(builder: Builder) : TableTheme(builder) {
     @Px
     override fun tableCellPadding(): Int {
         return tableCellPadding
@@ -22,24 +22,21 @@ open class TableEntryTheme protected constructor(builder: Builder) : TableTheme(
 
     @ColorInt
     fun tableBorderColor(paint: Paint): Int {
-        return if (tableBorderColor == 0)
-            ColorUtils.applyAlpha(paint.color, TABLE_BORDER_DEF_ALPHA)
-        else
-            tableBorderColor
+        return if (tableBorderColor == 0) ColorUtils.applyAlpha(paint.color, TABLE_BORDER_DEF_ALPHA)
+        else tableBorderColor
     }
 
     @Px
     override fun tableBorderWidth(paint: Paint): Int {
-        return if (tableBorderWidth < 0) (paint.strokeWidth + .5f).toInt() else
-            tableBorderWidth
+        return if (tableBorderWidth < 0) (paint.strokeWidth + .5f).toInt() else tableBorderWidth
     }
 
     @ColorInt
     fun tableOddRowBackgroundColor(paint: Paint): Int {
-        return if (tableOddRowBackgroundColor == 0)
-            ColorUtils.applyAlpha(paint.color, TABLE_ODD_ROW_DEF_ALPHA)
-        else
-            tableOddRowBackgroundColor
+        return if (tableOddRowBackgroundColor == 0) ColorUtils.applyAlpha(
+            paint.color, TABLE_ODD_ROW_DEF_ALPHA
+        )
+        else tableOddRowBackgroundColor
     }
 
     @ColorInt

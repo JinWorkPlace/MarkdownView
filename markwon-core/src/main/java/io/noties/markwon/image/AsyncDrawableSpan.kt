@@ -11,7 +11,7 @@ import io.noties.markwon.utils.SpanUtils
 
 open class AsyncDrawableSpan(
     private val theme: MarkwonTheme,
-    @JvmField val drawable: AsyncDrawable,
+    open val drawable: AsyncDrawable,
     @param:Alignment private val alignment: Int,
     private val replacementTextIsLink: Boolean
 ) : ReplacementSpan() {

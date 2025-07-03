@@ -6,7 +6,9 @@ import androidx.annotation.ColorInt
 import io.noties.markwon.core.spans.EmphasisSpan
 import io.noties.markwon.core.spans.StrongEmphasisSpan
 
-class Prism4jThemeDarkula(@param:ColorInt private val background: Int) : Prism4jThemeBase() {
+class Prism4jThemeDarkula(
+    @param:ColorInt private val background: Int
+) : Prism4jThemeBase() {
     override fun background(): Int {
         return background
     }

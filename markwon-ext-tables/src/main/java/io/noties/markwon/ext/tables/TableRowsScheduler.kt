@@ -30,7 +30,7 @@ internal object TableRowsScheduler {
                 // @since 4.1.0
                 // let's stack-up invalidation calls (so invalidation happens,
                 // but not with each table-row-span draw call)
-                val runnable: Runnable = Runnable { view.text = view.getText() }
+                val runnable: Runnable = Runnable { view.text = view.text }
 
                 override fun invalidate() {
                     // @since 4.1.0 post invalidation (combine multiple calls)
@@ -59,7 +59,7 @@ internal object TableRowsScheduler {
 
     private fun extract(view: TextView): Array<TableRowSpan>? {
         val out: Array<TableRowSpan>?
-        val text = view.getText()
+        val text = view.text
         out = if (!TextUtils.isEmpty(text) && text is Spanned) {
             text.getSpans(0, text.length, TableRowSpan::class.java)
         } else {

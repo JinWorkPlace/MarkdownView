@@ -17,8 +17,7 @@ class EmphasisEditHandler : AbstractEditHandler<EmphasisSpan>() {
                 override fun create(): EmphasisSpan {
                     return EmphasisSpan()
                 }
-            }
-        )
+            })
     }
 
     override fun handleMarkdownSpan(
@@ -29,8 +28,7 @@ class EmphasisEditHandler : AbstractEditHandler<EmphasisSpan>() {
         spanStart: Int,
         spanTextLength: Int
     ) {
-        val match =
-            MarkwonEditorUtils.findDelimited(input, spanStart, "*", "_")
+        val match = MarkwonEditorUtils.findDelimited(input, spanStart, "*", "_")
         match?.let {
             editable.setSpan(
                 persistedSpans.get(EmphasisSpan::class.java),

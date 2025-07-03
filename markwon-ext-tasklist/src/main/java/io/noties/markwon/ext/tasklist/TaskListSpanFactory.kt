@@ -6,11 +6,9 @@ import io.noties.markwon.RenderProps
 import io.noties.markwon.SpanFactory
 
 class TaskListSpanFactory(private val drawable: Drawable) : SpanFactory {
-    override fun getSpans(configuration: MarkwonConfiguration, props: RenderProps): Any? {
+    override fun getSpans(configuration: MarkwonConfiguration, props: RenderProps): TaskListSpan {
         return TaskListSpan(
-            configuration.theme(),
-            drawable,
-            TaskListProps.DONE.get(props, false)
+            configuration.theme(), drawable, TaskListProps.DONE.get(props, false)
         )
     }
 }

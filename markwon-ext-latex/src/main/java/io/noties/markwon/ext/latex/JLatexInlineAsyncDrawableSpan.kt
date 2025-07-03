@@ -11,7 +11,7 @@ import io.noties.markwon.core.MarkwonTheme
  */
 internal class JLatexInlineAsyncDrawableSpan(
     theme: MarkwonTheme,
-    private val drawable: JLatextAsyncDrawable,
+    override val drawable: JLatextAsyncDrawable,
     @ColorInt color: Int
 ) : JLatexAsyncDrawableSpan(theme, drawable, color) {
 
@@ -27,7 +27,7 @@ internal class JLatexInlineAsyncDrawableSpan(
         val size: Int
 
         if (drawable.hasResult()) {
-            val rect = drawable.getBounds()
+            val rect = drawable.bounds
 
             if (fm != null) {
                 val half = rect.bottom / 2

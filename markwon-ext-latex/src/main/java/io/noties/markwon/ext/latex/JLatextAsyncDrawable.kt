@@ -8,7 +8,7 @@ import io.noties.markwon.image.ImageSizeResolver
 /**
  * @since 4.3.0
  */
-internal class JLatextAsyncDrawable(
+class JLatextAsyncDrawable(
     destination: String,
     loader: AsyncDrawableLoader,
     imageSizeResolver: ImageSizeResolver,

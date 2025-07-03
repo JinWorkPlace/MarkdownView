@@ -6,7 +6,9 @@ import io.noties.markwon.image.ImageSizeResolver
 
 // we must make drawable fit canvas (if specified), but do not keep the ratio whilst scaling up
 // @since 4.0.0
-internal class JLatexBlockImageSizeResolver(private val fitCanvas: Boolean) : ImageSizeResolver() {
+internal class JLatexBlockImageSizeResolver(
+    private val fitCanvas: Boolean
+) : ImageSizeResolver() {
     override fun resolveImageSize(drawable: AsyncDrawable): Rect {
         val imageBounds = drawable.result!!.bounds
         val canvasWidth = drawable.lastKnownCanvasWidth

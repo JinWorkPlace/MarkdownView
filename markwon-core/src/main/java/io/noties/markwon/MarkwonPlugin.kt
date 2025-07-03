@@ -23,7 +23,7 @@ interface MarkwonPlugin {
      * @see Registry.require
      * @since 4.0.0
      */
-    interface Action<P : MarkwonPlugin> {
+    fun interface Action<P : MarkwonPlugin> {
         fun apply(p: P)
     }
 
