@@ -7,7 +7,6 @@ import android.widget.TextView
 import android.widget.TextView.BufferType
 import org.commonmark.node.Node
 import org.commonmark.parser.Parser
-import java.util.Collections
 import java.util.Locale
 
 /**
@@ -19,6 +18,7 @@ internal data class MarkwonImpl(
     private val parser: Parser, // @since 4.1.1
     private val visitorFactory: MarkwonVisitorFactory,
     private val configuration: MarkwonConfiguration,
+    override val plugins: MutableList<out MarkwonPlugin>,
     private val fallbackToRawInputWhenEmpty: Boolean,
 ) : Markwon() {
     override fun parse(input: String): Node {
@@ -67,12 +67,6 @@ internal data class MarkwonImpl(
 
         return spanned
     }
-
-//    /**
-//     * @since 4.4.0
-//     */
-    override val plugins: MutableList<out MarkwonPlugin>
-        get() = Collections.unmodifiableList(plugins)
 
     override fun setMarkdown(textView: TextView, markdown: String) {
         setParsedMarkdown(textView, toMarkdown(markdown))
