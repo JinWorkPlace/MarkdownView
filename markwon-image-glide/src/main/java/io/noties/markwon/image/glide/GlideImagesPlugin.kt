@@ -31,25 +31,22 @@ class GlideImagesPlugin internal constructor(glideStore: GlideStore) : AbstractM
         fun cancel(target: Target<*>)
     }
 
-    private val glideAsyncDrawableLoader: GlideAsyncDrawableLoader
+    private val glideAsyncDrawableLoader: GlideAsyncDrawableLoader =
+        GlideAsyncDrawableLoader(glideStore)
 
-    init {
-        this.glideAsyncDrawableLoader = GlideAsyncDrawableLoader(glideStore)
+    override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
+        builder.setFactory(Image::class.java, ImageSpanFactory())
     }
 
-    public override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
-        builder.setFactory<Image>(Image::class.java, ImageSpanFactory())
-    }
-
-    public override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+    override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
         builder.asyncDrawableLoader(glideAsyncDrawableLoader)
     }
 
-    public override fun beforeSetText(textView: TextView, markdown: Spanned) {
+    override fun beforeSetText(textView: TextView, markdown: Spanned) {
         unschedule(textView)
     }
 
-    public override fun afterSetText(textView: TextView) {
+    override fun afterSetText(textView: TextView) {
         schedule(textView)
     }
 
@@ -58,20 +55,20 @@ class GlideImagesPlugin internal constructor(glideStore: GlideStore) : AbstractM
         private val cache: MutableMap<AsyncDrawable?, Target<*>?> =
             HashMap<AsyncDrawable?, Target<*>?>(2)
 
-        public override fun load(drawable: AsyncDrawable) {
+        override fun load(drawable: AsyncDrawable) {
             val target: CustomTarget<Drawable?> = AsyncDrawableTarget(drawable)
             cache.put(drawable, target)
             glideStore.load(drawable).into<Target<Drawable?>?>(target)
         }
 
-        public override fun cancel(drawable: AsyncDrawable) {
+        override fun cancel(drawable: AsyncDrawable) {
             val target = cache.remove(drawable)
             if (target != null) {
                 glideStore.cancel(target)
             }
         }
 
-        public override fun placeholder(drawable: AsyncDrawable): Drawable? {
+        override fun placeholder(drawable: AsyncDrawable): Drawable? {
             return null
         }
 
