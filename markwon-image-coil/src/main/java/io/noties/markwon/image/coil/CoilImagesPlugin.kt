@@ -96,7 +96,7 @@ class CoilImagesPlugin internal constructor(
                     loaded.set(true)
                     if (drawable.isAttached) {
                         DrawableUtils.applyIntrinsicBoundsIfEmpty(result)
-                        drawable.setResult(result)
+                        drawable.result = result
                     }
                 }
             }
@@ -104,7 +104,7 @@ class CoilImagesPlugin internal constructor(
             override fun onStart(placeholder: Drawable?) {
                 if (placeholder != null && drawable.isAttached) {
                     DrawableUtils.applyIntrinsicBoundsIfEmpty(placeholder)
-                    drawable.setResult(placeholder)
+                    drawable.result = placeholder
                 }
             }
 
@@ -112,7 +112,7 @@ class CoilImagesPlugin internal constructor(
                 if (cache.remove(drawable) != null) {
                     if (error != null && drawable.isAttached) {
                         DrawableUtils.applyIntrinsicBoundsIfEmpty(error)
-                        drawable.setResult(error)
+                        drawable.result = error
                     }
                 }
             }
