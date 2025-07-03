@@ -41,10 +41,10 @@ open class Prism4jSyntaxHighlight protected constructor(
             grammar = _grammar
         }
 
-        if (grammar != null) {
-            out = highlight(language!!, grammar, code)
+        out = if (grammar != null) {
+            highlight(language!!, grammar, code)
         } else {
-            out = code
+            code
         }
 
         return out
