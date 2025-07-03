@@ -30,7 +30,7 @@ public abstract class TagHandler {
 
         for (HtmlTag.Block child : block.children()) {
 
-            if (!child.isClosed) {
+            if (!child.isClosed()) {
                 continue;
             }
 

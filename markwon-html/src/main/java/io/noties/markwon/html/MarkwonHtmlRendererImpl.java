@@ -38,7 +38,7 @@ class MarkwonHtmlRendererImpl extends MarkwonHtmlRenderer {
             for (HtmlTag.Inline inline : tags) {
 
                 // if tag is not closed -> do not render
-                if (!inline.isClosed) {
+                if (!inline.isClosed()) {
                     continue;
                 }
 
@@ -49,7 +49,7 @@ class MarkwonHtmlRendererImpl extends MarkwonHtmlRenderer {
             }
         });
 
-        parser.flushBlockTags(end, new MarkwonHtmlParser.FlushAction<HtmlTag.Block>() {
+        parser.flushBlockTags(end, new MarkwonHtmlParser.FlushAction<>() {
             @Override
             public void apply(@NonNull List<HtmlTag.Block> tags) {
 
@@ -57,7 +57,7 @@ class MarkwonHtmlRendererImpl extends MarkwonHtmlRenderer {
 
                 for (HtmlTag.Block block : tags) {
 
-                    if (!block.isClosed) {
+                    if (!block.isClosed()) {
                         continue;
                     }
 
