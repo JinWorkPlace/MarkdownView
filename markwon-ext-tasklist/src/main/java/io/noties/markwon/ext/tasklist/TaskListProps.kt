@@ -7,5 +7,5 @@ import io.noties.markwon.Prop
  */
 object TaskListProps {
     @JvmField
-    val DONE: Prop<Boolean?> = Prop.of<Boolean?>("task-list-done")
+    val DONE: Prop<Boolean> = Prop.of("task-list-done")
 }

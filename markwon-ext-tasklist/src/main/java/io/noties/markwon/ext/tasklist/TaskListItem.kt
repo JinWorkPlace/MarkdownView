@@ -7,8 +7,6 @@ import org.commonmark.node.CustomBlock
  */
 class TaskListItem(@JvmField val isDone: Boolean) : CustomBlock() {
     override fun toString(): String {
-        return "TaskListItem{" +
-                "isDone=" + isDone +
-                '}'
+        return "TaskListItem{isDone=$isDone}"
     }
 }

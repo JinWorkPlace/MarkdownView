@@ -128,7 +128,7 @@ class TablePlugin internal constructor(private val theme: TableTheme) : Abstract
                 val addNewLine: Boolean
                 run {
                     val builderLength = builder.length
-                    addNewLine = builderLength > 0 && '\n' != builder.get(builderLength - 1)
+                    addNewLine = builderLength > 0 && '\n' != builder[builderLength - 1]
                 }
 
                 if (addNewLine) {

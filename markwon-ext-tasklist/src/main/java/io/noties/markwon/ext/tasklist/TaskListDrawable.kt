@@ -31,7 +31,7 @@ class TaskListDrawable(
     // unfortunately we cannot rely on TextView to be LAYER_TYPE_SOFTWARE
     // if we could we would draw our checkMarkPath with PorterDuff.CLEAR
     init {
-        checkMarkPaint.setColor(checkMarkColor)
+        checkMarkPaint.color = checkMarkColor
         checkMarkPaint.style = Paint.Style.STROKE
     }
 
@@ -69,7 +69,7 @@ class TaskListDrawable(
             color = normalOutlineColor
         }
         paint.style = style
-        paint.setColor(color)
+        paint.color = color
 
         val bounds = getBounds()
 
@@ -93,11 +93,11 @@ class TaskListDrawable(
     }
 
     override fun setAlpha(@IntRange(from = 0, to = 255) alpha: Int) {
-        paint.setAlpha(alpha)
+        paint.alpha = alpha
     }
 
     override fun setColorFilter(colorFilter: ColorFilter?) {
-        paint.setColorFilter(colorFilter)
+        paint.colorFilter = colorFilter
     }
 
     @Deprecated("Deprecated in Java")
