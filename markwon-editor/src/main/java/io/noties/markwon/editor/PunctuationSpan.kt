@@ -7,7 +7,7 @@ import io.noties.markwon.utils.ColorUtils
 internal class PunctuationSpan : CharacterStyle() {
     override fun updateDrawState(tp: TextPaint) {
         val color = ColorUtils.applyAlpha(tp.color, DEF_PUNCTUATION_ALPHA)
-        tp.setColor(color)
+        tp.color = color
     }
 
     companion object {
