@@ -1,22 +1,18 @@
-package io.noties.markwon.image;
+package io.noties.markwon.image
 
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.os.Looper;
-import android.os.SystemClock;
-import android.text.Spanned;
-import android.view.View;
-import android.widget.TextView;
+import android.graphics.Rect
+import android.graphics.drawable.Drawable
+import android.os.Looper
+import android.os.SystemClock
+import android.text.Spanned
+import android.view.View
+import android.view.View.OnAttachStateChangeListener
+import android.widget.TextView
+import io.noties.markwon.R
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import io.noties.markwon.R;
-
-public abstract class AsyncDrawableScheduler {
-
-    public static void schedule(@NonNull final TextView textView) {
-
+object AsyncDrawableScheduler {
+    @JvmStatic
+    fun schedule(textView: TextView) {
         // we need a simple check if current text has already scheduled drawables
         // we need this in order to allow multiple calls to schedule (different plugins
         // might use AsyncDrawable), but we do not want to repeat the task
@@ -25,162 +21,137 @@ public abstract class AsyncDrawableScheduler {
         // if it's not -> unschedule, else ignore
 
         // @since 4.0.0
-        final Integer lastTextHashCode = (Integer) textView.getTag(R.id.markwon_drawables_scheduler_last_text_hashcode);
-        final int textHashCode = textView.getText().hashCode();
+
+        val lastTextHashCode =
+            textView.getTag(R.id.markwon_drawables_scheduler_last_text_hashcode) as Int?
+        val textHashCode = textView.text.hashCode()
         if (lastTextHashCode != null && lastTextHashCode == textHashCode) {
-            return;
+            return
         }
-        textView.setTag(R.id.markwon_drawables_scheduler_last_text_hashcode, textHashCode);
+        textView.setTag(R.id.markwon_drawables_scheduler_last_text_hashcode, textHashCode)
 
 
-        final AsyncDrawableSpan[] spans = extractSpans(textView);
-        if (spans != null && spans.length > 0) {
-
+        val spans = extractSpans(textView)
+        if (spans != null && spans.isNotEmpty()) {
             if (textView.getTag(R.id.markwon_drawables_scheduler) == null) {
-                final View.OnAttachStateChangeListener listener = new View.OnAttachStateChangeListener() {
-                    @Override
-                    public void onViewAttachedToWindow(@NonNull View v) {
-
+                val listener: OnAttachStateChangeListener = object : OnAttachStateChangeListener {
+                    override fun onViewAttachedToWindow(v: View) {
                     }
 
-                    @Override
-                    public void onViewDetachedFromWindow(View v) {
-                        unschedule(textView);
-                        v.removeOnAttachStateChangeListener(this);
-                        v.setTag(R.id.markwon_drawables_scheduler, null);
+                    override fun onViewDetachedFromWindow(v: View) {
+                        unschedule(textView)
+                        v.removeOnAttachStateChangeListener(this)
+                        v.setTag(R.id.markwon_drawables_scheduler, null)
                     }
-                };
-                textView.addOnAttachStateChangeListener(listener);
-                textView.setTag(R.id.markwon_drawables_scheduler, listener);
+                }
+                textView.addOnAttachStateChangeListener(listener)
+                textView.setTag(R.id.markwon_drawables_scheduler, listener)
             }
 
             // @since 4.1.0
-            final DrawableCallbackImpl.Invalidator invalidator = new TextViewInvalidator(textView);
+            val invalidator: DrawableCallbackImpl.Invalidator = TextViewInvalidator(textView)
 
-            AsyncDrawable drawable;
+            var drawable: AsyncDrawable?
 
-            for (AsyncDrawableSpan span : spans) {
-                drawable = span.drawable;
-                drawable.setCallback2(new DrawableCallbackImpl(textView, invalidator, drawable.getBounds()));
+            for (span in spans) {
+                drawable = span.drawable
+                drawable.setCallback2(
+                    DrawableCallbackImpl(
+                        textView, invalidator, drawable.bounds
+                    )
+                )
             }
         }
     }
 
     // must be called when text manually changed in TextView
-    public static void unschedule(@NonNull TextView view) {
-
+    @JvmStatic
+    fun unschedule(view: TextView) {
         // @since 4.0.0
+
         if (view.getTag(R.id.markwon_drawables_scheduler_last_text_hashcode) == null) {
-            return;
+            return
         }
-        view.setTag(R.id.markwon_drawables_scheduler_last_text_hashcode, null);
+        view.setTag(R.id.markwon_drawables_scheduler_last_text_hashcode, null)
 
 
-        final AsyncDrawableSpan[] spans = extractSpans(view);
-        if (spans != null && spans.length > 0) {
-            for (AsyncDrawableSpan span : spans) {
-                span.drawable.setCallback2(null);
+        val spans = extractSpans(view)
+        if (spans != null && spans.isNotEmpty()) {
+            for (span in spans) {
+                span.drawable.setCallback2(null)
             }
         }
     }
 
-    @Nullable
-    private static AsyncDrawableSpan[] extractSpans(@NonNull TextView textView) {
+    private fun extractSpans(textView: TextView): Array<AsyncDrawableSpan>? {
+        val cs = textView.text
+        val length = cs?.length ?: 0
 
-        final CharSequence cs = textView.getText();
-        final int length = cs != null ? cs.length() : 0;
-
-        if (length == 0 || !(cs instanceof Spanned)) {
-            return null;
+        if (length == 0 || cs !is Spanned) {
+            return null
         }
 
         // we also could've tried the `nextSpanTransition`, but strangely it leads to worse performance
         // than direct getSpans
-
-        return ((Spanned) cs).getSpans(0, length, AsyncDrawableSpan.class);
+        return cs.getSpans(0, length, AsyncDrawableSpan::class.java)
     }
 
-    private AsyncDrawableScheduler() {
-    }
-
-    private static class DrawableCallbackImpl implements Drawable.Callback {
-
+    private class DrawableCallbackImpl(
+        private val view: TextView, // @since 4.1.0
+        private val invalidator: Invalidator, initialBounds: Rect?
+    ) : Drawable.Callback {
         // @since 4.1.0
         // interface to be used when bounds change and view must be invalidated
         interface Invalidator {
-            void invalidate();
+            fun invalidate()
         }
 
-        private final TextView view;
-        private final Invalidator invalidator; // @since 4.1.0
+        private var previousBounds: Rect
 
-        private Rect previousBounds;
-
-        DrawableCallbackImpl(@NonNull TextView view, @NonNull Invalidator invalidator, Rect initialBounds) {
-            this.view = view;
-            this.invalidator = invalidator;
-            this.previousBounds = new Rect(initialBounds);
+        init {
+            this.previousBounds = Rect(initialBounds)
         }
 
-        @Override
-        public void invalidateDrawable(@NonNull final Drawable who) {
-
+        override fun invalidateDrawable(who: Drawable) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                view.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        invalidateDrawable(who);
-                    }
-                });
-                return;
+                view.post { invalidateDrawable(who) }
+                return
             }
 
-            final Rect rect = who.getBounds();
+            val rect = who.bounds
 
             // okay... the thing is IF we do not change bounds size, normal invalidate would do
             // but if the size has changed, then we need to update the whole layout...
-
-            if (!previousBounds.equals(rect)) {
+            if (previousBounds != rect) {
                 // @since 4.1.0
                 // invalidation moved to upper level (so invalidation can be deferred,
                 // and multiple calls combined)
-                invalidator.invalidate();
-                previousBounds = new Rect(rect);
+                invalidator.invalidate()
+                previousBounds = Rect(rect)
             } else {
-
-                view.postInvalidate();
+                view.postInvalidate()
             }
         }
 
-        @Override
-        public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
-            final long delay = when - SystemClock.uptimeMillis();
-            view.postDelayed(what, delay);
+        override fun scheduleDrawable(who: Drawable, what: Runnable, `when`: Long) {
+            val delay = `when` - SystemClock.uptimeMillis()
+            view.postDelayed(what, delay)
         }
 
-        @Override
-        public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
-            view.removeCallbacks(what);
+        override fun unscheduleDrawable(who: Drawable, what: Runnable) {
+            view.removeCallbacks(what)
         }
     }
 
-    private static class TextViewInvalidator implements DrawableCallbackImpl.Invalidator, Runnable {
-
-        private final TextView textView;
-
-        TextViewInvalidator(@NonNull TextView textView) {
-            this.textView = textView;
+    private class TextViewInvalidator(private val textView: TextView) :
+        DrawableCallbackImpl.Invalidator, Runnable {
+        override fun invalidate() {
+            textView.removeCallbacks(this)
+            textView.post(this)
         }
 
-        @Override
-        public void invalidate() {
-            textView.removeCallbacks(this);
-            textView.post(this);
-        }
-
-        @Override
-        public void run() {
-            textView.setText(textView.getText());
+        override fun run() {
+            textView.text = textView.text
         }
     }
 }
