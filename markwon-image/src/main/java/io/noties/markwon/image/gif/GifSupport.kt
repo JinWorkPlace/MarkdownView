@@ -1,45 +1,39 @@
-package io.noties.markwon.image.gif;
+package io.noties.markwon.image.gif
 
-import android.util.Log;
-
-import androidx.annotation.NonNull;
+import android.util.Log
 
 /**
  * @since 4.0.0
  */
-public abstract class GifSupport {
+object GifSupport {
+    private val HAS_GIF: Boolean
 
-    private static boolean HAS_GIF;
-
-    static {
-        boolean result;
+    init {
+        var result: Boolean
         try {
             // @since 4.3.1
-            Class.forName("pl.droidsonroids.gif.GifDrawable");
-            result = true;
-        } catch (Throwable t) {
+            Class.forName("pl.droidsonroids.gif.GifDrawable")
+            result = true
+        } catch (t: Throwable) {
             // @since 4.1.1 instead of printing full stacktrace of the exception,
             // just print a warning to the console
-            Log.w("MarkwonImagesPlugin", missingMessage());
-            result = false;
+            Log.w("MarkwonImagesPlugin", missingMessage())
+            result = false
         }
-        HAS_GIF = result;
+        HAS_GIF = result
     }
 
-    public static boolean hasGifSupport() {
-        return HAS_GIF;
+    @JvmStatic
+    fun hasGifSupport(): Boolean {
+        return HAS_GIF
     }
 
     /**
      * @since 4.1.1
      */
-    @NonNull
-    static String missingMessage() {
+    fun missingMessage(): String {
         return "`pl.droidsonroids.gif:android-gif-drawable:*` " +
                 "dependency is missing, please add to your project explicitly if you " +
-                "wish to use GIF media-decoder";
-    }
-
-    private GifSupport() {
+                "wish to use GIF media-decoder"
     }
 }

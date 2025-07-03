@@ -82,7 +82,7 @@ public class DataUriSchemeHandlerTest {
             assertNotNull(entry.getKey(), item);
             assertTrue(item.hasDecodingNeeded());
 
-            final ImageItem.WithDecodingNeeded withDecodingNeeded = item.getAsWithDecodingNeeded();
+            final ImageItem.WithDecodingNeeded withDecodingNeeded = item.asWithDecodingNeeded;
             assertEquals(entry.getKey(), entry.getValue().contentType, withDecodingNeeded.contentType());
             assertEquals(entry.getKey(), entry.getValue().data, readStream(withDecodingNeeded.inputStream()));
         }
