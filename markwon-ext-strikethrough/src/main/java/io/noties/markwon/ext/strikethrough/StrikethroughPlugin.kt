@@ -34,7 +34,7 @@ class StrikethroughPlugin : AbstractMarkwonPlugin() {
             MarkwonVisitor.NodeVisitor { visitor, strikethrough ->
                 val length = visitor.length()
                 visitor.visitChildren(strikethrough)
-                visitor.setSpansForNodeOptional<Strikethrough>(strikethrough, length)
+                visitor.setSpansForNodeOptional(strikethrough, length)
             })
     }
 

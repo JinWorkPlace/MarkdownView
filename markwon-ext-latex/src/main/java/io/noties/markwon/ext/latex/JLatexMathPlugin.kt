@@ -50,29 +50,24 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
 
     @VisibleForTesting
     class Config(builder: Builder) {
-        val theme: JLatexMathTheme
+        val theme: JLatexMathTheme = builder.theme.build()
 
         // @since 4.3.0
         @JvmField
-        val blocksEnabled: Boolean
+        val blocksEnabled: Boolean = builder.blocksEnabled
 
         @JvmField
-        val blocksLegacy: Boolean
+        val blocksLegacy: Boolean = builder.blocksLegacy
 
         @JvmField
-        val inlinesEnabled: Boolean
+        val inlinesEnabled: Boolean = builder.inlinesEnabled
 
         // @since 4.3.0
-        val errorHandler: ErrorHandler?
+        val errorHandler: ErrorHandler? = builder.errorHandler
 
         val executorService: ExecutorService?
 
         init {
-            this.theme = builder.theme.build()
-            this.blocksEnabled = builder.blocksEnabled
-            this.blocksLegacy = builder.blocksLegacy
-            this.inlinesEnabled = builder.inlinesEnabled
-            this.errorHandler = builder.errorHandler
             // @since 4.0.0
             var executorService = builder.executorService
             if (executorService == null) {
@@ -94,8 +89,8 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
 
     override fun configure(registry: MarkwonPlugin.Registry) {
         if (config.inlinesEnabled) {
-            registry.require(MarkwonInlineParserPlugin::class.java)
-                .factoryBuilder().addInlineProcessor(JLatexMathInlineProcessor())
+            registry.require(MarkwonInlineParserPlugin::class.java).factoryBuilder()
+                .addInlineProcessor(JLatexMathInlineProcessor())
         }
     }
 
@@ -120,19 +115,19 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
             return
         }
 
-        builder.on<JLatexMathBlock?>(
-            JLatexMathBlock::class.java, object : MarkwonVisitor.NodeVisitor<JLatexMathBlock?> {
-                override fun visit(visitor: MarkwonVisitor, jLatexMathBlock: JLatexMathBlock) {
-                    visitor.blockStart(jLatexMathBlock)
+        builder.on(
+            JLatexMathBlock::class.java, object : MarkwonVisitor.NodeVisitor<JLatexMathBlock> {
+                override fun visit(visitor: MarkwonVisitor, node: JLatexMathBlock) {
+                    visitor.blockStart(node)
 
-                    val latex = jLatexMathBlock.latex()
+                    val latex = node.latex()
 
                     val length = visitor.length()
 
                     // @since 4.0.2 we cannot append _raw_ latex as a placeholder-text,
                     // because Android will draw formula for each line of text, thus
                     // leading to formula duplicated (drawn on each line of text)
-                    visitor.builder().append(Companion.prepareLatexTextPlaceholder(latex!!))
+                    visitor.builder().append(prepareLatexTextPlaceholder(latex!!))
 
                     val configuration = visitor.configuration()
 
@@ -148,7 +143,7 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
 
                     visitor.setSpans(length, span)
 
-                    visitor.blockEnd(jLatexMathBlock)
+                    visitor.blockEnd(node)
                 }
             })
     }
@@ -158,17 +153,17 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
             return
         }
 
-        builder.on<JLatexMathNode?>(
-            JLatexMathNode::class.java, object : MarkwonVisitor.NodeVisitor<JLatexMathNode?> {
-                override fun visit(visitor: MarkwonVisitor, jLatexMathNode: JLatexMathNode) {
-                    val latex = jLatexMathNode.latex()
+        builder.on(
+            JLatexMathNode::class.java, object : MarkwonVisitor.NodeVisitor<JLatexMathNode> {
+                override fun visit(visitor: MarkwonVisitor, node: JLatexMathNode) {
+                    val latex = node.latex()
 
                     val length = visitor.length()
 
                     // @since 4.0.2 we cannot append _raw_ latex as a placeholder-text,
                     // because Android will draw formula for each line of text, thus
                     // leading to formula duplicated (drawn on each line of text)
-                    visitor.builder().append(Companion.prepareLatexTextPlaceholder(latex!!))
+                    visitor.builder().append(prepareLatexTextPlaceholder(latex!!))
 
                     val configuration = visitor.configuration()
 
@@ -192,7 +187,7 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
     }
 
     @Suppress("unused")
-    class Builder internal constructor(// @since 4.3.0
+    class Builder internal constructor(
         val theme: JLatexMathTheme.Builder
     ) {
         // @since 4.3.0
@@ -258,15 +253,14 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
     // @since 4.0.0
     internal class JLatextAsyncDrawableLoader(private val config: Config) : AsyncDrawableLoader() {
         private val handler = Handler(Looper.getMainLooper())
-        private val cache: MutableMap<AsyncDrawable?, Future<*>?> =
-            HashMap<AsyncDrawable?, Future<*>?>(3)
+        private val cache: MutableMap<AsyncDrawable, Future<*>> = HashMap(3)
 
         override fun load(drawable: AsyncDrawable) {
             // this method must be called from main-thread only (thus synchronization can be skipped)
 
             // check for currently running tasks associated with provided drawable
 
-            val future = cache.get(drawable)
+            val future = cache[drawable]
 
             // if it's present -> proceed with new execution
             // as asyncDrawable is immutable, it won't have destination changed (so there is no need
@@ -301,15 +295,13 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
                     }
 
                     fun execute() {
-                        val jLatexMathDrawable: JLatexMathDrawable
-
                         val jLatextAsyncDrawable = drawable as JLatextAsyncDrawable
-
-                        if (jLatextAsyncDrawable.isBlock) {
-                            jLatexMathDrawable = createBlockDrawable(jLatextAsyncDrawable)
-                        } else {
-                            jLatexMathDrawable = createInlineDrawable(jLatextAsyncDrawable)
-                        }
+                        val jLatexMathDrawable: JLatexMathDrawable =
+                            if (jLatextAsyncDrawable.isBlock) {
+                                createBlockDrawable(jLatextAsyncDrawable)
+                            } else {
+                                createInlineDrawable(jLatextAsyncDrawable)
+                            }
 
                         setResult(drawable, jLatexMathDrawable)
                     }
@@ -321,9 +313,7 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
             // this method also must be called from main thread only
 
             val future = cache.remove(drawable)
-            if (future != null) {
-                future.cancel(true)
-            }
+            future?.cancel(true)
 
             // remove all callbacks (via runnable) and messages posted for this drawable
             handler.removeCallbacksAndMessages(drawable)
@@ -392,12 +382,9 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
         private fun setResult(drawable: AsyncDrawable, result: Drawable) {
             // we must post to handler, but also have a way to identify the drawable
             // for which we are posting (in case of cancellation)
-            handler.postAtTime(object : Runnable {
-                override fun run() {
-                    // remove entry from cache (it will be present if task is not cancelled)
-                    if (cache.remove(drawable) != null && drawable.isAttached()) {
-                        drawable.setResult(result)
-                    }
+            handler.postAtTime({ // remove entry from cache (it will be present if task is not cancelled)
+                if (cache.remove(drawable) != null && drawable.isAttached) {
+                    drawable.result = result
                 }
             }, drawable, SystemClock.uptimeMillis())
         }
@@ -407,8 +394,8 @@ class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting v
         override fun resolveImageSize(drawable: AsyncDrawable): Rect {
             // @since 4.4.0 resolve inline size (scale down if exceed available width)
 
-            val imageBounds = drawable.getResult().getBounds()
-            val canvasWidth = drawable.getLastKnownCanvasWidth()
+            val imageBounds = drawable.result!!.bounds
+            val canvasWidth = drawable.lastKnownCanvasWidth
             val w = imageBounds.width()
 
             if (w > canvasWidth) {

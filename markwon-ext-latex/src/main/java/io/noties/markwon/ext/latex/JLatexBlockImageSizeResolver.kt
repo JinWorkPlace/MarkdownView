@@ -8,7 +8,7 @@ import io.noties.markwon.image.ImageSizeResolver
 // @since 4.0.0
 internal class JLatexBlockImageSizeResolver(private val fitCanvas: Boolean) : ImageSizeResolver() {
     override fun resolveImageSize(drawable: AsyncDrawable): Rect {
-        val imageBounds = drawable.result.getBounds()
+        val imageBounds = drawable.result!!.bounds
         val canvasWidth = drawable.lastKnownCanvasWidth
 
         if (fitCanvas) {
