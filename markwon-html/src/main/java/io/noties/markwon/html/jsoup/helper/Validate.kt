@@ -1,19 +1,19 @@
-package io.noties.markwon.html.jsoup.helper;
+package io.noties.markwon.html.jsoup.helper
 
 /**
  * Simple validation methods. Designed for jsoup internal use
  */
-public final class Validate {
-
-    private Validate() {}
+object Validate {
 
     /**
      * Validates that the object is not null
      * @param obj object to test
      */
-    public static void notNull(Object obj) {
-        if (obj == null)
-            throw new IllegalArgumentException("Object must not be null");
+    @JvmStatic
+    fun notNull(obj: Any?) {
+        if (obj == null) {
+            throw IllegalArgumentException("Object must not be null")
+        }
     }
 
     /**
@@ -21,55 +21,66 @@ public final class Validate {
      * @param obj object to test
      * @param msg message to output if validation fails
      */
-    public static void notNull(Object obj, String msg) {
-        if (obj == null)
-            throw new IllegalArgumentException(msg);
+    @JvmStatic
+    fun notNull(obj: Any?, msg: String) {
+        if (obj == null) {
+            throw IllegalArgumentException(msg)
+        }
     }
 
     /**
      * Validates that the value is true
-     * @param val object to test
+     * @param value object to test
      */
-    public static void isTrue(boolean val) {
-        if (!val)
-            throw new IllegalArgumentException("Must be true");
+    @JvmStatic
+    fun isTrue(value: Boolean) {
+        if (!value) {
+            throw IllegalArgumentException("Must be true")
+        }
     }
 
     /**
      * Validates that the value is true
-     * @param val object to test
+     * @param value object to test
      * @param msg message to output if validation fails
      */
-    public static void isTrue(boolean val, String msg) {
-        if (!val)
-            throw new IllegalArgumentException(msg);
+    @JvmStatic
+    fun isTrue(value: Boolean, msg: String) {
+        if (!value) {
+            throw IllegalArgumentException(msg)
+        }
     }
 
     /**
      * Validates that the value is false
-     * @param val object to test
+     * @param value object to test
      */
-    public static void isFalse(boolean val) {
-        if (val)
-            throw new IllegalArgumentException("Must be false");
+    @JvmStatic
+    fun isFalse(value: Boolean) {
+        if (value) {
+            throw IllegalArgumentException("Must be false")
+        }
     }
 
     /**
      * Validates that the value is false
-     * @param val object to test
+     * @param value object to test
      * @param msg message to output if validation fails
      */
-    public static void isFalse(boolean val, String msg) {
-        if (val)
-            throw new IllegalArgumentException(msg);
+    @JvmStatic
+    fun isFalse(value: Boolean, msg: String) {
+        if (value) {
+            throw IllegalArgumentException(msg)
+        }
     }
 
     /**
      * Validates that the array contains no null elements
      * @param objects the array to test
      */
-    public static void noNullElements(Object[] objects) {
-        noNullElements(objects, "Array must not contain any null objects");
+    @JvmStatic
+    fun noNullElements(objects: Array<Any?>) {
+        noNullElements(objects, "Array must not contain any null objects")
     }
 
     /**
@@ -77,19 +88,24 @@ public final class Validate {
      * @param objects the array to test
      * @param msg message to output if validation fails
      */
-    public static void noNullElements(Object[] objects, String msg) {
-        for (Object obj : objects)
-            if (obj == null)
-                throw new IllegalArgumentException(msg);
+    @JvmStatic
+    fun noNullElements(objects: Array<Any?>, msg: String) {
+        for (obj in objects) {
+            if (obj == null) {
+                throw IllegalArgumentException(msg)
+            }
+        }
     }
 
     /**
      * Validates that the string is not empty
      * @param string the string to test
      */
-    public static void notEmpty(String string) {
-        if (string == null || string.isEmpty())
-            throw new IllegalArgumentException("String must not be empty");
+    @JvmStatic
+    fun notEmpty(string: String?) {
+        if (string == null || string.isEmpty()) {
+            throw IllegalArgumentException("String must not be empty")
+        }
     }
 
     /**
@@ -97,16 +113,19 @@ public final class Validate {
      * @param string the string to test
      * @param msg message to output if validation fails
      */
-    public static void notEmpty(String string, String msg) {
-        if (string == null || string.isEmpty())
-            throw new IllegalArgumentException(msg);
+    @JvmStatic
+    fun notEmpty(string: String?, msg: String) {
+        if (string == null || string.isEmpty()) {
+            throw IllegalArgumentException(msg)
+        }
     }
 
     /**
-     Cause a failure.
-     @param msg message to output.
+     * Cause a failure.
+     * @param msg message to output.
      */
-    public static void fail(String msg) {
-        throw new IllegalArgumentException(msg);
+    @JvmStatic
+    fun fail(msg: String) {
+        throw IllegalArgumentException(msg)
     }
 }
