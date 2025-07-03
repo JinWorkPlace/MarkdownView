@@ -1,37 +1,51 @@
-package io.noties.markwon.image.svg
+package io.noties.markwon.image.svg;
 
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.PictureDrawable
-import com.caverock.androidsvg.SVG
-import com.caverock.androidsvg.SVGParseException
-import io.noties.markwon.image.MediaDecoder
-import java.io.InputStream
+import android.graphics.Picture;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PictureDrawable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.SVGParseException;
+
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
+
+import io.noties.markwon.image.MediaDecoder;
 
 /**
  * @since 4.2.0
  */
-class SvgPictureMediaDecoder : MediaDecoder() {
-    override fun decode(contentType: String?, inputStream: InputStream): Drawable {
-        val svg: SVG
+public class SvgPictureMediaDecoder extends MediaDecoder {
+
+    public static final String CONTENT_TYPE = "image/svg+xml";
+
+    @NonNull
+    public static SvgPictureMediaDecoder create() {
+        return new SvgPictureMediaDecoder();
+    }
+
+    @NonNull
+    @Override
+    public Drawable decode(@Nullable String contentType, @NonNull InputStream inputStream) {
+
+        final SVG svg;
         try {
-            svg = SVG.getFromInputStream(inputStream)
-        } catch (e: SVGParseException) {
-            throw IllegalStateException("Exception decoding SVG", e)
+            svg = SVG.getFromInputStream(inputStream);
+        } catch (SVGParseException e) {
+            throw new IllegalStateException("Exception decoding SVG", e);
         }
 
-        val picture = svg.renderToPicture()
-        return PictureDrawable(picture)
+        final Picture picture = svg.renderToPicture();
+        return new PictureDrawable(picture);
     }
 
-    override fun supportedTypes(): MutableCollection<String?> {
-        return mutableSetOf(CONTENT_TYPE)
-    }
-
-    companion object {
-        const val CONTENT_TYPE: String = "image/svg+xml"
-
-        fun create(): SvgPictureMediaDecoder {
-            return SvgPictureMediaDecoder()
-        }
+    @NonNull
+    @Override
+    public Collection<String> supportedTypes() {
+        return Collections.singleton(CONTENT_TYPE);
     }
 }

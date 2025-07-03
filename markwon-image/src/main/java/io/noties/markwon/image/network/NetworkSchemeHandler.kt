@@ -1,68 +1,86 @@
-package io.noties.markwon.image.network
+package io.noties.markwon.image.network;
 
-import android.net.Uri
-import io.noties.markwon.image.ImageItem
-import io.noties.markwon.image.SchemeHandler
-import java.io.BufferedInputStream
-import java.io.IOException
-import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.Arrays
+import android.net.Uri;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+
+import io.noties.markwon.image.ImageItem;
+import io.noties.markwon.image.SchemeHandler;
 
 /**
  * A simple network scheme handler that is not dependent on any external libraries.
  *
- * @see .create
+ * @see #create()
  * @since 3.0.0
  */
-class NetworkSchemeHandler internal constructor() : SchemeHandler() {
-    override fun handle(raw: String, uri: Uri): ImageItem {
-        val imageItem: ImageItem
+public class NetworkSchemeHandler extends SchemeHandler {
+
+    public static final String SCHEME_HTTP = "http";
+    public static final String SCHEME_HTTPS = "https";
+
+    @NonNull
+    public static NetworkSchemeHandler create() {
+        return new NetworkSchemeHandler();
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    NetworkSchemeHandler() {
+
+    }
+
+    @NonNull
+    @Override
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri) {
+
+        final ImageItem imageItem;
         try {
-            val url = URL(raw)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.connect()
 
-            val responseCode = connection.getResponseCode()
+            final URL url = new URL(raw);
+            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+
+            final int responseCode = connection.getResponseCode();
             if (responseCode >= 200 && responseCode < 300) {
-                val contentType: String? = contentType(connection.getHeaderField("Content-Type"))
-                val inputStream: InputStream = BufferedInputStream(connection.getInputStream())
-                imageItem = ImageItem.withDecodingNeeded(contentType, inputStream)
+                final String contentType = contentType(connection.getHeaderField("Content-Type"));
+                final InputStream inputStream = new BufferedInputStream(connection.getInputStream());
+                imageItem = ImageItem.withDecodingNeeded(contentType, inputStream);
             } else {
-                throw IOException("Bad response code: $responseCode, url: $raw")
+                throw new IOException("Bad response code: " + responseCode + ", url: " + raw);
             }
-        } catch (e: IOException) {
-            throw IllegalStateException("Exception obtaining network resource: $raw", e)
+
+        } catch (IOException e) {
+            throw new IllegalStateException("Exception obtaining network resource: " + raw, e);
         }
 
-        return imageItem
+        return imageItem;
     }
 
-    override fun supportedSchemes(): MutableCollection<String?> {
-        return mutableListOf<String?>(SCHEME_HTTP, SCHEME_HTTPS)
+    @NonNull
+    @Override
+    public Collection<String> supportedSchemes() {
+        return Arrays.asList(SCHEME_HTTP, SCHEME_HTTPS);
     }
 
-        companion object {
-        const val SCHEME_HTTP: String = "http"
-        const val SCHEME_HTTPS: String = "https"
+    @Nullable
+    static String contentType(@Nullable String contentType) {
 
-        @JvmStatic
-        fun create(): NetworkSchemeHandler {
-            return NetworkSchemeHandler()
+        if (contentType == null) {
+            return null;
         }
 
-        fun contentType(contentType: String?): String? {
-            if (contentType == null) {
-                return null
-            }
-
-            val index = contentType.indexOf(';')
-            if (index > -1) {
-                return contentType.substring(0, index)
-            }
-
-            return contentType
+        final int index = contentType.indexOf(';');
+        if (index > -1) {
+            return contentType.substring(0, index);
         }
+
+        return contentType;
     }
 }

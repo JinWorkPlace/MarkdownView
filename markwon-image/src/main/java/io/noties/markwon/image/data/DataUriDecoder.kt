@@ -1,37 +1,39 @@
-package io.noties.markwon.image.data
+package io.noties.markwon.image.data;
 
-import android.text.TextUtils
-import android.util.Base64
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import android.text.TextUtils;
+import android.util.Base64;
 
-abstract class DataUriDecoder {
-    @Throws(Throwable::class)
-    abstract fun decode(dataUri: DataUri): ByteArray?
+public abstract class DataUriDecoder {
 
-    internal class Impl : DataUriDecoder() {
-        @Throws(Throwable::class)
-        override fun decode(dataUri: DataUri): ByteArray? {
-            val data = dataUri.data
+    @Nullable
+    public abstract byte[] decode(@NonNull DataUri dataUri) throws Throwable;
 
-            return if (!TextUtils.isEmpty(data)) {
-                if (dataUri.base64) {
-                    Base64.decode(data!!.toByteArray(charset(CHARSET)), Base64.DEFAULT)
-                } else {
-                    data!!.toByteArray(charset(CHARSET))
-                }
-            } else {
-                null
-            }
-        }
-
-        companion object {
-            private const val CHARSET = "UTF-8"
-        }
+    @NonNull
+    public static DataUriDecoder create() {
+        return new Impl();
     }
 
-    companion object {
-        @JvmStatic
-        fun create(): DataUriDecoder {
-            return Impl()
+    static class Impl extends DataUriDecoder {
+
+        private static final String CHARSET = "UTF-8";
+
+        @Nullable
+        @Override
+        public byte[] decode(@NonNull DataUri dataUri) throws Throwable {
+
+            final String data = dataUri.data();
+
+            if (!TextUtils.isEmpty(data)) {
+                if (dataUri.base64()) {
+                    return Base64.decode(data.getBytes(CHARSET), Base64.DEFAULT);
+                } else {
+                    return data.getBytes(CHARSET);
+                }
+            } else {
+                return null;
+            }
         }
     }
 }

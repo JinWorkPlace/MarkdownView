@@ -1,118 +1,119 @@
-package io.noties.markwon.image
+package io.noties.markwon.image;
 
-import io.noties.markwon.image.ImagesPlugin.PlaceholderProvider
-import io.noties.markwon.image.data.DataUriSchemeHandler
-import io.noties.markwon.image.gif.GifMediaDecoder
-import io.noties.markwon.image.gif.GifSupport.hasGifSupport
-import io.noties.markwon.image.network.NetworkSchemeHandler
-import io.noties.markwon.image.svg.SvgMediaDecoder
-import io.noties.markwon.image.svg.SvgSupport.hasSvgSupport
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-internal class AsyncDrawableLoaderBuilder {
-    @JvmField
-    var executorService: ExecutorService? = null
-    @JvmField
-    val schemeHandlers: MutableMap<String?, SchemeHandler?> = HashMap(3)
-    @JvmField
-    val mediaDecoders: MutableMap<String?, MediaDecoder?> = HashMap(3)
-    @JvmField
-    var defaultMediaDecoder: MediaDecoder?
-    @JvmField
-    var placeholderProvider: PlaceholderProvider? = null
-    @JvmField
-    var errorHandler: ImagesPlugin.ErrorHandler? = null
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-    @JvmField
-    var isBuilt: Boolean = false
+import io.noties.markwon.image.data.DataUriSchemeHandler;
+import io.noties.markwon.image.gif.GifMediaDecoder;
+import io.noties.markwon.image.gif.GifSupport;
+import io.noties.markwon.image.network.NetworkSchemeHandler;
+import io.noties.markwon.image.svg.SvgMediaDecoder;
+import io.noties.markwon.image.svg.SvgSupport;
 
-    init {
+class AsyncDrawableLoaderBuilder {
+
+    ExecutorService executorService;
+    final Map<String, SchemeHandler> schemeHandlers = new HashMap<>(3);
+    final Map<String, MediaDecoder> mediaDecoders = new HashMap<>(3);
+    MediaDecoder defaultMediaDecoder;
+    ImagesPlugin.PlaceholderProvider placeholderProvider;
+    ImagesPlugin.ErrorHandler errorHandler;
+
+    boolean isBuilt;
+
+    AsyncDrawableLoaderBuilder() {
+
         // @since 4.0.0
         // okay, let's add supported schemes at the start, this would be : data-uri and default network
         // we should not use file-scheme as it's a bit complicated to assume file usage (lack of permissions)
-
-        addSchemeHandler(DataUriSchemeHandler.create())
-        addSchemeHandler(NetworkSchemeHandler.create())
+        addSchemeHandler(DataUriSchemeHandler.create());
+        addSchemeHandler(NetworkSchemeHandler.create());
 
         // add SVG and GIF, but only if they are present in the class-path
-        if (hasSvgSupport()) {
-            addMediaDecoder(SvgMediaDecoder.create())
+        if (SvgSupport.hasSvgSupport()) {
+            addMediaDecoder(SvgMediaDecoder.create());
         }
 
-        if (hasGifSupport()) {
-            addMediaDecoder(GifMediaDecoder.create())
+        if (GifSupport.hasGifSupport()) {
+            addMediaDecoder(GifMediaDecoder.create());
         }
 
-        defaultMediaDecoder = DefaultMediaDecoder.create()
+        defaultMediaDecoder = DefaultMediaDecoder.create();
     }
 
-    fun executorService(executorService: ExecutorService) {
-        checkState()
-        this.executorService = executorService
+    void executorService(@NonNull ExecutorService executorService) {
+        checkState();
+        this.executorService = executorService;
     }
 
-    fun addSchemeHandler(schemeHandler: SchemeHandler) {
-        checkState()
-        for (scheme in schemeHandler.supportedSchemes()) {
-            schemeHandlers.put(scheme, schemeHandler)
-        }
-    }
-
-    fun addMediaDecoder(mediaDecoder: MediaDecoder) {
-        checkState()
-        for (type in mediaDecoder.supportedTypes()) {
-            mediaDecoders.put(type, mediaDecoder)
+    void addSchemeHandler(@NonNull SchemeHandler schemeHandler) {
+        checkState();
+        for (String scheme : schemeHandler.supportedSchemes()) {
+            schemeHandlers.put(scheme, schemeHandler);
         }
     }
 
-    fun defaultMediaDecoder(mediaDecoder: MediaDecoder?) {
-        checkState()
-        this.defaultMediaDecoder = mediaDecoder
+    void addMediaDecoder(@NonNull MediaDecoder mediaDecoder) {
+        checkState();
+        for (String type : mediaDecoder.supportedTypes()) {
+            mediaDecoders.put(type, mediaDecoder);
+        }
     }
 
-    fun removeSchemeHandler(scheme: String) {
-        checkState()
-        schemeHandlers.remove(scheme)
+    void defaultMediaDecoder(@Nullable MediaDecoder mediaDecoder) {
+        checkState();
+        this.defaultMediaDecoder = mediaDecoder;
     }
 
-    fun removeMediaDecoder(contentType: String) {
-        checkState()
-        mediaDecoders.remove(contentType)
+    void removeSchemeHandler(@NonNull String scheme) {
+        checkState();
+        schemeHandlers.remove(scheme);
+    }
+
+    void removeMediaDecoder(@NonNull String contentType) {
+        checkState();
+        mediaDecoders.remove(contentType);
     }
 
     /**
      * @since 3.0.0
      */
-    fun placeholderProvider(placeholderDrawableProvider: PlaceholderProvider) {
-        checkState()
-        this.placeholderProvider = placeholderDrawableProvider
+    void placeholderProvider(@NonNull ImagesPlugin.PlaceholderProvider placeholderDrawableProvider) {
+        checkState();
+        this.placeholderProvider = placeholderDrawableProvider;
     }
 
     /**
      * @since 3.0.0
      */
-    fun errorHandler(errorHandler: ImagesPlugin.ErrorHandler) {
-        checkState()
-        this.errorHandler = errorHandler
+    void errorHandler(@NonNull ImagesPlugin.ErrorHandler errorHandler) {
+        checkState();
+        this.errorHandler = errorHandler;
     }
 
-    fun build(): AsyncDrawableLoader {
-        checkState()
+    @NonNull
+    AsyncDrawableLoader build() {
 
-        isBuilt = true
+        checkState();
+
+        isBuilt = true;
 
         if (executorService == null) {
-            executorService = Executors.newCachedThreadPool()
+            executorService = Executors.newCachedThreadPool();
         }
 
-        return AsyncDrawableLoaderImpl(this)
+        return new AsyncDrawableLoaderImpl(this);
     }
 
-    private fun checkState() {
-        check(!isBuilt) {
-            "ImagesPlugin has already been configured " +
-                    "and cannot be modified any further"
+    private void checkState() {
+        if (isBuilt) {
+            throw new IllegalStateException("ImagesPlugin has already been configured " +
+                    "and cannot be modified any further");
         }
     }
 }

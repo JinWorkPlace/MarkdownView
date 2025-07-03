@@ -1,79 +1,102 @@
-package io.noties.markwon.image.gif
+package io.noties.markwon.image.gif;
 
-import android.graphics.drawable.Drawable
-import io.noties.markwon.image.MediaDecoder
-import pl.droidsonroids.gif.GifDrawable
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.InputStream
+import android.graphics.drawable.Drawable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
+
+import io.noties.markwon.image.MediaDecoder;
+import pl.droidsonroids.gif.GifDrawable;
 
 /**
  * @since 1.1.0
  */
-open class GifMediaDecoder(private val autoPlayGif: Boolean) : MediaDecoder() {
-    init {
-        // @since 4.0.0
-        validate()
+@SuppressWarnings("WeakerAccess")
+public class GifMediaDecoder extends MediaDecoder {
+
+    public static final String CONTENT_TYPE = "image/gif";
+
+    /**
+     * Creates a {@link GifMediaDecoder} with {@code autoPlayGif = true}
+     *
+     * @since 4.0.0
+     */
+    @NonNull
+    public static GifMediaDecoder create() {
+        return create(true);
     }
 
-    override fun decode(contentType: String?, inputStream: InputStream): Drawable {
-        val bytes: ByteArray
+    @NonNull
+    public static GifMediaDecoder create(boolean autoPlayGif) {
+        return new GifMediaDecoder(autoPlayGif);
+    }
+
+    private final boolean autoPlayGif;
+
+    protected GifMediaDecoder(boolean autoPlayGif) {
+        this.autoPlayGif = autoPlayGif;
+
+        // @since 4.0.0
+        validate();
+    }
+
+    @NonNull
+    @Override
+    public Drawable decode(@Nullable String contentType, @NonNull InputStream inputStream) {
+
+        final byte[] bytes;
         try {
-            bytes = readBytes(inputStream)
-        } catch (e: IOException) {
-            throw IllegalStateException("Cannot read GIF input-stream", e)
+            bytes = readBytes(inputStream);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read GIF input-stream", e);
         }
 
-        val drawable: GifDrawable
+        final GifDrawable drawable;
         try {
-            drawable = newGifDrawable(bytes)
-        } catch (e: IOException) {
-            throw IllegalStateException("Exception creating GifDrawable", e)
+            drawable = newGifDrawable(bytes);
+        } catch (IOException e) {
+            throw new IllegalStateException("Exception creating GifDrawable", e);
         }
 
         if (!autoPlayGif) {
-            drawable.pause()
+            drawable.pause();
         }
 
-        return drawable
+        return drawable;
     }
 
-    override fun supportedTypes(): MutableCollection<String?> {
-        return mutableSetOf<String?>(CONTENT_TYPE)
+    @NonNull
+    @Override
+    public Collection<String> supportedTypes() {
+        return Collections.singleton(CONTENT_TYPE);
     }
 
-    @Throws(IOException::class)
-    protected fun newGifDrawable(bytes: ByteArray): GifDrawable {
-        return GifDrawable(bytes)
+    @NonNull
+    protected GifDrawable newGifDrawable(@NonNull byte[] bytes) throws IOException {
+        return new GifDrawable(bytes);
     }
 
-    companion object {
-        const val CONTENT_TYPE: String = "image/gif"
-
-        /**
-         * Creates a [GifMediaDecoder] with `autoPlayGif = true`
-         *
-         * @since 4.0.0
-         */
-        @JvmOverloads
-        fun create(autoPlayGif: Boolean = true): GifMediaDecoder {
-            return GifMediaDecoder(autoPlayGif)
+    @NonNull
+    protected static byte[] readBytes(@NonNull InputStream stream) throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final int length = 1024 * 8;
+        final byte[] buffer = new byte[length];
+        int read;
+        while ((read = stream.read(buffer, 0, length)) != -1) {
+            outputStream.write(buffer, 0, read);
         }
+        return outputStream.toByteArray();
+    }
 
-        @Throws(IOException::class)
-        protected fun readBytes(stream: InputStream): ByteArray {
-            val outputStream = ByteArrayOutputStream()
-            val length = 1024 * 8
-            val buffer = ByteArray(length)
-            var read: Int
-            while ((stream.read(buffer, 0, length).also { read = it }) != -1) {
-                outputStream.write(buffer, 0, read)
-            }
-            return outputStream.toByteArray()
-        }
-
-        private fun validate() {
-            check(GifSupport.hasGifSupport()) { GifSupport.missingMessage() }
+    private static void validate() {
+        if (!GifSupport.hasGifSupport()) {
+            throw new IllegalStateException(GifSupport.missingMessage());
         }
     }
 }

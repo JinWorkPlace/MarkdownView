@@ -1,24 +1,31 @@
-package io.noties.markwon.image
+package io.noties.markwon.image;
 
-import android.net.Uri
+import android.net.Uri;
+
+import androidx.annotation.NonNull;
+
+import java.util.Collection;
 
 /**
  * @since 3.0.0
  */
-abstract class SchemeHandler {
+public abstract class SchemeHandler {
+
     /**
      * Changes since 4.0.0:
+     * <ul>
+     * <li>Returns `non-null` image-item</li>
+     * </ul>
      *
-     *  * Returns `non-null` image-item
-     *
-     *
-     * @see ImageItem.withResult
-     * @see ImageItem.withDecodingNeeded
+     * @see ImageItem#withResult(android.graphics.drawable.Drawable)
+     * @see ImageItem#withDecodingNeeded(String, java.io.InputStream)
      */
-    abstract fun handle(raw: String, uri: Uri): ImageItem
+    @NonNull
+    public abstract ImageItem handle(@NonNull String raw, @NonNull Uri uri);
 
     /**
      * @since 4.0.0
      */
-    abstract fun supportedSchemes(): MutableCollection<String?>
+    @NonNull
+    public abstract Collection<String> supportedSchemes();
 }

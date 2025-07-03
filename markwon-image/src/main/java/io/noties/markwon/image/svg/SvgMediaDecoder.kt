@@ -1,68 +1,89 @@
-package io.noties.markwon.image.svg
+package io.noties.markwon.image.svg;
 
-import android.annotation.SuppressLint
-import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import com.caverock.androidsvg.SVG
-import com.caverock.androidsvg.SVGParseException
-import io.noties.markwon.image.MediaDecoder
-import java.io.InputStream
-import androidx.core.graphics.createBitmap
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.SVGParseException;
+
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
+
+import io.noties.markwon.image.MediaDecoder;
 
 /**
  * @since 1.1.0
  */
-class SvgMediaDecoder internal constructor(private val resources: Resources) : MediaDecoder() {
-    init {
+public class SvgMediaDecoder extends MediaDecoder {
+
+    public static final String CONTENT_TYPE = "image/svg+xml";
+
+    /**
+     * @see #create(Resources)
+     * @since 4.0.0
+     */
+    @NonNull
+    public static SvgMediaDecoder create() {
+        return create(Resources.getSystem());
+    }
+
+    @NonNull
+    public static SvgMediaDecoder create(@NonNull Resources resources) {
+        return new SvgMediaDecoder(resources);
+    }
+
+    private final Resources resources;
+
+    @SuppressWarnings("WeakerAccess")
+    SvgMediaDecoder(Resources resources) {
+        this.resources = resources;
+
         // @since 4.0.0
-        validate()
+        validate();
     }
 
-    @SuppressLint("UseKtx")
-    override fun decode(contentType: String?, inputStream: InputStream): Drawable {
-        val svg: SVG
+    @NonNull
+    @Override
+    public Drawable decode(@Nullable String contentType, @NonNull InputStream inputStream) {
+
+        final SVG svg;
         try {
-            svg = SVG.getFromInputStream(inputStream)
-        } catch (e: SVGParseException) {
-            throw IllegalStateException("Exception decoding SVG", e)
+            svg = SVG.getFromInputStream(inputStream);
+        } catch (SVGParseException e) {
+            throw new IllegalStateException("Exception decoding SVG", e);
         }
 
-        val w = svg.getDocumentWidth()
-        val h = svg.getDocumentHeight()
-        val density = resources.displayMetrics.density
+        final float w = svg.getDocumentWidth();
+        final float h = svg.getDocumentHeight();
+        final float density = resources.getDisplayMetrics().density;
 
-        val width = (w * density + .5f).toInt()
-        val height = (h * density + .5f).toInt()
+        final int width = (int) (w * density + .5F);
+        final int height = (int) (h * density + .5F);
 
-        val bitmap = createBitmap(width, height, Bitmap.Config.ARGB_4444)
-        val canvas = Canvas(bitmap)
-        canvas.scale(density, density)
-        svg.renderToCanvas(canvas)
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
+        final Canvas canvas = new Canvas(bitmap);
+        canvas.scale(density, density);
+        svg.renderToCanvas(canvas);
 
-        return BitmapDrawable(resources, bitmap)
+        return new BitmapDrawable(resources, bitmap);
     }
 
-    override fun supportedTypes(): MutableCollection<String?> {
-        return mutableSetOf<String?>(CONTENT_TYPE)
+    @NonNull
+    @Override
+    public Collection<String> supportedTypes() {
+        return Collections.singleton(CONTENT_TYPE);
     }
 
-    companion object {
-        const val CONTENT_TYPE: String = "image/svg+xml"
-
-        /**
-         * @see .create
-         * @since 4.0.0
-         */
-        @JvmOverloads
-        fun create(resources: Resources = Resources.getSystem()): SvgMediaDecoder {
-            return SvgMediaDecoder(resources)
-        }
-
-        private fun validate() {
-            check(SvgSupport.hasSvgSupport()) { SvgSupport.missingMessage() }
+    private static void validate() {
+        if (!SvgSupport.hasSvgSupport()) {
+            throw new IllegalStateException(SvgSupport.missingMessage());
         }
     }
 }
