@@ -4,7 +4,9 @@ import io.noties.markwon.MarkwonVisitor
 
 abstract class TagHandler {
     abstract fun handle(
-        visitor: MarkwonVisitor, renderer: MarkwonHtmlRenderer, tag: HtmlTag
+        visitor: MarkwonVisitor,
+        renderer: MarkwonHtmlRenderer,
+        tag: HtmlTag
     )
 
     /**
@@ -14,9 +16,10 @@ abstract class TagHandler {
 
 
     companion object {
-        @JvmStatic
-        protected fun visitChildren(
-            visitor: MarkwonVisitor, renderer: MarkwonHtmlRenderer, block: HtmlTag.Block
+        fun visitChildren(
+            visitor: MarkwonVisitor,
+            renderer: MarkwonHtmlRenderer,
+            block: HtmlTag.Block
         ) {
             var handler: TagHandler?
 

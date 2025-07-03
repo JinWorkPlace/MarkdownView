@@ -3,7 +3,7 @@ package io.noties.markwon.html
 import io.noties.markwon.html.AppendableUtils.appendQuietly
 
 internal abstract class TrimmingAppender {
-    abstract fun <T> append(output: T, data: String) where T : Appendable, T : CharSequence
+    abstract fun <T> append(output: T, data: String) where T : Appendable?, T : CharSequence?
 
     internal class Impl : TrimmingAppender() {
         // if data is fully empty (consists of white spaces) -> do not add anything
@@ -11,8 +11,8 @@ internal abstract class TrimmingAppender {
         //  - trim to one space (if at all present) append to output only if previous is ws
         // trailing ws:
         //  - if present trim to single space
-        override fun <T> append(output: T, data: String) where T : Appendable, T : CharSequence {
-            val startLength = output.length
+        override fun <T> append(output: T, data: String) where T : Appendable?, T : CharSequence? {
+            val startLength = output!!.length
 
             var c: Char
 
@@ -51,7 +51,6 @@ internal abstract class TrimmingAppender {
     }
 
     companion object {
-        @JvmStatic
         fun create(): TrimmingAppender {
             return Impl()
         }

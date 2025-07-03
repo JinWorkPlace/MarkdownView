@@ -5,7 +5,8 @@ import io.noties.markwon.html.MarkwonHtmlParser.FlushAction
 import java.util.Collections
 
 internal class MarkwonHtmlRendererImpl(
-    private val allowNonClosedTags: Boolean, private val tagHandlers: MutableMap<String, TagHandler>
+    private val allowNonClosedTags: Boolean,
+    private val tagHandlers: MutableMap<String?, TagHandler?>
 ) : MarkwonHtmlRenderer() {
     override fun render(visitor: MarkwonVisitor, parser: MarkwonHtmlParser) {
         val end: Int = if (!allowNonClosedTags) {
@@ -14,19 +15,21 @@ internal class MarkwonHtmlRendererImpl(
             visitor.length()
         }
 
-        parser.flushInlineTags(end) { tags: MutableList<HtmlTag.Inline> ->
-            var handler: TagHandler?
-            for (inline in tags) {
-                // if tag is not closed -> do not render
+        parser.flushInlineTags(end, object : FlushAction<HtmlTag.Inline> {
+            override fun apply(tags: MutableList<HtmlTag.Inline>) {
+                var handler: TagHandler?
+                for (inline in tags) {
+                    // if tag is not closed -> do not render
 
-                if (!inline.isClosed) {
-                    continue
+                    if (!inline.isClosed) {
+                        continue
+                    }
+
+                    handler = tagHandler(inline.name())
+                    handler?.handle(visitor, this@MarkwonHtmlRendererImpl, inline)
                 }
-
-                handler = tagHandler(inline.name())
-                handler?.handle(visitor, this@MarkwonHtmlRendererImpl, inline)
             }
-        }
+        })
 
         parser.flushBlockTags(end, object : FlushAction<HtmlTag.Block> {
             override fun apply(tags: MutableList<HtmlTag.Block>) {
@@ -56,7 +59,7 @@ internal class MarkwonHtmlRendererImpl(
     }
 
     internal class Builder {
-        private val tagHandlers: MutableMap<String, TagHandler> = HashMap(2)
+        private val tagHandlers: MutableMap<String?, TagHandler?> = HashMap(2)
         private var allowNonClosedTags = false
         private var excludeDefaults = false
 
@@ -96,7 +99,8 @@ internal class MarkwonHtmlRendererImpl(
             // okay, let's validate that we have at least one tagHandler registered
             // if we have none -> return no-op implementation
             return if (!tagHandlers.isEmpty()) MarkwonHtmlRendererImpl(
-                allowNonClosedTags, Collections.unmodifiableMap(tagHandlers)
+                allowNonClosedTags,
+                Collections.unmodifiableMap<String?, TagHandler?>(tagHandlers)
             ) else MarkwonHtmlRendererNoOp()
         }
 

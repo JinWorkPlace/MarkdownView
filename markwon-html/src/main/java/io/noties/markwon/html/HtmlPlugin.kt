@@ -86,7 +86,7 @@ class HtmlPlugin internal constructor() : AbstractMarkwonPlugin() {
         return this
     }
 
-    override fun configureConfiguration(configurationBuilder: MarkwonConfiguration.Builder) {
+    override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
         // @since 4.0.0 we init internal html-renderer here (marks the end of configuration)
 
         val builder = this.builder
