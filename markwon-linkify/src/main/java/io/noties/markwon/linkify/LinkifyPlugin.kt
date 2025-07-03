@@ -16,8 +16,7 @@ import io.noties.markwon.core.CoreProps
 import org.commonmark.node.Link
 
 class LinkifyPlugin internal constructor(
-    @param:LinkifyMask private val mask: Int,
-    private val useCompat: Boolean
+    @param:LinkifyMask private val mask: Int, private val useCompat: Boolean
 ) : AbstractMarkwonPlugin() {
     @IntDef(flag = true, value = [Linkify.EMAIL_ADDRESSES, Linkify.PHONE_NUMBERS, Linkify.WEB_URLS])
     @Retention(
@@ -27,8 +26,7 @@ class LinkifyPlugin internal constructor(
 
     override fun configure(registry: MarkwonPlugin.Registry) {
         registry.require(
-            CorePlugin::class.java,
-            MarkwonPlugin.Action { corePlugin ->
+            CorePlugin::class.java, MarkwonPlugin.Action { corePlugin ->
                 // @since 4.3.0
                 val listener: LinkifyTextAddedListener = if (useCompat) {
                     LinkifyCompatTextAddedListener(mask)
@@ -97,8 +95,7 @@ class LinkifyPlugin internal constructor(
         @JvmOverloads
         fun create(useCompat: Boolean = false): LinkifyPlugin {
             return create(
-                Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS or Linkify.WEB_URLS,
-                useCompat
+                Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS or Linkify.WEB_URLS, useCompat
             )
         }
 

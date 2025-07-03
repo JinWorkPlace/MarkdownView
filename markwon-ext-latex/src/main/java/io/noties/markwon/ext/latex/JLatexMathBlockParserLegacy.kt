@@ -1,7 +1,6 @@
 package io.noties.markwon.ext.latex
 
 import org.commonmark.node.Block
-import org.commonmark.parser.SourceLine
 import org.commonmark.parser.block.AbstractBlockParser
 import org.commonmark.parser.block.AbstractBlockParserFactory
 import org.commonmark.parser.block.BlockContinue
@@ -31,7 +30,7 @@ internal class JLatexMathBlockParserLegacy : AbstractBlockParser() {
         return BlockContinue.atIndex(parserState.index)
     }
 
-    override fun addLine(line: SourceLine) {
+    override fun addLine(line: CharSequence) {
         if (builder.isNotEmpty()) {
             builder.append('\n')
         }
@@ -40,8 +39,7 @@ internal class JLatexMathBlockParserLegacy : AbstractBlockParser() {
 
         val length = builder.length
         if (length > 1) {
-            isClosed = '$' == builder.get(length - 1)
-                    && '$' == builder.get(length - 2)
+            isClosed = '$' == builder.get(length - 1) && '$' == builder.get(length - 2)
             if (isClosed) {
                 builder.replace(length - 2, length, "")
             }
@@ -54,18 +52,14 @@ internal class JLatexMathBlockParserLegacy : AbstractBlockParser() {
 
     class Factory : AbstractBlockParserFactory() {
         override fun tryStart(
-            state: ParserState,
-            matchedBlockParser: MatchedBlockParser?
+            state: ParserState, matchedBlockParser: MatchedBlockParser?
         ): BlockStart? {
-            val line: CharSequence? = state.line.content
+            val line: CharSequence? = state.line
             val length = line?.length ?: 0
 
             if (length > 1) {
-                if ('$' == line!![0]
-                    && '$' == line[1]
-                ) {
-                    return BlockStart.of(JLatexMathBlockParserLegacy())
-                        .atIndex(state.index + 2)
+                if ('$' == line!![0] && '$' == line[1]) {
+                    return BlockStart.of(JLatexMathBlockParserLegacy()).atIndex(state.index + 2)
                 }
             }
 

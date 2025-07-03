@@ -33,7 +33,7 @@ class TaskListPlugin private constructor(private val drawable: Drawable) : Abstr
 
                     TaskListProps.DONE.set(visitor.renderProps(), taskListItem.isDone)
 
-                    visitor.setSpansForNode<TaskListItem?>(taskListItem, length)
+                    visitor.setSpansForNode(taskListItem, length)
 
                     if (visitor.hasNext(taskListItem)) {
                         visitor.ensureNewLine()

@@ -75,7 +75,7 @@ open class TableTheme protected constructor(builder: Builder) {
             tableBorderColor
         }
 
-        paint.setColor(color)
+        paint.color = color
         // @since 4.3.1 before it was STROKE... change to FILL as we draw border differently
         paint.style = Paint.Style.FILL
     }
@@ -86,7 +86,7 @@ open class TableTheme protected constructor(builder: Builder) {
         } else {
             tableOddRowBackgroundColor
         }
-        paint.setColor(color)
+        paint.color = color
         paint.style = Paint.Style.FILL
     }
 
@@ -95,7 +95,7 @@ open class TableTheme protected constructor(builder: Builder) {
      */
     fun applyTableEvenRowStyle(paint: Paint) {
         // by default to background to even row
-        paint.setColor(tableEvenRowBackgroundColor)
+        paint.color = tableEvenRowBackgroundColor
         paint.style = Paint.Style.FILL
     }
 
@@ -103,7 +103,7 @@ open class TableTheme protected constructor(builder: Builder) {
      * @since 1.1.1
      */
     fun applyTableHeaderRowStyle(paint: Paint) {
-        paint.setColor(tableHeaderRowBackgroundColor)
+        paint.color = tableHeaderRowBackgroundColor
         paint.style = Paint.Style.FILL
     }
 

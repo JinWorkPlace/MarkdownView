@@ -29,8 +29,9 @@ import java.util.concurrent.Future
 /**
  * @since 3.0.0
  */
-class JLatexMathPlugin internal constructor(@JvmField @field:VisibleForTesting val config: Config) :
-    AbstractMarkwonPlugin() {
+class JLatexMathPlugin internal constructor(
+    @JvmField @field:VisibleForTesting val config: Config
+) : AbstractMarkwonPlugin() {
     /**
      * @since 4.3.0
      */

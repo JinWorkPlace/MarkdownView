@@ -17,7 +17,7 @@ internal class TableBorderDrawable : Drawable() {
 
     override fun draw(canvas: Canvas) {
         if (paint.strokeWidth > 0) {
-            canvas.drawRect(getBounds(), paint)
+            canvas.drawRect(bounds, paint)
         }
     }
 
@@ -36,7 +36,7 @@ internal class TableBorderDrawable : Drawable() {
 
     fun update(@Px borderWidth: Int, @ColorInt color: Int) {
         paint.strokeWidth = borderWidth.toFloat()
-        paint.setColor(color)
+        paint.color = color
         invalidateSelf()
     }
 }

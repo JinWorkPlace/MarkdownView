@@ -33,14 +33,10 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-
     implementation(libs.jlatexmath.android)
 
     api(project(":markwon-core"))
     api(project(":markwon-inline-parser"))
-    implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

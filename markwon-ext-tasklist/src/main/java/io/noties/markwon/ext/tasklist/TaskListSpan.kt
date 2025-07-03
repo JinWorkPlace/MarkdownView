@@ -73,7 +73,7 @@ class TaskListSpan(
                 } else {
                     STATE_NONE
                 }
-                drawable.setState(state)
+                drawable.state = state
             }
             val l: Int = if (dir > 0) {
                 x + ((width - w) / 2)
