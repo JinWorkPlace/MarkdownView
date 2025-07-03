@@ -73,6 +73,6 @@ interface MarkwonSpansFactory {
          */
         fun <N : Node> requireFactory(node: Class<N>): SpanFactory?
 
-        fun build(): MarkwonSpansFactory?
+        fun build(): MarkwonSpansFactory
     }
 }

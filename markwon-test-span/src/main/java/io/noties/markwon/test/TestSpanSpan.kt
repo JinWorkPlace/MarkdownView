@@ -1,58 +1,35 @@
-package io.noties.markwon.test;
+package io.noties.markwon.test
 
-import androidx.annotation.NonNull;
-
-import java.util.List;
-import java.util.Map;
-
-class TestSpanSpan extends TestSpan.Span {
-
-    private final String name;
-    private final List<TestSpan> children;
-    private final Map<String, Object> arguments;
-
-    public TestSpanSpan(
-            @NonNull String name,
-            @NonNull List<TestSpan> children,
-            @NonNull Map<String, Object> arguments) {
-        this.name = name;
-        this.children = children;
-        this.arguments = arguments;
+internal class TestSpanSpan(
+    private val name: String,
+    private val children: MutableList<TestSpan>,
+    private val arguments: MutableMap<String?, Any?>
+) : TestSpan.Span() {
+    override fun name(): String {
+        return name
     }
 
-    @NonNull
-    @Override
-    public String name() {
-        return name;
+    override fun arguments(): MutableMap<String?, Any?> {
+        return arguments
     }
 
-    @NonNull
-    @Override
-    public Map<String, Object> arguments() {
-        return arguments;
+    override fun children(): MutableList<TestSpan> {
+        return children
     }
 
-    @NonNull
-    @Override
-    public List<TestSpan> children() {
-        return children;
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+
+        val that = other as TestSpanSpan
+
+        if (name != that.name) return false
+        return arguments == that.arguments
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        TestSpanSpan that = (TestSpanSpan) o;
-
-        if (!name.equals(that.name)) return false;
-        return arguments.equals(that.arguments);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + arguments.hashCode();
-        return result;
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + arguments.hashCode()
+        return result
     }
 }

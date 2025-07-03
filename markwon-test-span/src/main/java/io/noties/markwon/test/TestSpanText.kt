@@ -1,47 +1,28 @@
-package io.noties.markwon.test;
+package io.noties.markwon.test
 
-import androidx.annotation.NonNull;
-
-import java.util.Collections;
-import java.util.List;
-
-class TestSpanText extends TestSpan.Text {
-
-    private final String literal;
-
-    TestSpanText(@NonNull String literal) {
-        this.literal = literal;
+internal class TestSpanText(private val literal: String) : TestSpan.Text() {
+    override fun literal(): String {
+        return literal
     }
 
-    @NonNull
-    @Override
-    public String literal() {
-        return literal;
+    override fun length(): Int {
+        return literal.length
     }
 
-    @Override
-    public int length() {
-        return literal.length();
+    override fun children(): MutableList<TestSpan> {
+        return mutableListOf()
     }
 
-    @NonNull
-    @Override
-    public List<TestSpan> children() {
-        return Collections.emptyList();
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+
+        val that = other as TestSpanText
+
+        return literal == that.literal
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        TestSpanText that = (TestSpanText) o;
-
-        return literal.equals(that.literal);
-    }
-
-    @Override
-    public int hashCode() {
-        return literal.hashCode();
+    override fun hashCode(): Int {
+        return literal.hashCode()
     }
 }

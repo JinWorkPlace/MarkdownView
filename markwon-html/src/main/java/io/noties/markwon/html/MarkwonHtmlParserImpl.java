@@ -1,14 +1,14 @@
 package io.noties.markwon.html;
 
+import static io.noties.markwon.html.AppendableUtils.appendQuietly;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -20,8 +20,6 @@ import io.noties.markwon.html.jsoup.parser.CharacterReader;
 import io.noties.markwon.html.jsoup.parser.ParseErrorList;
 import io.noties.markwon.html.jsoup.parser.Token;
 import io.noties.markwon.html.jsoup.parser.Tokeniser;
-
-import static io.noties.markwon.html.AppendableUtils.appendQuietly;
 
 /**
  * @since 2.0.0
@@ -55,54 +53,9 @@ public class MarkwonHtmlParserImpl extends MarkwonHtmlParser {
     private static final String TAG_LIST_ITEM = "li";
 
     static {
-        INLINE_TAGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-                "a", "abbr", "acronym",
-                "b", "bdo", "big", "br", "button",
-                "cite", "code",
-                "dfn",
-                "em",
-                "i", "img", "input",
-                "kbd",
-                "label",
-                "map",
-                "object",
-                "q",
-                "samp", "script", "select", "small", "span", "strong", "sub", "sup",
-                "textarea", "time", "tt",
-                "var"
-        )));
-        VOID_TAGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-                "area",
-                "base", "br",
-                "col",
-                "embed",
-                "hr",
-                "img", "input",
-                "keygen",
-                "link",
-                "meta",
-                "param",
-                "source",
-                "track",
-                "wbr"
-        )));
-        BLOCK_TAGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-                "address", "article", "aside",
-                "blockquote",
-                "canvas",
-                "dd", "div", "dl", "dt",
-                "fieldset", "figcaption", "figure", "footer", "form",
-                "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr",
-                "li",
-                "main",
-                "nav", "noscript",
-                "ol", "output",
-                "p", "pre",
-                "section",
-                "table", "tfoot",
-                "ul",
-                "video"
-        )));
+        INLINE_TAGS = Set.of("a", "abbr", "acronym", "b", "bdo", "big", "br", "button", "cite", "code", "dfn", "em", "i", "img", "input", "kbd", "label", "map", "object", "q", "samp", "script", "select", "small", "span", "strong", "sub", "sup", "textarea", "time", "tt", "var");
+        VOID_TAGS = Set.of("area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr");
+        BLOCK_TAGS = Set.of("address", "article", "aside", "blockquote", "canvas", "dd", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr", "li", "main", "nav", "noscript", "ol", "output", "p", "pre", "section", "table", "tfoot", "ul", "video");
     }
 
     private final HtmlEmptyTagReplacement emptyTagReplacement;
@@ -185,7 +138,7 @@ public class MarkwonHtmlParserImpl extends MarkwonHtmlParser {
 
     @Override
     public void flushInlineTags(int documentLength, @NonNull FlushAction<HtmlTag.Inline> action) {
-        if (inlineTags.size() > 0) {
+        if (!inlineTags.isEmpty()) {
 
             if (documentLength > HtmlTag.NO_END) {
                 for (HtmlTagImpl.InlineImpl inline : inlineTags) {
@@ -193,10 +146,10 @@ public class MarkwonHtmlParserImpl extends MarkwonHtmlParser {
                 }
             }
 
-            action.apply(Collections.unmodifiableList((List<? extends HtmlTag.Inline>) inlineTags));
+            action.apply(Collections.unmodifiableList(inlineTags));
             inlineTags.clear();
         } else {
-            action.apply(Collections.<HtmlTag.Inline>emptyList());
+            action.apply(Collections.emptyList());
         }
     }
 
@@ -213,10 +166,10 @@ public class MarkwonHtmlParserImpl extends MarkwonHtmlParser {
         }
 
         final List<HtmlTag.Block> children = block.children();
-        if (children.size() > 0) {
+        if (!children.isEmpty()) {
             action.apply(children);
         } else {
-            action.apply(Collections.<HtmlTag.Block>emptyList());
+            action.apply(Collections.emptyList());
         }
 
         currentBlock = HtmlTagImpl.BlockImpl.root();
@@ -243,8 +196,7 @@ public class MarkwonHtmlParserImpl extends MarkwonHtmlParser {
                 || startTag.selfClosing) {
 
             final String replacement = emptyTagReplacement.replace(inline);
-            if (replacement != null
-                    && replacement.length() > 0) {
+            if (replacement != null && !replacement.isEmpty()) {
                 AppendableUtils.appendQuietly(output, replacement);
             }
 
@@ -308,13 +260,13 @@ public class MarkwonHtmlParserImpl extends MarkwonHtmlParser {
 
         final int start = output.length();
 
-        final HtmlTagImpl.BlockImpl block = HtmlTagImpl.BlockImpl.create(name, start, extractAttributes(startTag), currentBlock);
+        final HtmlTagImpl.BlockImpl block = HtmlTagImpl.BlockImpl.Companion.create(name, start, extractAttributes(startTag), currentBlock);
 
         final boolean isVoid = isVoidTag(name) || startTag.selfClosing;
         if (isVoid) {
             final String replacement = emptyTagReplacement.replace(block);
             if (replacement != null
-                    && replacement.length() > 0) {
+                    && !replacement.isEmpty()) {
                 AppendableUtils.appendQuietly(output, replacement);
             }
             block.closeAt(output.length());
