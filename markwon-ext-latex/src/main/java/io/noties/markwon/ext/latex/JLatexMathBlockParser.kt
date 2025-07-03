@@ -2,7 +2,6 @@ package io.noties.markwon.ext.latex
 
 import org.commonmark.internal.util.Parsing
 import org.commonmark.node.Block
-import org.commonmark.parser.SourceLine
 import org.commonmark.parser.block.AbstractBlockParser
 import org.commonmark.parser.block.AbstractBlockParserFactory
 import org.commonmark.parser.block.BlockContinue
@@ -25,7 +24,7 @@ internal class JLatexMathBlockParser(private val signs: Int) : AbstractBlockPars
 
     override fun tryContinue(parserState: ParserState): BlockContinue {
         val nextNonSpaceIndex = parserState.nextNonSpaceIndex
-        val line: CharSequence = parserState.line.content
+        val line: CharSequence = parserState.line
         val length = line.length
 
         // check for closing
@@ -45,7 +44,7 @@ internal class JLatexMathBlockParser(private val signs: Int) : AbstractBlockPars
         return BlockContinue.atIndex(parserState.index)
     }
 
-    override fun addLine(line: SourceLine) {
+    override fun addLine(line: CharSequence) {
         builder.append(line)
         builder.append('\n')
     }
@@ -73,7 +72,7 @@ internal class JLatexMathBlockParser(private val signs: Int) : AbstractBlockPars
             }
 
             val nextNonSpaceIndex = state.nextNonSpaceIndex
-            val line: CharSequence = state.line.content
+            val line: CharSequence = state.line
             val length = line.length
 
             val signs: Int = consume(DOLLAR, line, nextNonSpaceIndex, length)

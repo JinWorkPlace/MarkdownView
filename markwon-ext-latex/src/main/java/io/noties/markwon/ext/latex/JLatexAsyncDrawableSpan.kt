@@ -13,7 +13,7 @@ import ru.noties.jlatexmath.awt.Color
  */
 open class JLatexAsyncDrawableSpan(
     theme: MarkwonTheme,
-    private val drawable: JLatextAsyncDrawable,
+    override val drawable: JLatextAsyncDrawable,
     @param:ColorInt private val color: Int
 ) : AsyncDrawableSpan(
     theme, drawable, ALIGN_CENTER, false
@@ -27,7 +27,7 @@ open class JLatexAsyncDrawableSpan(
 
     override fun draw(
         canvas: Canvas,
-        text: CharSequence?,
+        text: CharSequence,
         start: Int,
         end: Int,
         x: Float,
@@ -48,10 +48,6 @@ open class JLatexAsyncDrawableSpan(
             }
         }
         super.draw(canvas, text, start, end, x, top, y, bottom, paint)
-    }
-
-    private fun drawable(): JLatextAsyncDrawable {
-        return drawable
     }
 
     @ColorInt
