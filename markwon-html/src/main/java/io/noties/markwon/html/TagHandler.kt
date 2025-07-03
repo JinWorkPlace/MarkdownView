@@ -1,44 +1,36 @@
-package io.noties.markwon.html;
+package io.noties.markwon.html
 
-import androidx.annotation.NonNull;
+import io.noties.markwon.MarkwonVisitor
 
-import java.util.Collection;
-
-import io.noties.markwon.MarkwonVisitor;
-
-public abstract class TagHandler {
-
-    public abstract void handle(
-            @NonNull MarkwonVisitor visitor,
-            @NonNull MarkwonHtmlRenderer renderer,
-            @NonNull HtmlTag tag
-    );
+abstract class TagHandler {
+    abstract fun handle(
+        visitor: MarkwonVisitor, renderer: MarkwonHtmlRenderer, tag: HtmlTag
+    )
 
     /**
      * @since 4.0.0
      */
-    @NonNull
-    public abstract Collection<String> supportedTags();
+    abstract fun supportedTags(): MutableCollection<String>
 
 
-    protected static void visitChildren(
-            @NonNull MarkwonVisitor visitor,
-            @NonNull MarkwonHtmlRenderer renderer,
-            @NonNull HtmlTag.Block block) {
+    companion object {
+        @JvmStatic
+        protected fun visitChildren(
+            visitor: MarkwonVisitor, renderer: MarkwonHtmlRenderer, block: HtmlTag.Block
+        ) {
+            var handler: TagHandler?
 
-        TagHandler handler;
+            for (child in block.children()) {
+                if (!child.isClosed) {
+                    continue
+                }
 
-        for (HtmlTag.Block child : block.children()) {
-
-            if (!child.isClosed()) {
-                continue;
-            }
-
-            handler = renderer.tagHandler(child.name());
-            if (handler != null) {
-                handler.handle(visitor, renderer, child);
-            } else {
-                visitChildren(visitor, renderer, child);
+                handler = renderer.tagHandler(child.name())
+                if (handler != null) {
+                    handler.handle(visitor, renderer, child)
+                } else {
+                    visitChildren(visitor, renderer, child)
+                }
             }
         }
     }

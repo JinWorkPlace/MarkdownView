@@ -1,143 +1,113 @@
-package io.noties.markwon.html;
+package io.noties.markwon.html
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import io.noties.markwon.MarkwonVisitor
+import io.noties.markwon.html.MarkwonHtmlParser.FlushAction
+import java.util.Collections
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import io.noties.markwon.MarkwonVisitor;
-
-class MarkwonHtmlRendererImpl extends MarkwonHtmlRenderer {
-
-    private final boolean allowNonClosedTags;
-    private final Map<String, TagHandler> tagHandlers;
-
-    @SuppressWarnings("WeakerAccess")
-    MarkwonHtmlRendererImpl(boolean allowNonClosedTags, @NonNull Map<String, TagHandler> tagHandlers) {
-        this.allowNonClosedTags = allowNonClosedTags;
-        this.tagHandlers = tagHandlers;
-    }
-
-    @Override
-    public void render(@NonNull final MarkwonVisitor visitor, @NonNull MarkwonHtmlParser parser) {
-
-        final int end;
-        if (!allowNonClosedTags) {
-            end = HtmlTag.NO_END;
+internal class MarkwonHtmlRendererImpl(
+    private val allowNonClosedTags: Boolean, private val tagHandlers: MutableMap<String, TagHandler>
+) : MarkwonHtmlRenderer() {
+    override fun render(visitor: MarkwonVisitor, parser: MarkwonHtmlParser) {
+        val end: Int = if (!allowNonClosedTags) {
+            HtmlTag.NO_END
         } else {
-            end = visitor.length();
+            visitor.length()
         }
 
-        parser.flushInlineTags(end, tags -> {
-
-            TagHandler handler;
-
-            for (HtmlTag.Inline inline : tags) {
-
+        parser.flushInlineTags(end) { tags: MutableList<HtmlTag.Inline> ->
+            var handler: TagHandler?
+            for (inline in tags) {
                 // if tag is not closed -> do not render
-                if (!inline.isClosed()) {
-                    continue;
+
+                if (!inline.isClosed) {
+                    continue
                 }
 
-                handler = tagHandler(inline.name());
-                if (handler != null) {
-                    handler.handle(visitor, MarkwonHtmlRendererImpl.this, inline);
-                }
+                handler = tagHandler(inline.name())
+                handler?.handle(visitor, this@MarkwonHtmlRendererImpl, inline)
             }
-        });
+        }
 
-        parser.flushBlockTags(end, new MarkwonHtmlParser.FlushAction<>() {
-            @Override
-            public void apply(@NonNull List<HtmlTag.Block> tags) {
+        parser.flushBlockTags(end, object : FlushAction<HtmlTag.Block> {
+            override fun apply(tags: MutableList<HtmlTag.Block>) {
+                var handler: TagHandler?
 
-                TagHandler handler;
-
-                for (HtmlTag.Block block : tags) {
-
-                    if (!block.isClosed()) {
-                        continue;
+                for (block in tags) {
+                    if (!block.isClosed) {
+                        continue
                     }
 
-                    handler = tagHandler(block.name());
+                    handler = tagHandler(block.name())
                     if (handler != null) {
-                        handler.handle(visitor, MarkwonHtmlRendererImpl.this, block);
+                        handler.handle(visitor, this@MarkwonHtmlRendererImpl, block)
                     } else {
                         // see if any of children can be handled
-                        apply(block.children());
+                        apply(block.children())
                     }
                 }
             }
-        });
+        })
 
-        parser.reset();
+        parser.reset()
     }
 
-    @Nullable
-    @Override
-    public TagHandler tagHandler(@NonNull String tagName) {
-        return tagHandlers.get(tagName);
+    override fun tagHandler(tagName: String): TagHandler? {
+        return tagHandlers[tagName]
     }
 
-    static class Builder {
+    internal class Builder {
+        private val tagHandlers: MutableMap<String, TagHandler> = HashMap(2)
+        private var allowNonClosedTags = false
+        private var excludeDefaults = false
 
-        private final Map<String, TagHandler> tagHandlers = new HashMap<>(2);
-        private boolean allowNonClosedTags;
-        private boolean excludeDefaults;
+        private var isBuilt = false
 
-        private boolean isBuilt;
-
-        void allowNonClosedTags(boolean allowNonClosedTags) {
-            checkState();
-            this.allowNonClosedTags = allowNonClosedTags;
+        fun allowNonClosedTags(allowNonClosedTags: Boolean) {
+            checkState()
+            this.allowNonClosedTags = allowNonClosedTags
         }
 
-        void addHandler(@NonNull TagHandler tagHandler) {
-            checkState();
-            for (String tag : tagHandler.supportedTags()) {
-                tagHandlers.put(tag, tagHandler);
+        fun addHandler(tagHandler: TagHandler) {
+            checkState()
+            for (tag in tagHandler.supportedTags()) {
+                tagHandlers.put(tag, tagHandler)
             }
         }
 
-        @Nullable
-        TagHandler getHandler(@NonNull String tagName) {
-            checkState();
-            return tagHandlers.get(tagName);
+        fun getHandler(tagName: String): TagHandler? {
+            checkState()
+            return tagHandlers[tagName]
         }
 
-        public void excludeDefaults(boolean excludeDefaults) {
-            checkState();
-            this.excludeDefaults = excludeDefaults;
+        fun excludeDefaults(excludeDefaults: Boolean) {
+            checkState()
+            this.excludeDefaults = excludeDefaults
         }
 
-        boolean excludeDefaults() {
-            return excludeDefaults;
+        fun excludeDefaults(): Boolean {
+            return excludeDefaults
         }
 
-        @NonNull
-        public MarkwonHtmlRenderer build() {
+        fun build(): MarkwonHtmlRenderer {
+            checkState()
 
-            checkState();
-
-            isBuilt = true;
+            isBuilt = true
 
             // okay, let's validate that we have at least one tagHandler registered
             // if we have none -> return no-op implementation
-            return !tagHandlers.isEmpty() ? new MarkwonHtmlRendererImpl(allowNonClosedTags, Collections.unmodifiableMap(tagHandlers)) : new MarkwonHtmlRendererNoOp();
+            return if (!tagHandlers.isEmpty()) MarkwonHtmlRendererImpl(
+                allowNonClosedTags, Collections.unmodifiableMap(tagHandlers)
+            ) else MarkwonHtmlRendererNoOp()
         }
 
-        private void checkState() {
-            if (isBuilt) {
-                throw new IllegalStateException("Builder has been already built");
-            }
+        private fun checkState() {
+            check(!isBuilt) { "Builder has been already built" }
         }
 
-        void addDefaultTagHandler(@NonNull TagHandler tagHandler) {
-            for (String tag : tagHandler.supportedTags()) {
+        fun addDefaultTagHandler(tagHandler: TagHandler) {
+            for (tag in tagHandler.supportedTags()) {
                 if (!tagHandlers.containsKey(tag)) {
-                    tagHandlers.put(tag, tagHandler);
+                    tagHandlers.put(tag, tagHandler)
                 }
             }
         }

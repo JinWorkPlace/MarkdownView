@@ -1,61 +1,59 @@
-package io.noties.markwon.html;
+package io.noties.markwon.html
 
-import static io.noties.markwon.html.AppendableUtils.appendQuietly;
+import io.noties.markwon.html.AppendableUtils.appendQuietly
 
-import androidx.annotation.NonNull;
+internal abstract class TrimmingAppender {
+    abstract fun <T> append(output: T, data: String) where T : Appendable, T : CharSequence
 
-abstract class TrimmingAppender {
-
-    abstract <T extends Appendable & CharSequence> void append(@NonNull T output, @NonNull String data);
-
-    @NonNull
-    static TrimmingAppender create() {
-        return new Impl();
-    }
-
-    static class Impl extends TrimmingAppender {
-
+    internal class Impl : TrimmingAppender() {
         // if data is fully empty (consists of white spaces) -> do not add anything
         // leading ws:
         //  - trim to one space (if at all present) append to output only if previous is ws
         // trailing ws:
         //  - if present trim to single space
+        override fun <T> append(output: T, data: String) where T : Appendable, T : CharSequence {
+            val startLength = output.length
 
-        @Override
-        <T extends Appendable & CharSequence> void append(@NonNull T output, @NonNull String data) {
+            var c: Char
 
-            final int startLength = output.length();
+            var previousIsWhiteSpace = false
 
-            char c;
-
-            boolean previousIsWhiteSpace = false;
-
-            for (int i = 0, length = data.length(); i < length; i++) {
-
-                c = data.charAt(i);
+            var i = 0
+            val length = data.length
+            while (i < length) {
+                c = data[i]
 
                 if (Character.isWhitespace(c)) {
-                    previousIsWhiteSpace = true;
-                    continue;
+                    previousIsWhiteSpace = true
+                    i++
+                    continue
                 }
 
                 if (previousIsWhiteSpace) {
                     // validate that output has ws as last char
-                    final int outputLength = output.length();
-                    if (outputLength > 0 && !Character.isWhitespace(output.charAt(outputLength - 1))) {
-                        appendQuietly(output, ' ');
+                    val outputLength = output.length
+                    if (outputLength > 0 && !Character.isWhitespace(output[outputLength - 1])) {
+                        appendQuietly(output, ' ')
                     }
                 }
 
-                previousIsWhiteSpace = false;
-                appendQuietly(output, c);
+                previousIsWhiteSpace = false
+                appendQuietly(output, c)
+                i++
             }
 
             // additionally check if previousIsWhiteSpace is true (if data ended with ws)
             // BUT only if we have added something (otherwise the whole data is empty (white))
-            if (previousIsWhiteSpace && (startLength < output.length())) {
-                appendQuietly(output, ' ');
+            if (previousIsWhiteSpace && (startLength < output.length)) {
+                appendQuietly(output, ' ')
             }
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun create(): TrimmingAppender {
+            return Impl()
         }
     }
 }
