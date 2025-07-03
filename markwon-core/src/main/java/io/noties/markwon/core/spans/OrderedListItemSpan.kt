@@ -95,18 +95,10 @@ class OrderedListItemSpan(
                 return
             }
 
-            val spans = text.getSpans(
-                0, text.length, OrderedListItemSpan::class.java
-            )
-
-            if (spans != null) {
-                val paint = textView.paint
-                for (span in spans) {
-                    if (span != null) {
-                        span.margin = (paint.measureText(span.number) + .5f).toInt()
-                    }
+            text.getSpans(0, text.length, OrderedListItemSpan::class.java)?.filterNotNull()
+                ?.forEach { span ->
+                    span.margin = (textView.paint.measureText(span.number) + .5f).toInt()
                 }
-            }
         }
     }
 }

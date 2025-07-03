@@ -114,7 +114,7 @@ class MarkwonConfiguration private constructor(builder: Builder) {
             return this
         }
 
-        fun build(theme: MarkwonTheme, spansFactory: MarkwonSpansFactory?): MarkwonConfiguration {
+        fun build(theme: MarkwonTheme, spansFactory: MarkwonSpansFactory): MarkwonConfiguration {
             this.theme = theme
             this.spansFactory = spansFactory
 

@@ -25,24 +25,21 @@ public abstract class AsyncDrawableScheduler {
         // if it's not -> unschedule, else ignore
 
         // @since 4.0.0
-        final Integer lastTextHashCode =
-                (Integer) textView.getTag(R.id.markwon_drawables_scheduler_last_text_hashcode);
+        final Integer lastTextHashCode = (Integer) textView.getTag(R.id.markwon_drawables_scheduler_last_text_hashcode);
         final int textHashCode = textView.getText().hashCode();
-        if (lastTextHashCode != null
-                && lastTextHashCode == textHashCode) {
+        if (lastTextHashCode != null && lastTextHashCode == textHashCode) {
             return;
         }
         textView.setTag(R.id.markwon_drawables_scheduler_last_text_hashcode, textHashCode);
 
 
         final AsyncDrawableSpan[] spans = extractSpans(textView);
-        if (spans != null
-                && spans.length > 0) {
+        if (spans != null && spans.length > 0) {
 
             if (textView.getTag(R.id.markwon_drawables_scheduler) == null) {
                 final View.OnAttachStateChangeListener listener = new View.OnAttachStateChangeListener() {
                     @Override
-                    public void onViewAttachedToWindow(View v) {
+                    public void onViewAttachedToWindow(@NonNull View v) {
 
                     }
 
@@ -80,8 +77,7 @@ public abstract class AsyncDrawableScheduler {
 
 
         final AsyncDrawableSpan[] spans = extractSpans(view);
-        if (spans != null
-                && spans.length > 0) {
+        if (spans != null && spans.length > 0) {
             for (AsyncDrawableSpan span : spans) {
                 span.drawable.setCallback2(null);
             }
@@ -92,12 +88,9 @@ public abstract class AsyncDrawableScheduler {
     private static AsyncDrawableSpan[] extractSpans(@NonNull TextView textView) {
 
         final CharSequence cs = textView.getText();
-        final int length = cs != null
-                ? cs.length()
-                : 0;
+        final int length = cs != null ? cs.length() : 0;
 
-        if (length == 0
-                || !(cs instanceof Spanned)) {
+        if (length == 0 || !(cs instanceof Spanned)) {
             return null;
         }
 
@@ -123,10 +116,7 @@ public abstract class AsyncDrawableScheduler {
 
         private Rect previousBounds;
 
-        DrawableCallbackImpl(
-                @NonNull TextView view,
-                @NonNull Invalidator invalidator,
-                Rect initialBounds) {
+        DrawableCallbackImpl(@NonNull TextView view, @NonNull Invalidator invalidator, Rect initialBounds) {
             this.view = view;
             this.invalidator = invalidator;
             this.previousBounds = new Rect(initialBounds);
