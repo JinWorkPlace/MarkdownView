@@ -144,7 +144,7 @@ class TableEntry internal constructor(
                 column = row.columns()[x]
 
                 val textView = ensureTextView(layout, y, x)
-                textView.setGravity(textGravity(column.alignment(), cellTextCenterVertical))
+                textView.gravity = textGravity(column.alignment(), cellTextCenterVertical)
                 textView.paint.isFakeBoldText = row.header()
 
                 // apply padding only if not specified in theme (otherwise just use the value from layout)
@@ -223,8 +223,7 @@ class TableEntry internal constructor(
                 if (!textViewChecked) {
                     if (textIdRes == 0) {
                         if (view !is TextView) {
-                            val name =
-                                layout.context.resources.getResourceName(textLayoutResId)
+                            val name = layout.context.resources.getResourceName(textLayoutResId)
                             throw IllegalStateException(
                                 String.format(
                                     "textLayoutResId(R.layout.%s) " + "has other than TextView root view. Specify TextView ID explicitly",
@@ -277,9 +276,7 @@ class TableEntry internal constructor(
     }
 
     private fun ensureTableBorderBackground(
-        view: View,
-        @Px borderWidth: Int,
-        @ColorInt borderColor: Int
+        view: View, @Px borderWidth: Int, @ColorInt borderColor: Int
     ) {
         if (borderWidth == 0) {
             view.background = null
@@ -322,7 +319,7 @@ class TableEntry internal constructor(
                 check(itemView is TableLayout) { "Root view is not TableLayout. Please provide " + "TableLayout ID explicitly" }
                 tableLayout = itemView
             } else {
-                tableLayout = requireView<TableLayout?>(tableLayoutIdRes)!!
+                tableLayout = requireView<TableLayout>(tableLayoutIdRes)
             }
             this.tableLayout = tableLayout
         }

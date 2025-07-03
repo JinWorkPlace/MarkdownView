@@ -18,8 +18,9 @@ import org.commonmark.parser.Parser
  *
  * @since 3.0.0
  */
-class TableEntryPlugin internal constructor(private val theme: TableEntryTheme) :
-    AbstractMarkwonPlugin() {
+class TableEntryPlugin internal constructor(
+    private val theme: TableEntryTheme
+) : AbstractMarkwonPlugin() {
     fun theme(): TableEntryTheme {
         return theme
     }
