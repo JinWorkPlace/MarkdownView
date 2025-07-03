@@ -44,7 +44,15 @@ open class MarkwonTheme protected constructor(builder: Builder) {
     val blockMargin: Int
 
     // by default it's 1/4th of `blockMargin`
-    protected val blockQuoteWidth: Int
+    var blockQuoteWidth: Int
+        get() {
+            val out: Int = if (blockQuoteWidth == 0) {
+                (blockMargin * .25f + .5f).toInt()
+            } else {
+                blockQuoteWidth
+            }
+            return out
+        }
 
     // by default it's text color with `BLOCK_QUOTE_DEF_COLOR_ALPHA` applied alpha
     protected val blockQuoteColor: Int
@@ -167,15 +175,6 @@ open class MarkwonTheme protected constructor(builder: Builder) {
         }
         paint.style = Paint.Style.FILL
         paint.color = color
-    }
-
-    fun getBlockQuoteWidth(): Int {
-        val out: Int = if (blockQuoteWidth == 0) {
-            (blockMargin * .25f + .5f).toInt()
-        } else {
-            blockQuoteWidth
-        }
-        return out
     }
 
     fun applyListItemStyle(paint: Paint) {

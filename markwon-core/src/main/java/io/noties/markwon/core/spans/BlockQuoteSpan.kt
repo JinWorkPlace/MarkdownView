@@ -33,7 +33,7 @@ data class BlockQuoteSpan(
         first: Boolean,
         layout: Layout?
     ) {
-        val width = theme.getBlockQuoteWidth()
+        val width = theme.blockQuoteWidth
 
         paint.set(p)
 

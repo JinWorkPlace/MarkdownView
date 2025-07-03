@@ -104,10 +104,6 @@ class SpannableBuilder @JvmOverloads constructor(
         return builder.get(index)
     }
 
-    fun charAt(index: Int): Char {
-        return builder.get(index)
-    }
-
     /**
      * @since 2.0.0 to follow CharSequence interface
      */

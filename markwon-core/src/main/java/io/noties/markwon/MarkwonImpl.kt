@@ -19,8 +19,7 @@ internal data class MarkwonImpl(
     private val parser: Parser, // @since 4.1.1
     private val visitorFactory: MarkwonVisitorFactory,
     private val configuration: MarkwonConfiguration,
-    private val listPlugin: MutableList<MarkwonPlugin>,
-    private val fallbackToRawInputWhenEmpty: Boolean
+    private val fallbackToRawInputWhenEmpty: Boolean,
 ) : Markwon() {
     override fun parse(input: String): Node {
         // make sure that all plugins are called `processMarkdown` before parsing
@@ -69,11 +68,11 @@ internal data class MarkwonImpl(
         return spanned
     }
 
-    /**
-     * @since 4.4.0
-     */
+//    /**
+//     * @since 4.4.0
+//     */
     override val plugins: MutableList<out MarkwonPlugin>
-        get() = listPlugin
+        get() = Collections.unmodifiableList(plugins)
 
     override fun setMarkdown(textView: TextView, markdown: String) {
         setParsedMarkdown(textView, toMarkdown(markdown))
@@ -128,10 +127,6 @@ internal data class MarkwonImpl(
             )
         }
         return plugin
-    }
-
-    fun getPlugins(): MutableList<out MarkwonPlugin> {
-        return Collections.unmodifiableList(plugins)
     }
 
     override fun configuration(): MarkwonConfiguration {
