@@ -23,7 +23,7 @@ class OrderedListItemSpan(
 
     override fun getLeadingMargin(first: Boolean): Int {
         // @since 2.0.1 we return maximum value of both (now we should measure number before)
-        return max(margin, theme.getBlockMargin())
+        return max(margin, theme.blockMargin)
     }
 
     override fun drawLeadingMargin(
@@ -56,7 +56,7 @@ class OrderedListItemSpan(
         val numberWidth = (paint.measureText(number) + .5f).toInt()
 
         // @since 1.0.3
-        var width = theme.getBlockMargin()
+        var width = theme.blockMargin
         if (numberWidth > width) {
             // let's keep this logic here in case a user decided not to call #measure and is fine
             // with current implementation

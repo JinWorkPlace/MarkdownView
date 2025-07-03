@@ -31,7 +31,7 @@ class TaskListSpan(
     }
 
     override fun getLeadingMargin(first: Boolean): Int {
-        return theme.getBlockMargin()
+        return theme.blockMargin
     }
 
     override fun drawLeadingMargin(
@@ -59,7 +59,7 @@ class TaskListSpan(
 
         val save = c.save()
         try {
-            val width = theme.getBlockMargin()
+            val width = theme.blockMargin
             val height = (descent - ascent + 0.5f).toInt()
 
             val w = (width * .75f + .5f).toInt()

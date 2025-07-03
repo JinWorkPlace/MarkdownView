@@ -1,316 +1,228 @@
-package io.noties.markwon.core;
+package io.noties.markwon.core
 
-import android.content.Context;
-import android.graphics.Paint;
-import android.graphics.Typeface;
-import android.text.TextPaint;
-
-import androidx.annotation.ColorInt;
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Px;
-import androidx.annotation.Size;
-
-import java.util.Arrays;
-import java.util.Locale;
-
-import io.noties.markwon.MarkwonPlugin;
-import io.noties.markwon.utils.ColorUtils;
-import io.noties.markwon.utils.Dip;
+import android.content.Context
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.text.TextPaint
+import androidx.annotation.ColorInt
+import androidx.annotation.IntRange
+import androidx.annotation.Px
+import androidx.annotation.Size
+import io.noties.markwon.utils.ColorUtils.applyAlpha
+import io.noties.markwon.utils.Dip
+import java.util.Locale
+import kotlin.math.min
 
 /**
- * Class to hold <i>theming</i> information for rending of markdown.
- * <p>
- * Since version 3.0.0 this class should be considered as <em>CoreTheme</em> as its
+ * Class to hold *theming* information for rending of markdown.
+ *
+ *
+ * Since version 3.0.0 this class should be considered as *CoreTheme* as its
  * information holds data for core features only. But based on this other components can still use it
  * to display markdown consistently.
- * <p>
- * Since version 3.0.0 this class should not be instantiated manually. Instead a {@link MarkwonPlugin}
- * should be used: {@link MarkwonPlugin#configureTheme(Builder)}
- * <p>
- * Since version 3.0.0 properties related to <em>strike-through</em>, <em>tables</em> and <em>HTML</em>
+ *
+ *
+ * Since version 3.0.0 this class should not be instantiated manually. Instead a [MarkdownPlugin]
+ * should be used: [MarkdownPlugin.configureTheme]
+ *
+ *
+ * Since version 3.0.0 properties related to *strike-through*, *tables* and *HTML*
  * are moved to specific plugins in independent artifacts
  *
  * @see CorePlugin
- * @see MarkwonPlugin#configureTheme(Builder)
+ *
+ * @see io.noties.markwon.MarkwonPlugin.configureTheme
  */
-@SuppressWarnings("WeakerAccess")
-public class MarkwonTheme {
-
-    /**
-     * Factory method to obtain an instance of {@link MarkwonTheme} with all values as defaults
-     *
-     * @param context Context in order to resolve defaults
-     * @return {@link MarkwonTheme} instance
-     * @see #builderWithDefaults(Context)
-     * @since 1.0.0
-     */
-    @NonNull
-    public static MarkwonTheme create(@NonNull Context context) {
-        return builderWithDefaults(context).build();
-    }
-
-    /**
-     * Create an <strong>empty</strong> instance of {@link Builder} with no default values applied
-     * <p>
-     * Since version 3.0.0 manual construction of {@link MarkwonTheme} is not required, instead a
-     * {@link MarkwonPlugin#configureTheme(Builder)} should be used in order
-     * to change certain theme properties
-     *
-     * @since 3.0.0
-     */
-    @SuppressWarnings("unused")
-    @NonNull
-    public static Builder emptyBuilder() {
-        return new Builder();
-    }
-
-    /**
-     * Factory method to create a {@link Builder} instance and initialize it with values
-     * from supplied {@link MarkwonTheme}
-     *
-     * @param copyFrom {@link MarkwonTheme} to copy values from
-     * @return {@link Builder} instance
-     * @see #builderWithDefaults(Context)
-     * @since 1.0.0
-     */
-    @NonNull
-    public static Builder builder(@NonNull MarkwonTheme copyFrom) {
-        return new Builder(copyFrom);
-    }
-
-    /**
-     * Factory method to obtain a {@link Builder} instance initialized with default values taken
-     * from current application theme.
-     *
-     * @param context Context to obtain default styling values (colors, etc)
-     * @return {@link Builder} instance
-     * @since 1.0.0
-     */
-    @NonNull
-    public static Builder builderWithDefaults(@NonNull Context context) {
-
-        final Dip dip = Dip.create(context);
-        return new Builder().codeBlockMargin(dip.toPx(8)).blockMargin(dip.toPx(24)).blockQuoteWidth(dip.toPx(4)).bulletListItemStrokeWidth(dip.toPx(1)).headingBreakHeight(dip.toPx(1)).thematicBreakHeight(dip.toPx(4));
-    }
-
-    protected static final int BLOCK_QUOTE_DEF_COLOR_ALPHA = 25;
-
-    protected static final int CODE_DEF_BACKGROUND_COLOR_ALPHA = 25;
-    protected static final float CODE_DEF_TEXT_SIZE_RATIO = .87F;
-
-    protected static final int HEADING_DEF_BREAK_COLOR_ALPHA = 75;
-
-    // taken from html spec (most browsers render headings like that)
-    // is not exposed via protected modifier in order to disallow modification
-    private static final float[] HEADING_SIZES = {2.F, 1.5F, 1.17F, 1.F, .83F, .67F,};
-
-    protected static final int THEMATIC_BREAK_DEF_ALPHA = 25;
-
-    protected final int linkColor;
+open class MarkwonTheme protected constructor(builder: Builder) {
+    protected val linkColor: Int
 
     // specifies whether we underline links, by default is true
     // @since 4.5.0
-    protected final boolean isLinkedUnderlined;
+    protected val isLinkedUnderlined: Boolean
 
     // used in quote, lists
-    protected final int blockMargin;
+    val blockMargin: Int
 
     // by default it's 1/4th of `blockMargin`
-    protected final int blockQuoteWidth;
+    protected val blockQuoteWidth: Int
 
     // by default it's text color with `BLOCK_QUOTE_DEF_COLOR_ALPHA` applied alpha
-    protected final int blockQuoteColor;
+    protected val blockQuoteColor: Int
 
     // by default uses text color (applied for un-ordered lists & ordered (bullets & numbers)
-    protected final int listItemColor;
+    protected val listItemColor: Int
 
     // by default the stroke color of a paint object
-    protected final int bulletListItemStrokeWidth;
+    protected val bulletListItemStrokeWidth: Int
 
     // width of bullet, by default min(blockMargin, height) / 2
-    protected final int bulletWidth;
+    protected val bulletWidth: Int
 
     // by default - main text color
-    protected final int codeTextColor;
+    protected val codeTextColor: Int
 
     // by default - codeTextColor
-    protected final int codeBlockTextColor;
+    protected val codeBlockTextColor: Int
 
     // by default 0.1 alpha of textColor/codeTextColor
-    protected final int codeBackgroundColor;
+    protected val codeBackgroundColor: Int
 
     // by default codeBackgroundColor
-    protected final int codeBlockBackgroundColor;
+    protected val codeBlockBackgroundColor: Int
 
     // by default `width` of a space char... it's fun and games, but span doesn't have access to paint in `getLeadingMargin`
     // so, we need to set this value explicitly (think of an utility method, that takes TextView/TextPaint and measures space char)
-    protected final int codeBlockMargin;
+    val codeBlockMargin: Int
 
     // by default Typeface.MONOSPACE
-    protected final Typeface codeTypeface;
+    protected val codeTypeface: Typeface?
 
-    protected final Typeface codeBlockTypeface;
+    protected val codeBlockTypeface: Typeface?
 
     // by default a bit (how much?!) smaller than normal text
     // applied ONLY if default typeface was used, otherwise, not applied
-    protected final int codeTextSize;
+    protected val codeTextSize: Int
 
-    protected final int codeBlockTextSize;
+    protected val codeBlockTextSize: Int
 
     // by default paint.getStrokeWidth
-    protected final int headingBreakHeight;
+    protected val headingBreakHeight: Int
 
     // by default, text color with `HEADING_DEF_BREAK_COLOR_ALPHA` applied alpha
-    protected final int headingBreakColor;
+    protected val headingBreakColor: Int
 
     // by default, whatever typeface is set on the TextView
     // @since 1.1.0
-    protected final Typeface headingTypeface;
+    protected val headingTypeface: Typeface?
 
     // by default, we use standard multipliers from the HTML spec (see HEADING_SIZES for values).
     // this library supports 6 heading sizes, so make sure the array you pass here has 6 elements.
     // @since 1.1.0
-    protected final float[] headingTextSizeMultipliers;
+    protected val headingTextSizeMultipliers: FloatArray?
 
     // by default textColor with `THEMATIC_BREAK_DEF_ALPHA` applied alpha
-    protected final int thematicBreakColor;
+    protected val thematicBreakColor: Int
 
     // by default paint.strokeWidth
-    protected final int thematicBreakHeight;
+    protected val thematicBreakHeight: Int
 
-    protected MarkwonTheme(@NonNull Builder builder) {
-        this.linkColor = builder.linkColor;
-        this.isLinkedUnderlined = builder.isLinkUnderlined;
-        this.blockMargin = builder.blockMargin;
-        this.blockQuoteWidth = builder.blockQuoteWidth;
-        this.blockQuoteColor = builder.blockQuoteColor;
-        this.listItemColor = builder.listItemColor;
-        this.bulletListItemStrokeWidth = builder.bulletListItemStrokeWidth;
-        this.bulletWidth = builder.bulletWidth;
-        this.codeTextColor = builder.codeTextColor;
-        this.codeBlockTextColor = builder.codeBlockTextColor;
-        this.codeBackgroundColor = builder.codeBackgroundColor;
-        this.codeBlockBackgroundColor = builder.codeBlockBackgroundColor;
-        this.codeBlockMargin = builder.codeBlockMargin;
-        this.codeTypeface = builder.codeTypeface;
-        this.codeBlockTypeface = builder.codeBlockTypeface;
-        this.codeTextSize = builder.codeTextSize;
-        this.codeBlockTextSize = builder.codeBlockTextSize;
-        this.headingBreakHeight = builder.headingBreakHeight;
-        this.headingBreakColor = builder.headingBreakColor;
-        this.headingTypeface = builder.headingTypeface;
-        this.headingTextSizeMultipliers = builder.headingTextSizeMultipliers;
-        this.thematicBreakColor = builder.thematicBreakColor;
-        this.thematicBreakHeight = builder.thematicBreakHeight;
+    init {
+        this.linkColor = builder.linkColor
+        this.isLinkedUnderlined = builder.isLinkUnderlined
+        this.blockMargin = builder.blockMargin
+        this.blockQuoteWidth = builder.blockQuoteWidth
+        this.blockQuoteColor = builder.blockQuoteColor
+        this.listItemColor = builder.listItemColor
+        this.bulletListItemStrokeWidth = builder.bulletListItemStrokeWidth
+        this.bulletWidth = builder.bulletWidth
+        this.codeTextColor = builder.codeTextColor
+        this.codeBlockTextColor = builder.codeBlockTextColor
+        this.codeBackgroundColor = builder.codeBackgroundColor
+        this.codeBlockBackgroundColor = builder.codeBlockBackgroundColor
+        this.codeBlockMargin = builder.codeBlockMargin
+        this.codeTypeface = builder.codeTypeface
+        this.codeBlockTypeface = builder.codeBlockTypeface
+        this.codeTextSize = builder.codeTextSize
+        this.codeBlockTextSize = builder.codeBlockTextSize
+        this.headingBreakHeight = builder.headingBreakHeight
+        this.headingBreakColor = builder.headingBreakColor
+        this.headingTypeface = builder.headingTypeface
+        this.headingTextSizeMultipliers = builder.headingTextSizeMultipliers
+        this.thematicBreakColor = builder.thematicBreakColor
+        this.thematicBreakHeight = builder.thematicBreakHeight
     }
 
     /**
      * @since 1.0.5
      */
-    public void applyLinkStyle(@NonNull TextPaint paint) {
-        paint.setUnderlineText(isLinkedUnderlined);
+    fun applyLinkStyle(paint: TextPaint) {
+        paint.isUnderlineText = isLinkedUnderlined
         if (linkColor != 0) {
-            paint.setColor(linkColor);
+            paint.color = linkColor
         } else {
             // if linkColor is not specified during configuration -> use default one
-            paint.setColor(paint.linkColor);
+            paint.color = paint.linkColor
         }
     }
 
-    public void applyLinkStyle(@NonNull Paint paint) {
-        paint.setUnderlineText(isLinkedUnderlined);
+    fun applyLinkStyle(paint: Paint) {
+        paint.isUnderlineText = isLinkedUnderlined
         if (linkColor != 0) {
             // by default we will be using text color
-            paint.setColor(linkColor);
+            paint.color = linkColor
         } else {
             // @since 1.0.5, if link color is specified during configuration, _try_ to use the
             // default one (if provided paint is an instance of TextPaint)
-            if (paint instanceof TextPaint) {
-                paint.setColor(((TextPaint) paint).linkColor);
+            if (paint is TextPaint) {
+                paint.color = paint.linkColor
             }
         }
     }
 
-    public void applyBlockQuoteStyle(@NonNull Paint paint) {
-        final int color;
-        if (blockQuoteColor == 0) {
-            color = ColorUtils.applyAlpha(paint.getColor(), BLOCK_QUOTE_DEF_COLOR_ALPHA);
+    fun applyBlockQuoteStyle(paint: Paint) {
+        val color: Int = if (blockQuoteColor == 0) {
+            applyAlpha(paint.color, BLOCK_QUOTE_DEF_COLOR_ALPHA)
         } else {
-            color = blockQuoteColor;
+            blockQuoteColor
         }
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(color);
+        paint.style = Paint.Style.FILL
+        paint.color = color
     }
 
-    public int getBlockMargin() {
-        return blockMargin;
+    fun getBlockQuoteWidth(): Int {
+        val out: Int = if (blockQuoteWidth == 0) {
+            (blockMargin * .25f + .5f).toInt()
+        } else {
+            blockQuoteWidth
+        }
+        return out
     }
 
-    public int getBlockQuoteWidth() {
-        final int out;
-        if (blockQuoteWidth == 0) {
-            out = (int) (blockMargin * .25F + .5F);
+    fun applyListItemStyle(paint: Paint) {
+        val color: Int = if (listItemColor != 0) {
+            listItemColor
         } else {
-            out = blockQuoteWidth;
+            paint.color
         }
-        return out;
-    }
-
-    public void applyListItemStyle(@NonNull Paint paint) {
-
-        final int color;
-        if (listItemColor != 0) {
-            color = listItemColor;
-        } else {
-            color = paint.getColor();
-        }
-        paint.setColor(color);
+        paint.color = color
 
         if (bulletListItemStrokeWidth != 0) {
-            paint.setStrokeWidth(bulletListItemStrokeWidth);
+            paint.strokeWidth = bulletListItemStrokeWidth.toFloat()
         }
     }
 
-    public int getBulletWidth(int height) {
-
-        final int min = Math.min(blockMargin, height) / 2;
-
-        final int width;
-        if (bulletWidth == 0 || bulletWidth > min) {
-            width = min;
+    fun getBulletWidth(height: Int): Int {
+        val min = min(blockMargin, height) / 2
+        val width: Int = if (bulletWidth == 0 || bulletWidth > min) {
+            min
         } else {
-            width = bulletWidth;
+            bulletWidth
         }
 
-        return width;
+        return width
     }
 
     /**
      * @since 3.0.0
      */
-    public void applyCodeTextStyle(@NonNull Paint paint) {
-
+    fun applyCodeTextStyle(paint: Paint) {
         if (codeTextColor != 0) {
-            paint.setColor(codeTextColor);
+            paint.color = codeTextColor
         }
 
         if (codeTypeface != null) {
-
-            paint.setTypeface(codeTypeface);
+            paint.typeface = codeTypeface
 
             if (codeTextSize > 0) {
-                paint.setTextSize(codeTextSize);
+                paint.textSize = codeTextSize.toFloat()
             }
-
         } else {
-
-            paint.setTypeface(Typeface.MONOSPACE);
+            paint.typeface = Typeface.MONOSPACE
 
             if (codeTextSize > 0) {
-                paint.setTextSize(codeTextSize);
+                paint.textSize = codeTextSize.toFloat()
             } else {
-                paint.setTextSize(paint.getTextSize() * CODE_DEF_TEXT_SIZE_RATIO);
+                paint.textSize = paint.textSize * CODE_DEF_TEXT_SIZE_RATIO
             }
         }
     }
@@ -318,300 +230,277 @@ public class MarkwonTheme {
     /**
      * @since 3.0.0
      */
-    public void applyCodeBlockTextStyle(@NonNull Paint paint) {
-
+    fun applyCodeBlockTextStyle(paint: Paint) {
         // apply text color, first check for block specific value,
         // then check for code (inline), else do nothing (keep original color of text)
-        final int textColor = codeBlockTextColor != 0 ? codeBlockTextColor : codeTextColor;
+
+        val textColor = if (codeBlockTextColor != 0) codeBlockTextColor else codeTextColor
 
         if (textColor != 0) {
-            paint.setColor(textColor);
+            paint.color = textColor
         }
 
-        final Typeface typeface = codeBlockTypeface != null ? codeBlockTypeface : codeTypeface;
+        val typeface = codeBlockTypeface ?: codeTypeface
 
         if (typeface != null) {
-
-            paint.setTypeface(typeface);
+            paint.typeface = typeface
 
             // please note that we won't be calculating textSize
             // (like we do when no Typeface is provided), if it's some specific typeface
             // we would confuse users about textSize
-            final int textSize = codeBlockTextSize > 0 ? codeBlockTextSize : codeTextSize;
+            val textSize = if (codeBlockTextSize > 0) codeBlockTextSize else codeTextSize
 
             if (textSize > 0) {
-                paint.setTextSize(textSize);
+                paint.textSize = textSize.toFloat()
             }
         } else {
-
             // by default use monospace
-            paint.setTypeface(Typeface.MONOSPACE);
 
-            final int textSize = codeBlockTextSize > 0 ? codeBlockTextSize : codeTextSize;
+            paint.typeface = Typeface.MONOSPACE
+
+            val textSize = if (codeBlockTextSize > 0) codeBlockTextSize else codeTextSize
 
             if (textSize > 0) {
-                paint.setTextSize(textSize);
+                paint.textSize = textSize.toFloat()
             } else {
                 // calculate default value
-                paint.setTextSize(paint.getTextSize() * CODE_DEF_TEXT_SIZE_RATIO);
+                paint.textSize = paint.textSize * CODE_DEF_TEXT_SIZE_RATIO
             }
         }
     }
 
 
-    public int getCodeBlockMargin() {
-        return codeBlockMargin;
-    }
-
     /**
      * @since 3.0.0
      */
-    public int getCodeBackgroundColor(@NonNull Paint paint) {
-        final int color;
-        if (codeBackgroundColor != 0) {
-            color = codeBackgroundColor;
+    fun getCodeBackgroundColor(paint: Paint): Int {
+        val color: Int = if (codeBackgroundColor != 0) {
+            codeBackgroundColor
         } else {
-            color = ColorUtils.applyAlpha(paint.getColor(), CODE_DEF_BACKGROUND_COLOR_ALPHA);
+            applyAlpha(paint.color, CODE_DEF_BACKGROUND_COLOR_ALPHA)
         }
-        return color;
+        return color
     }
 
     /**
      * @since 3.0.0
      */
-    public int getCodeBlockBackgroundColor(@NonNull Paint paint) {
+    fun getCodeBlockBackgroundColor(paint: Paint): Int {
+        val color =
+            if (codeBlockBackgroundColor != 0) codeBlockBackgroundColor else codeBackgroundColor
 
-        final int color = codeBlockBackgroundColor != 0 ? codeBlockBackgroundColor : codeBackgroundColor;
-
-        return color != 0 ? color : ColorUtils.applyAlpha(paint.getColor(), CODE_DEF_BACKGROUND_COLOR_ALPHA);
+        return if (color != 0) color else applyAlpha(
+            paint.color, CODE_DEF_BACKGROUND_COLOR_ALPHA
+        )
     }
 
-    public void applyHeadingTextStyle(@NonNull Paint paint, @IntRange(from = 1, to = 6) int level) {
+    fun applyHeadingTextStyle(paint: Paint, @IntRange(from = 1, to = 6) level: Int) {
         if (headingTypeface == null) {
-            paint.setFakeBoldText(true);
+            paint.isFakeBoldText = true
         } else {
-            paint.setTypeface(headingTypeface);
+            paint.typeface = headingTypeface
         }
-        final float[] textSizes = headingTextSizeMultipliers != null ? headingTextSizeMultipliers : HEADING_SIZES;
+        val textSizes: FloatArray? = headingTextSizeMultipliers ?: HEADING_SIZES
 
-        if (textSizes != null && textSizes.length >= level) {
-            paint.setTextSize(paint.getTextSize() * textSizes[level - 1]);
+        if (textSizes != null && textSizes.size >= level) {
+            paint.textSize = paint.textSize * textSizes[level - 1]
         } else {
-            throw new IllegalStateException(String.format(Locale.US, "Supplied heading level: %d is invalid, where configured heading sizes are: `%s`", level, Arrays.toString(textSizes)));
+            throw IllegalStateException(
+                String.format(
+                    Locale.US,
+                    "Supplied heading level: %d is invalid, where configured heading sizes are: `%s`",
+                    level,
+                    textSizes.contentToString()
+                )
+            )
         }
     }
 
-    public void applyHeadingBreakStyle(@NonNull Paint paint) {
-        final int color;
-        if (headingBreakColor != 0) {
-            color = headingBreakColor;
+    fun applyHeadingBreakStyle(paint: Paint) {
+        val color: Int = if (headingBreakColor != 0) {
+            headingBreakColor
         } else {
-            color = ColorUtils.applyAlpha(paint.getColor(), HEADING_DEF_BREAK_COLOR_ALPHA);
+            applyAlpha(paint.color, HEADING_DEF_BREAK_COLOR_ALPHA)
         }
-        paint.setColor(color);
-        paint.setStyle(Paint.Style.FILL);
+        paint.color = color
+        paint.style = Paint.Style.FILL
         if (headingBreakHeight >= 0) {
-            //noinspection SuspiciousNameCombination
-            paint.setStrokeWidth(headingBreakHeight);
+            paint.strokeWidth = headingBreakHeight.toFloat()
         }
     }
 
-    public void applyThematicBreakStyle(@NonNull Paint paint) {
-        final int color;
-        if (thematicBreakColor != 0) {
-            color = thematicBreakColor;
+    fun applyThematicBreakStyle(paint: Paint) {
+        val color: Int = if (thematicBreakColor != 0) {
+            thematicBreakColor
         } else {
-            color = ColorUtils.applyAlpha(paint.getColor(), THEMATIC_BREAK_DEF_ALPHA);
+            applyAlpha(paint.color, THEMATIC_BREAK_DEF_ALPHA)
         }
-        paint.setColor(color);
-        paint.setStyle(Paint.Style.FILL);
+        paint.color = color
+        paint.style = Paint.Style.FILL
 
         if (thematicBreakHeight >= 0) {
-            //noinspection SuspiciousNameCombination
-            paint.setStrokeWidth(thematicBreakHeight);
+            paint.strokeWidth = thematicBreakHeight.toFloat()
         }
     }
 
-    @SuppressWarnings("unused")
-    public static class Builder {
+    @Suppress("unused")
+    class Builder {
+        var linkColor: Int = 0
+        var isLinkUnderlined: Boolean = true // @since 4.5.0
+        var blockMargin: Int = 0
+        var blockQuoteWidth: Int = 0
+        var blockQuoteColor: Int = 0
+        var listItemColor: Int = 0
+        var bulletListItemStrokeWidth: Int = 0
+        var bulletWidth: Int = 0
+        var codeTextColor: Int = 0
+        var codeBlockTextColor: Int = 0 // @since 1.0.5
+        var codeBackgroundColor: Int = 0
+        var codeBlockBackgroundColor: Int = 0 // @since 1.0.5
+        var codeBlockMargin: Int = 0
+        var codeTypeface: Typeface? = null
+        var codeBlockTypeface: Typeface? = null // @since 3.0.0
+        var codeTextSize: Int = 0
+        var codeBlockTextSize: Int = 0 // @since 3.0.0
+        var headingBreakHeight: Int = -1
+        var headingBreakColor: Int = 0
+        var headingTypeface: Typeface? = null
+        var headingTextSizeMultipliers: FloatArray? = null
+        var thematicBreakColor: Int = 0
+        var thematicBreakHeight: Int = -1
 
-        private int linkColor;
-        private boolean isLinkUnderlined = true; // @since 4.5.0
-        private int blockMargin;
-        private int blockQuoteWidth;
-        private int blockQuoteColor;
-        private int listItemColor;
-        private int bulletListItemStrokeWidth;
-        private int bulletWidth;
-        private int codeTextColor;
-        private int codeBlockTextColor; // @since 1.0.5
-        private int codeBackgroundColor;
-        private int codeBlockBackgroundColor; // @since 1.0.5
-        private int codeBlockMargin;
-        private Typeface codeTypeface;
-        private Typeface codeBlockTypeface; // @since 3.0.0
-        private int codeTextSize;
-        private int codeBlockTextSize; // @since 3.0.0
-        private int headingBreakHeight = -1;
-        private int headingBreakColor;
-        private Typeface headingTypeface;
-        private float[] headingTextSizeMultipliers;
-        private int thematicBreakColor;
-        private int thematicBreakHeight = -1;
 
-        Builder() {
+        internal constructor()
+
+        internal constructor(theme: MarkwonTheme) {
+            this.linkColor = theme.linkColor
+            this.isLinkUnderlined = theme.isLinkedUnderlined
+            this.blockMargin = theme.blockMargin
+            this.blockQuoteWidth = theme.blockQuoteWidth
+            this.blockQuoteColor = theme.blockQuoteColor
+            this.listItemColor = theme.listItemColor
+            this.bulletListItemStrokeWidth = theme.bulletListItemStrokeWidth
+            this.bulletWidth = theme.bulletWidth
+            this.codeTextColor = theme.codeTextColor
+            this.codeBlockTextColor = theme.codeBlockTextColor
+            this.codeBackgroundColor = theme.codeBackgroundColor
+            this.codeBlockBackgroundColor = theme.codeBlockBackgroundColor
+            this.codeBlockMargin = theme.codeBlockMargin
+            this.codeTypeface = theme.codeTypeface
+            this.codeTextSize = theme.codeTextSize
+            this.headingBreakHeight = theme.headingBreakHeight
+            this.headingBreakColor = theme.headingBreakColor
+            this.headingTypeface = theme.headingTypeface
+            this.headingTextSizeMultipliers = theme.headingTextSizeMultipliers
+            this.thematicBreakColor = theme.thematicBreakColor
+            this.thematicBreakHeight = theme.thematicBreakHeight
         }
 
-        Builder(@NonNull MarkwonTheme theme) {
-            this.linkColor = theme.linkColor;
-            this.isLinkUnderlined = theme.isLinkedUnderlined;
-            this.blockMargin = theme.blockMargin;
-            this.blockQuoteWidth = theme.blockQuoteWidth;
-            this.blockQuoteColor = theme.blockQuoteColor;
-            this.listItemColor = theme.listItemColor;
-            this.bulletListItemStrokeWidth = theme.bulletListItemStrokeWidth;
-            this.bulletWidth = theme.bulletWidth;
-            this.codeTextColor = theme.codeTextColor;
-            this.codeBlockTextColor = theme.codeBlockTextColor;
-            this.codeBackgroundColor = theme.codeBackgroundColor;
-            this.codeBlockBackgroundColor = theme.codeBlockBackgroundColor;
-            this.codeBlockMargin = theme.codeBlockMargin;
-            this.codeTypeface = theme.codeTypeface;
-            this.codeTextSize = theme.codeTextSize;
-            this.headingBreakHeight = theme.headingBreakHeight;
-            this.headingBreakColor = theme.headingBreakColor;
-            this.headingTypeface = theme.headingTypeface;
-            this.headingTextSizeMultipliers = theme.headingTextSizeMultipliers;
-            this.thematicBreakColor = theme.thematicBreakColor;
-            this.thematicBreakHeight = theme.thematicBreakHeight;
+        fun linkColor(@ColorInt linkColor: Int): Builder {
+            this.linkColor = linkColor
+            return this
         }
 
-        @NonNull
-        public Builder linkColor(@ColorInt int linkColor) {
-            this.linkColor = linkColor;
-            return this;
+        fun isLinkUnderlined(isLinkUnderlined: Boolean): Builder {
+            this.isLinkUnderlined = isLinkUnderlined
+            return this
         }
 
-        @NonNull
-        public Builder isLinkUnderlined(boolean isLinkUnderlined) {
-            this.isLinkUnderlined = isLinkUnderlined;
-            return this;
+        fun blockMargin(@Px blockMargin: Int): Builder {
+            this.blockMargin = blockMargin
+            return this
         }
 
-        @NonNull
-        public Builder blockMargin(@Px int blockMargin) {
-            this.blockMargin = blockMargin;
-            return this;
+        fun blockQuoteWidth(@Px blockQuoteWidth: Int): Builder {
+            this.blockQuoteWidth = blockQuoteWidth
+            return this
         }
 
-        @NonNull
-        public Builder blockQuoteWidth(@Px int blockQuoteWidth) {
-            this.blockQuoteWidth = blockQuoteWidth;
-            return this;
+        fun blockQuoteColor(@ColorInt blockQuoteColor: Int): Builder {
+            this.blockQuoteColor = blockQuoteColor
+            return this
         }
 
-        @SuppressWarnings("SameParameterValue")
-        @NonNull
-        public Builder blockQuoteColor(@ColorInt int blockQuoteColor) {
-            this.blockQuoteColor = blockQuoteColor;
-            return this;
+        fun listItemColor(@ColorInt listItemColor: Int): Builder {
+            this.listItemColor = listItemColor
+            return this
         }
 
-        @NonNull
-        public Builder listItemColor(@ColorInt int listItemColor) {
-            this.listItemColor = listItemColor;
-            return this;
+        fun bulletListItemStrokeWidth(@Px bulletListItemStrokeWidth: Int): Builder {
+            this.bulletListItemStrokeWidth = bulletListItemStrokeWidth
+            return this
         }
 
-        @NonNull
-        public Builder bulletListItemStrokeWidth(@Px int bulletListItemStrokeWidth) {
-            this.bulletListItemStrokeWidth = bulletListItemStrokeWidth;
-            return this;
+        fun bulletWidth(@Px bulletWidth: Int): Builder {
+            this.bulletWidth = bulletWidth
+            return this
         }
 
-        @NonNull
-        public Builder bulletWidth(@Px int bulletWidth) {
-            this.bulletWidth = bulletWidth;
-            return this;
-        }
-
-        @NonNull
-        public Builder codeTextColor(@ColorInt int codeTextColor) {
-            this.codeTextColor = codeTextColor;
-            return this;
+        fun codeTextColor(@ColorInt codeTextColor: Int): Builder {
+            this.codeTextColor = codeTextColor
+            return this
         }
 
         /**
          * @since 1.0.5
          */
-        @NonNull
-        public Builder codeBlockTextColor(@ColorInt int codeBlockTextColor) {
-            this.codeBlockTextColor = codeBlockTextColor;
-            return this;
+        fun codeBlockTextColor(@ColorInt codeBlockTextColor: Int): Builder {
+            this.codeBlockTextColor = codeBlockTextColor
+            return this
         }
 
-        @SuppressWarnings({"SameParameterValue", "UnusedReturnValue"})
-        @NonNull
-        public Builder codeBackgroundColor(@ColorInt int codeBackgroundColor) {
-            this.codeBackgroundColor = codeBackgroundColor;
-            return this;
+        fun codeBackgroundColor(@ColorInt codeBackgroundColor: Int): Builder {
+            this.codeBackgroundColor = codeBackgroundColor
+            return this
         }
 
         /**
          * @since 1.0.5
          */
-        @NonNull
-        public Builder codeBlockBackgroundColor(@ColorInt int codeBlockBackgroundColor) {
-            this.codeBlockBackgroundColor = codeBlockBackgroundColor;
-            return this;
+        fun codeBlockBackgroundColor(@ColorInt codeBlockBackgroundColor: Int): Builder {
+            this.codeBlockBackgroundColor = codeBlockBackgroundColor
+            return this
         }
 
-        @NonNull
-        public Builder codeBlockMargin(@Px int codeBlockMargin) {
-            this.codeBlockMargin = codeBlockMargin;
-            return this;
+        fun codeBlockMargin(@Px codeBlockMargin: Int): Builder {
+            this.codeBlockMargin = codeBlockMargin
+            return this
         }
 
-        @NonNull
-        public Builder codeTypeface(@NonNull Typeface codeTypeface) {
-            this.codeTypeface = codeTypeface;
-            return this;
+        fun codeTypeface(codeTypeface: Typeface): Builder {
+            this.codeTypeface = codeTypeface
+            return this
         }
 
         /**
          * @since 3.0.0
          */
-        @NonNull
-        public Builder codeBlockTypeface(@NonNull Typeface typeface) {
-            this.codeBlockTypeface = typeface;
-            return this;
+        fun codeBlockTypeface(typeface: Typeface): Builder {
+            this.codeBlockTypeface = typeface
+            return this
         }
 
-        @NonNull
-        public Builder codeTextSize(@Px int codeTextSize) {
-            this.codeTextSize = codeTextSize;
-            return this;
+        fun codeTextSize(@Px codeTextSize: Int): Builder {
+            this.codeTextSize = codeTextSize
+            return this
         }
 
         /**
          * @since 3.0.0
          */
-        @NonNull
-        public Builder codeBlockTextSize(@Px int codeTextSize) {
-            this.codeBlockTextSize = codeTextSize;
-            return this;
+        fun codeBlockTextSize(@Px codeTextSize: Int): Builder {
+            this.codeBlockTextSize = codeTextSize
+            return this
         }
 
-        @NonNull
-        public Builder headingBreakHeight(@Px int headingBreakHeight) {
-            this.headingBreakHeight = headingBreakHeight;
-            return this;
+        fun headingBreakHeight(@Px headingBreakHeight: Int): Builder {
+            this.headingBreakHeight = headingBreakHeight
+            return this
         }
 
-        @NonNull
-        public Builder headingBreakColor(@ColorInt int headingBreakColor) {
-            this.headingBreakColor = headingBreakColor;
-            return this;
+        fun headingBreakColor(@ColorInt headingBreakColor: Int): Builder {
+            this.headingBreakColor = headingBreakColor
+            return this
         }
 
         /**
@@ -619,40 +508,104 @@ public class MarkwonTheme {
          * @return self
          * @since 1.1.0
          */
-        @NonNull
-        public Builder headingTypeface(@NonNull Typeface headingTypeface) {
-            this.headingTypeface = headingTypeface;
-            return this;
+        fun headingTypeface(headingTypeface: Typeface): Builder {
+            this.headingTypeface = headingTypeface
+            return this
         }
 
         /**
          * @param headingTextSizeMultipliers an array of multipliers values for heading elements.
-         *                                   The base value for this multipliers is TextView\'s text size
+         * The base value for this multipliers is TextView\'s text size
          * @return self
          * @since 1.1.0
          */
-        @SuppressWarnings("UnusedReturnValue")
-        @NonNull
-        public Builder headingTextSizeMultipliers(@Size(6) @NonNull float[] headingTextSizeMultipliers) {
-            this.headingTextSizeMultipliers = headingTextSizeMultipliers;
-            return this;
+        fun headingTextSizeMultipliers(@Size(6) headingTextSizeMultipliers: FloatArray): Builder {
+            this.headingTextSizeMultipliers = headingTextSizeMultipliers
+            return this
         }
 
-        @NonNull
-        public Builder thematicBreakColor(@ColorInt int thematicBreakColor) {
-            this.thematicBreakColor = thematicBreakColor;
-            return this;
+        fun thematicBreakColor(@ColorInt thematicBreakColor: Int): Builder {
+            this.thematicBreakColor = thematicBreakColor
+            return this
         }
 
-        @NonNull
-        public Builder thematicBreakHeight(@Px int thematicBreakHeight) {
-            this.thematicBreakHeight = thematicBreakHeight;
-            return this;
+        fun thematicBreakHeight(@Px thematicBreakHeight: Int): Builder {
+            this.thematicBreakHeight = thematicBreakHeight
+            return this
         }
 
-        @NonNull
-        public MarkwonTheme build() {
-            return new MarkwonTheme(this);
+        fun build(): MarkwonTheme {
+            return MarkwonTheme(this)
         }
+    }
+
+    companion object {
+        /**
+         * Factory method to obtain an instance of [MarkwonTheme] with all values as defaults
+         *
+         * @param context Context in order to resolve defaults
+         * @return [MarkwonTheme] instance
+         * @see .builderWithDefaults
+         * @since 1.0.0
+         */
+        fun create(context: Context): MarkwonTheme {
+            return builderWithDefaults(context).build()
+        }
+
+        /**
+         * Create an **empty** instance of [Builder] with no default values applied
+         *
+         *
+         * Since version 3.0.0 manual construction of [MarkwonTheme] is not required, instead a
+         * [io.noties.markwon.MarkwonPlugin.configureTheme] should be used in order
+         * to change certain theme properties
+         *
+         * @since 3.0.0
+         */
+        @Suppress("unused")
+        fun emptyBuilder(): Builder {
+            return Builder()
+        }
+
+        /**
+         * Factory method to create a [Builder] instance and initialize it with values
+         * from supplied [MarkwonTheme]
+         *
+         * @param copyFrom [MarkwonTheme] to copy values from
+         * @return [Builder] instance
+         * @see .builderWithDefaults
+         * @since 1.0.0
+         */
+        fun builder(copyFrom: MarkwonTheme): Builder {
+            return Builder(copyFrom)
+        }
+
+        /**
+         * Factory method to obtain a [Builder] instance initialized with default values taken
+         * from current application theme.
+         *
+         * @param context Context to obtain default styling values (colors, etc)
+         * @return [Builder] instance
+         * @since 1.0.0
+         */
+        fun builderWithDefaults(context: Context): Builder {
+            val dip = Dip.create(context)
+            return Builder().codeBlockMargin(dip.toPx(8)).blockMargin(dip.toPx(24))
+                .blockQuoteWidth(dip.toPx(4)).bulletListItemStrokeWidth(dip.toPx(1))
+                .headingBreakHeight(dip.toPx(1)).thematicBreakHeight(dip.toPx(4))
+        }
+
+        protected const val BLOCK_QUOTE_DEF_COLOR_ALPHA: Int = 25
+
+        protected const val CODE_DEF_BACKGROUND_COLOR_ALPHA: Int = 25
+        protected const val CODE_DEF_TEXT_SIZE_RATIO: Float = .87f
+
+        protected const val HEADING_DEF_BREAK_COLOR_ALPHA: Int = 75
+
+        // taken from html spec (most browsers render headings like that)
+        // is not exposed via protected modifier in order to disallow modification
+        private val HEADING_SIZES = floatArrayOf(2f, 1.5f, 1.17f, 1f, .83f, .67f)
+
+        protected const val THEMATIC_BREAK_DEF_ALPHA: Int = 25
     }
 }
