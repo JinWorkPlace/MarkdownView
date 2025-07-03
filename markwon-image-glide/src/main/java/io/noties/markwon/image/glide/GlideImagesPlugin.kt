@@ -1,177 +1,142 @@
-package io.noties.markwon.image.glide;
+package io.noties.markwon.image.glide
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.text.Spanned;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
-
-import org.commonmark.node.Image;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.MarkwonConfiguration;
-import io.noties.markwon.MarkwonSpansFactory;
-import io.noties.markwon.image.AsyncDrawable;
-import io.noties.markwon.image.AsyncDrawableLoader;
-import io.noties.markwon.image.AsyncDrawableScheduler;
-import io.noties.markwon.image.DrawableUtils;
-import io.noties.markwon.image.ImageSpanFactory;
+import android.content.Context
+import android.graphics.drawable.Drawable
+import android.text.Spanned
+import android.widget.TextView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.RequestManager
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.request.transition.Transition
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.MarkwonSpansFactory
+import io.noties.markwon.image.AsyncDrawable
+import io.noties.markwon.image.AsyncDrawableLoader
+import io.noties.markwon.image.AsyncDrawableScheduler.schedule
+import io.noties.markwon.image.AsyncDrawableScheduler.unschedule
+import io.noties.markwon.image.DrawableUtils.applyIntrinsicBoundsIfEmpty
+import io.noties.markwon.image.ImageSpanFactory
+import org.commonmark.node.Image
 
 /**
  * @since 4.0.0
  */
-public class GlideImagesPlugin extends AbstractMarkwonPlugin {
+class GlideImagesPlugin internal constructor(glideStore: GlideStore) : AbstractMarkwonPlugin() {
+    interface GlideStore {
+        fun load(drawable: AsyncDrawable): RequestBuilder<Drawable?>
 
-    public interface GlideStore {
-
-        @NonNull
-        RequestBuilder<Drawable> load(@NonNull AsyncDrawable drawable);
-
-        void cancel(@NonNull Target<?> target);
+        fun cancel(target: Target<*>)
     }
 
-    @NonNull
-    public static GlideImagesPlugin create(@NonNull final Context context) {
-        // @since 4.5.0 cache RequestManager
-        //  sometimes `cancel` would be called after activity is destroyed,
-        //  so `Glide.with(context)` will throw an exception
-        return create(Glide.with(context));
+    private val glideAsyncDrawableLoader: GlideAsyncDrawableLoader
+
+    init {
+        this.glideAsyncDrawableLoader = GlideAsyncDrawableLoader(glideStore)
     }
 
-    @NonNull
-    public static GlideImagesPlugin create(@NonNull final RequestManager requestManager) {
-        return create(new GlideStore() {
-            @NonNull
-            @Override
-            public RequestBuilder<Drawable> load(@NonNull AsyncDrawable drawable) {
-                return requestManager.load(drawable.destination);
-            }
-
-            @Override
-            public void cancel(@NonNull Target<?> target) {
-                requestManager.clear(target);
-            }
-        });
+    public override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
+        builder.setFactory<Image>(Image::class.java, ImageSpanFactory())
     }
 
-    @NonNull
-    public static GlideImagesPlugin create(@NonNull GlideStore glideStore) {
-        return new GlideImagesPlugin(glideStore);
+    public override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+        builder.asyncDrawableLoader(glideAsyncDrawableLoader)
     }
 
-    private final GlideAsyncDrawableLoader glideAsyncDrawableLoader;
-
-    @SuppressWarnings("WeakerAccess")
-    GlideImagesPlugin(@NonNull GlideStore glideStore) {
-        this.glideAsyncDrawableLoader = new GlideAsyncDrawableLoader(glideStore);
+    public override fun beforeSetText(textView: TextView, markdown: Spanned) {
+        unschedule(textView)
     }
 
-    @Override
-    public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
-        builder.setFactory(Image.class, new ImageSpanFactory());
+    public override fun afterSetText(textView: TextView) {
+        schedule(textView)
     }
 
-    @Override
-    public void configureConfiguration(@NonNull MarkwonConfiguration.Builder builder) {
-        builder.asyncDrawableLoader(glideAsyncDrawableLoader);
-    }
+    private class GlideAsyncDrawableLoader(private val glideStore: GlideStore) :
+        AsyncDrawableLoader() {
+        private val cache: MutableMap<AsyncDrawable?, Target<*>?> =
+            HashMap<AsyncDrawable?, Target<*>?>(2)
 
-    @Override
-    public void beforeSetText(@NonNull TextView textView, @NonNull Spanned markdown) {
-        AsyncDrawableScheduler.unschedule(textView);
-    }
-
-    @Override
-    public void afterSetText(@NonNull TextView textView) {
-        AsyncDrawableScheduler.schedule(textView);
-    }
-
-    private static class GlideAsyncDrawableLoader extends AsyncDrawableLoader {
-
-        private final GlideStore glideStore;
-        private final Map<AsyncDrawable, Target<?>> cache = new HashMap<>(2);
-
-        GlideAsyncDrawableLoader(@NonNull GlideStore glideStore) {
-            this.glideStore = glideStore;
+        public override fun load(drawable: AsyncDrawable) {
+            val target: CustomTarget<Drawable?> = AsyncDrawableTarget(drawable)
+            cache.put(drawable, target)
+            glideStore.load(drawable).into<Target<Drawable?>?>(target)
         }
 
-        @Override
-        public void load(@NonNull AsyncDrawable drawable) {
-            final Target<Drawable> target = new AsyncDrawableTarget(drawable);
-            cache.put(drawable, target);
-            glideStore.load(drawable).into(target);
-        }
-
-        @Override
-        public void cancel(@NonNull AsyncDrawable drawable) {
-            final Target<?> target = cache.remove(drawable);
+        public override fun cancel(drawable: AsyncDrawable) {
+            val target = cache.remove(drawable)
             if (target != null) {
-                glideStore.cancel(target);
+                glideStore.cancel(target)
             }
         }
 
-        @Nullable
-        @Override
-        public Drawable placeholder(@NonNull AsyncDrawable drawable) {
-            return null;
+        public override fun placeholder(drawable: AsyncDrawable): Drawable? {
+            return null
         }
 
-        private class AsyncDrawableTarget extends CustomTarget<Drawable> {
-
-            private final AsyncDrawable drawable;
-
-            AsyncDrawableTarget(@NonNull AsyncDrawable drawable) {
-                this.drawable = drawable;
-            }
-
-            @Override
-            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+        private inner class AsyncDrawableTarget(private val drawable: AsyncDrawable) :
+            CustomTarget<Drawable?>() {
+            override fun onResourceReady(
+                resource: Drawable,
+                transition: Transition<in Drawable?>?
+            ) {
                 if (cache.remove(drawable) != null) {
-                    if (drawable.isAttached()) {
-                        DrawableUtils.applyIntrinsicBoundsIfEmpty(resource);
-                        drawable.setResult(resource);
+                    if (drawable.isAttached) {
+                        applyIntrinsicBoundsIfEmpty(resource)
+                        drawable.result = resource
                     }
                 }
             }
 
-            @Override
-            public void onLoadStarted(@Nullable Drawable placeholder) {
-                if (placeholder != null && drawable.isAttached()) {
-                    DrawableUtils.applyIntrinsicBoundsIfEmpty(placeholder);
-                    drawable.setResult(placeholder);
+            override fun onLoadStarted(placeholder: Drawable?) {
+                if (placeholder != null && drawable.isAttached) {
+                    applyIntrinsicBoundsIfEmpty(placeholder)
+                    drawable.result = placeholder
                 }
             }
 
-            @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+            override fun onLoadFailed(errorDrawable: Drawable?) {
                 if (cache.remove(drawable) != null) {
-                    if (errorDrawable != null && drawable.isAttached()) {
-                        DrawableUtils.applyIntrinsicBoundsIfEmpty(errorDrawable);
-                        drawable.setResult(errorDrawable);
+                    if (errorDrawable != null && drawable.isAttached) {
+                        applyIntrinsicBoundsIfEmpty(errorDrawable)
+                        drawable.result = errorDrawable
                     }
                 }
             }
 
-            @Override
-            public void onLoadCleared(@Nullable Drawable placeholder) {
+            override fun onLoadCleared(placeholder: Drawable?) {
                 // we won't be checking if target is still present as cancellation
                 // must remove target anyway
-                if (drawable.isAttached()) {
-                    drawable.clearResult();
+                if (drawable.isAttached) {
+                    drawable.clearResult()
                 }
             }
+        }
+    }
+
+    companion object {
+        fun create(context: Context): GlideImagesPlugin {
+            // @since 4.5.0 cache RequestManager
+            //  sometimes `cancel` would be called after activity is destroyed,
+            //  so `Glide.with(context)` will throw an exception
+            return create(Glide.with(context))
+        }
+
+        fun create(requestManager: RequestManager): GlideImagesPlugin {
+            return create(object : GlideStore {
+                override fun load(drawable: AsyncDrawable): RequestBuilder<Drawable?> {
+                    return requestManager.load(drawable.destination)
+                }
+
+                override fun cancel(target: Target<*>) {
+                    requestManager.clear(target)
+                }
+            })
+        }
+
+        fun create(glideStore: GlideStore): GlideImagesPlugin {
+            return GlideImagesPlugin(glideStore)
         }
     }
 }
