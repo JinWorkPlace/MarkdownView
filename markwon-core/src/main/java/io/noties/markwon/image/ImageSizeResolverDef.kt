@@ -10,7 +10,7 @@ open class ImageSizeResolverDef : ImageSizeResolver() {
     override fun resolveImageSize(drawable: AsyncDrawable): Rect {
         return resolveImageSize(
             drawable.imageSize,
-            drawable.result.bounds,
+            drawable.result!!.bounds,
             drawable.lastKnownCanvasWidth,
             drawable.lastKnowTextSize
         )

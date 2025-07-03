@@ -32,7 +32,7 @@ class CodeBlockSpan(
     }
 
     override fun getLeadingMargin(first: Boolean): Int {
-        return theme.getCodeBlockMargin()
+        return theme.codeBlockMargin
     }
 
     override fun drawLeadingMargin(

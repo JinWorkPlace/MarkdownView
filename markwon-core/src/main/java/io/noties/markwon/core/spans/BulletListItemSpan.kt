@@ -21,7 +21,7 @@ class BulletListItemSpan(
     private val rectangle: Rect = ObjectsPool.rect()
 
     override fun getLeadingMargin(first: Boolean): Int {
-        return theme.getBlockMargin()
+        return theme.blockMargin
     }
 
     override fun drawLeadingMargin(
@@ -50,7 +50,7 @@ class BulletListItemSpan(
 
         val save = c.save()
         try {
-            val width = theme.getBlockMargin()
+            val width = theme.blockMargin
 
             // @since 1.0.6 we no longer rely on (bottom-top) calculation in order to detect line height
             // it lead to bad rendering as first & last lines received different results even

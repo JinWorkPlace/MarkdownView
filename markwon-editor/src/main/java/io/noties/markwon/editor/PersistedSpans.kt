@@ -36,7 +36,7 @@ abstract class PersistedSpans {
                 Log.e(
                     "MD-EDITOR", String.format(
                         Locale.ROOT,
-                        "Re-declaration of persisted span for '%s'", type.getName()
+                        "Re-declaration of persisted span for '%s'", type.name
                     )
                 )
             }
@@ -64,7 +64,7 @@ abstract class PersistedSpans {
             } else {
                 val spanFactory = spans[type]
                 checkNotNull(spanFactory) {
-                    "Requested type `" + type.getName() + "` was " +
+                    "Requested type `" + type.name + "` was " +
                             "not registered, use PersistedSpans.Builder#persistSpan method to register"
                 }
                 span = spanFactory.create()

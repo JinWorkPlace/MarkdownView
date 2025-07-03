@@ -4,7 +4,7 @@ package io.noties.markwon.html
  * @since 2.0.0
  */
 abstract class MarkwonHtmlParser {
-    interface FlushAction<T> {
+    fun interface FlushAction<T> {
         fun apply(tags: MutableList<T>)
     }
 

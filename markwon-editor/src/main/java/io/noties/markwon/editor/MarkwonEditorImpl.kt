@@ -51,7 +51,7 @@ internal class MarkwonEditorImpl(
                             //  editable here should return all spans that are contained in specified
                             //  region. Later we match if span starts at current position
                             //  and notify additional span handler about it
-                            val spans = renderedMarkdown.getSpans<Any?>(
+                            val spans = renderedMarkdown.getSpans(
                                 markdownLength, markdownLength + 1, Any::class.java
                             )
                             for (span in spans) {
@@ -93,7 +93,7 @@ internal class MarkwonEditorImpl(
                         //  for example, if some links were _autolinked_ (text is the same,
                         //  but there is an additional URLSpan)
                         if (hasAdditionalSpans) {
-                            val spans = renderedMarkdown.getSpans<Any?>(
+                            val spans = renderedMarkdown.getSpans(
                                 markdownStart, markdownLength, Any::class.java
                             )
                             for (span in spans) {
@@ -150,8 +150,8 @@ internal class MarkwonEditorImpl(
 
     private class RecordingSpannableStringBuilder(text: CharSequence?) :
         SpannableStringBuilder(text) {
-        val applied: MutableList<Span> = ArrayList<Span>(3)
-        val removed: MutableList<Any?> = ArrayList<Any?>(0)
+        val applied: MutableList<Span> = ArrayList(3)
+        val removed: MutableList<Any?> = ArrayList(0)
 
         override fun setSpan(what: Any?, start: Int, end: Int, flags: Int) {
             super.setSpan(what, start, end, flags)

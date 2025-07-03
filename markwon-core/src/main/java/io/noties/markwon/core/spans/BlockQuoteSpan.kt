@@ -16,7 +16,7 @@ data class BlockQuoteSpan(
     private val paint: Paint = ObjectsPool.paint()
 
     override fun getLeadingMargin(first: Boolean): Int {
-        return theme.getBlockMargin()
+        return theme.blockMargin
     }
 
     override fun drawLeadingMargin(
@@ -33,7 +33,7 @@ data class BlockQuoteSpan(
         first: Boolean,
         layout: Layout?
     ) {
-        val width = theme.getBlockQuoteWidth()
+        val width = theme.blockQuoteWidth
 
         paint.set(p)
 

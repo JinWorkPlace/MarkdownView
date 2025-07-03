@@ -4,9 +4,9 @@ import android.text.Editable
 import io.noties.markwon.Markwon
 
 /**
- * @see EmphasisEditHandler
+ * @see io.noties.markwon.editor.handler.EmphasisEditHandler
  *
- * @see StrongEmphasisEditHandler
+ * @see io.noties.markwon.editor.handler.StrongEmphasisEditHandler
  *
  * @since 4.2.0
  */

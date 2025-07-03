@@ -5,7 +5,6 @@ import android.widget.TextView.BufferType
 import io.noties.markwon.Markwon.TextSetter
 import io.noties.markwon.core.MarkwonTheme
 import org.commonmark.parser.Parser
-import java.util.Collections
 
 /**
  * @since 3.0.0
@@ -87,7 +86,6 @@ internal class MarkwonBuilderImpl(private val context: Context) : Markwon.Builde
             parserBuilder.build(),
             visitorFactory,
             configuration,
-            Collections.unmodifiableList(plugins),
             fallbackToRawInputWhenEmpty
         )
     }

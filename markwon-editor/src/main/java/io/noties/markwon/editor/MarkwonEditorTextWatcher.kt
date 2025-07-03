@@ -103,7 +103,7 @@ abstract class MarkwonEditorTextWatcher : TextWatcher {
                                     if (et != null) {
                                         selfChange = true
                                         try {
-                                            result.dispatchTo(editText!!.getText())
+                                            result.dispatchTo(editText!!.text)
                                         } finally {
                                             selfChange = false
                                         }
