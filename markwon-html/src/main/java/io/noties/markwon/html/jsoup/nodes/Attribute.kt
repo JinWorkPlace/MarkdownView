@@ -1,18 +1,25 @@
-package io.noties.markwon.html.jsoup.nodes;
+package io.noties.markwon.html.jsoup.nodes
 
-import androidx.annotation.NonNull;
-
-import java.util.Map;
-
-import io.noties.markwon.html.jsoup.helper.Validate;
+import io.noties.markwon.html.jsoup.helper.Validate.notEmpty
+import io.noties.markwon.html.jsoup.helper.Validate.notNull
 
 /**
  * A single key + value attribute. (Only used for presentation.)
  */
-public class Attribute implements Map.Entry<String, String>, Cloneable {
-    private String key;
-    private String val;
-    Attributes parent; // used to update the holding Attributes when the key / value is changed via this interface
+class Attribute(key: String, `val`: String?, parent: Attributes?) :
+    MutableMap.MutableEntry<String?, String?>, Cloneable {
+    override var key: String?
+
+    /**
+     * Get the attribute value.
+     *
+     * @return the attribute value
+     */
+    override var value: String?
+        private set
+
+    @JvmField
+    var parent: Attributes? // used to update the holding Attributes when the key / value is changed via this interface
 
     /**
      * Create a new attribute from unencoded (raw) key and value.
@@ -20,9 +27,7 @@ public class Attribute implements Map.Entry<String, String>, Cloneable {
      * @param key   attribute key; case is preserved.
      * @param value attribute value
      */
-    public Attribute(String key, String value) {
-        this(key, value, null);
-    }
+    constructor(key: String, value: String?) : this(key, value, null)
 
     /**
      * Create a new attribute from unencoded (raw) key and value.
@@ -31,21 +36,12 @@ public class Attribute implements Map.Entry<String, String>, Cloneable {
      * @param val    attribute value
      * @param parent the containing Attributes (this Attribute is not automatically added to said Attributes)
      */
-    public Attribute(String key, String val, Attributes parent) {
-        Validate.notNull(key);
-        this.key = key.trim();
-        Validate.notEmpty(key); // trimming could potentially make empty, so validate here
-        this.val = val;
-        this.parent = parent;
-    }
-
-    /**
-     * Get the attribute key.
-     *
-     * @return the attribute key
-     */
-    public String getKey() {
-        return key;
+    init {
+        notNull(key)
+        this.key = key.trim { it <= ' ' }
+        notEmpty(key) // trimming could potentially make empty, so validate here
+        this.value = `val`
+        this.parent = parent
     }
 
     /**
@@ -53,64 +49,52 @@ public class Attribute implements Map.Entry<String, String>, Cloneable {
      *
      * @param key the new key; must not be null
      */
-    public void setKey(String key) {
-        Validate.notNull(key);
-        key = key.trim();
-        Validate.notEmpty(key); // trimming could potentially make empty, so validate here
+    fun setKey(key: String) {
+        var key = key
+        notNull(key)
+        key = key.trim { it <= ' ' }
+        notEmpty(key) // trimming could potentially make empty, so validate here
         if (parent != null) {
-            int i = parent.indexOfKey(this.key);
-            if (i != Attributes.NotFound) parent.keys[i] = key;
+            val i = parent!!.indexOfKey(this.key!!)
+            if (i != Attributes.NotFound) parent!!.keys[i] = key
         }
-        this.key = key;
-    }
-
-    /**
-     * Get the attribute value.
-     *
-     * @return the attribute value
-     */
-    public String getValue() {
-        return val;
+        this.key = key
     }
 
     /**
      * Set the attribute value.
      *
-     * @param val the new attribute value; must not be null
+     * @param newValue the new attribute value; must not be null
      */
-    public String setValue(String val) {
-        String oldVal = parent.get(this.key);
+    override fun setValue(newValue: String?): String? {
+        val oldVal = parent!!.get(key!!)
         if (parent != null) {
-            int i = parent.indexOfKey(this.key);
-            if (i != Attributes.NotFound) parent.vals[i] = val;
+            val i = parent!!.indexOfKey(this.key!!)
+            if (i != Attributes.NotFound) parent!!.vals[i] = newValue
         }
-        this.val = val;
-        return oldVal;
+        this.value = newValue
+        return oldVal
     }
 
-    @Override
-    public boolean equals(Object o) { // note parent not considered
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Attribute attribute = (Attribute) o;
-        if (key != null ? !key.equals(attribute.key) : attribute.key != null) return false;
-        return val != null ? val.equals(attribute.val) : attribute.val == null;
+    override fun equals(o: Any?): Boolean { // note parent not considered
+        if (this === o) return true
+        if (o == null || javaClass != o.javaClass) return false
+        val attribute = o as Attribute
+        if (if (key != null) (key != attribute.key) else attribute.key != null) return false
+        return if (this.value != null) (this.value == attribute.value) else attribute.value == null
     }
 
-    @Override
-    public int hashCode() { // note parent not considered
-        int result = key != null ? key.hashCode() : 0;
-        result = 31 * result + (val != null ? val.hashCode() : 0);
-        return result;
+    override fun hashCode(): Int { // note parent not considered
+        var result = if (key != null) key.hashCode() else 0
+        result = 31 * result + (if (this.value != null) value.hashCode() else 0)
+        return result
     }
 
-    @NonNull
-    @Override
-    public Attribute clone() {
+    public override fun clone(): Attribute {
         try {
-            return (Attribute) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+            return super.clone() as Attribute
+        } catch (e: CloneNotSupportedException) {
+            throw RuntimeException(e)
         }
     }
 }

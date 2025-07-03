@@ -1,168 +1,146 @@
-package io.noties.markwon.html;
+package io.noties.markwon.html
 
-import android.text.TextUtils;
+import android.text.TextUtils
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+abstract class CssInlineStyleParser {
+    abstract fun parse(inlineStyle: String): Iterable<CssProperty>
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-public abstract class CssInlineStyleParser {
-
-    @NonNull
-    public abstract Iterable<CssProperty> parse(@NonNull String inlineStyle);
-
-    @NonNull
-    public static CssInlineStyleParser create() {
-        return new Impl();
-    }
-
-    static class Impl extends CssInlineStyleParser {
-
-        @NonNull
-        @Override
-        public Iterable<CssProperty> parse(@NonNull String inlineStyle) {
-            return new CssIterable(inlineStyle);
+    internal class Impl : CssInlineStyleParser() {
+        override fun parse(inlineStyle: String): Iterable<CssProperty> {
+            return CssIterable(inlineStyle)
         }
 
-        private record CssIterable(String input) implements Iterable<CssProperty> {
-
-            private CssIterable(@NonNull String input) {
-                this.input = input;
+        private class CssIterable(val input: String) : Iterable<CssProperty> {
+            override fun iterator(): MutableIterator<CssProperty> {
+                return CssIterator()
             }
 
-            @NonNull
-            @Override
-            public Iterator<CssProperty> iterator() {
-                return new CssIterator();
-            }
+            private inner class CssIterator : MutableIterator<CssProperty> {
+                private val cssProperty = CssProperty()
 
-            private class CssIterator implements Iterator<CssProperty> {
+                private val builder = StringBuilder()
 
-                private final CssProperty cssProperty = new CssProperty();
+                private val length = input.length
 
-                private final StringBuilder builder = new StringBuilder();
+                private var index = 0
 
-                private final int length = input.length();
+                override fun hasNext(): Boolean {
+                    prepareNext()
 
-                private int index;
-
-                @Override
-                public boolean hasNext() {
-
-                    prepareNext();
-
-                    return hasNextPrepared();
+                    return hasNextPrepared()
                 }
 
-                @Override
-                public CssProperty next() {
+                override fun next(): CssProperty {
                     if (!hasNextPrepared()) {
-                        throw new NoSuchElementException();
+                        throw NoSuchElementException()
                     }
-                    return cssProperty;
+                    return cssProperty
                 }
 
-                private void prepareNext() {
-
+                fun prepareNext() {
                     // clear first
-                    cssProperty.set("", "");
 
-                    builder.setLength(0);
+                    cssProperty.set("", "")
 
-                    String key = null;
-                    String value = null;
+                    builder.setLength(0)
 
-                    char c;
+                    var key: String? = null
+                    var value: String? = null
 
-                    boolean keyHasWhiteSpace = false;
+                    var c: Char
 
-                    for (int i = index; i < length; i++) {
+                    var keyHasWhiteSpace = false
 
-                        c = input.charAt(i);
+                    for (i in index..<length) {
+                        c = input[i]
 
                         // if we are building KEY, then when we encounter WS (white-space) we finish
                         // KEY and wait for the ':', if we do not find it and we find EOF or ';'
                         // we start creating KEY again after the ';'
-
                         if (key == null) {
-
                             if (':' == c) {
-
                                 // we have no key yet, but we might have started creating it already
-                                if (builder.length() > 0) {
-                                    key = builder.toString().trim();
+
+                                if (builder.isNotEmpty()) {
+                                    key = builder.toString().trim { it <= ' ' }
                                 }
 
-                                builder.setLength(0);
-
+                                builder.setLength(0)
                             } else {
                                 // if by any chance we have here the ';' -> reset key and try to match next
                                 if (';' == c) {
-                                    builder.setLength(0);
+                                    builder.setLength(0)
                                 } else {
-
                                     // key cannot have WS gaps (but leading and trailing are OK)
+
                                     if (Character.isWhitespace(c)) {
-                                        if (builder.length() > 0) {
-                                            keyHasWhiteSpace = true;
+                                        if (builder.isNotEmpty()) {
+                                            keyHasWhiteSpace = true
                                         }
                                     } else {
                                         // if not a WS and we have found WS before, start a-new
                                         // else append
                                         if (keyHasWhiteSpace) {
                                             // start new filling
-                                            builder.setLength(0);
-                                            builder.append(c);
+                                            builder.setLength(0)
+                                            builder.append(c)
                                             // clear this flag
-                                            keyHasWhiteSpace = false;
+                                            keyHasWhiteSpace = false
                                         } else {
-                                            builder.append(c);
+                                            builder.append(c)
                                         }
                                     }
                                 }
                             }
                         } else if (value == null) {
-
                             if (Character.isWhitespace(c)) {
-                                if (builder.length() > 0) {
-                                    builder.append(c);
+                                if (builder.isNotEmpty()) {
+                                    builder.append(c)
                                 }
                             } else if (';' == c) {
-
-                                value = builder.toString().trim();
-                                builder.setLength(0);
+                                value = builder.toString().trim { it <= ' ' }
+                                builder.setLength(0)
 
                                 // check if we have valid values -> if yes -> return it
                                 if (hasValues(key, value)) {
-                                    index = i + 1;
-                                    cssProperty.set(key, value);
-                                    return;
+                                    index = i + 1
+                                    cssProperty.set(key, value)
+                                    return
                                 }
-
                             } else {
-                                builder.append(c);
+                                builder.append(c)
                             }
                         }
                     }
 
                     // here we must additionally check for EOF (we might be tracking value here)
-                    if (key != null && builder.length() > 0) {
-                        value = builder.toString().trim();
-                        cssProperty.set(key, value);
-                        index = length;
+                    if (key != null && builder.isNotEmpty()) {
+                        value = builder.toString().trim { it <= ' ' }
+                        cssProperty.set(key, value)
+                        index = length
                     }
                 }
 
-                private boolean hasNextPrepared() {
-                    return hasValues(cssProperty.key(), cssProperty.value());
+                fun hasNextPrepared(): Boolean {
+                    return hasValues(cssProperty.key(), cssProperty.value())
                 }
 
-                private boolean hasValues(@Nullable String key, @Nullable String value) {
-                    return !TextUtils.isEmpty(key) && !TextUtils.isEmpty(value);
+                fun hasValues(key: String?, value: String?): Boolean {
+                    return !TextUtils.isEmpty(key) && !TextUtils.isEmpty(value)
+                }
+
+                override fun remove() {
+
                 }
             }
+
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun create(): CssInlineStyleParser {
+            return Impl()
         }
     }
 }

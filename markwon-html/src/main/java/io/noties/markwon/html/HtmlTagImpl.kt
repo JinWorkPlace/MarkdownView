@@ -2,7 +2,7 @@ package io.noties.markwon.html
 
 import java.util.Collections
 
-internal abstract class HtmlTagImpl protected constructor(
+abstract class HtmlTagImpl protected constructor(
     @JvmField val name: String, @JvmField val start: Int, val attributes: MutableMap<String, String>
 ) : HtmlTag {
     @JvmField
@@ -33,7 +33,7 @@ internal abstract class HtmlTagImpl protected constructor(
     abstract fun closeAt(end: Int)
 
 
-    internal class InlineImpl(
+    class InlineImpl(
         name: String, start: Int, attributes: MutableMap<String, String>
     ) : HtmlTagImpl(name, start, attributes), HtmlTag.Inline {
         override fun closeAt(end: Int) {
@@ -61,7 +61,7 @@ internal abstract class HtmlTagImpl protected constructor(
             }
     }
 
-    internal class BlockImpl(
+    class BlockImpl(
         name: String,
         start: Int,
         attributes: MutableMap<String, String>,
