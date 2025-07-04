@@ -38,16 +38,10 @@ dependencies {
     implementation(libs.material)
 
     api(project(":markwon-core"))
+    api(project(":markwon-image"))
     implementation(libs.androidx.core.ktx)
 
     compileOnly(libs.android.gif)
     compileOnly(libs.android.svg)
     compileOnly(libs.okhttp)
-
-    testImplementation(project(":markwon-test-span"))
-    testImplementation(libs.commons.io)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.mockito)
 }

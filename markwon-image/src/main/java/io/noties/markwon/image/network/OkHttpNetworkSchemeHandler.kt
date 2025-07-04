@@ -1,98 +1,66 @@
-package io.noties.markwon.image.network;
+package io.noties.markwon.image.network
 
-import android.net.Uri;
-import androidx.annotation.NonNull;
-
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-
-import io.noties.markwon.image.ImageItem;
-import io.noties.markwon.image.SchemeHandler;
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import android.net.Uri
+import io.noties.markwon.image.ImageItem
+import io.noties.markwon.image.SchemeHandler
+import io.noties.markwon.image.network.NetworkSchemeHandler.Companion.contentType
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 
 /**
  * @since 4.0.0
  */
-public class OkHttpNetworkSchemeHandler extends SchemeHandler {
+class OkHttpNetworkSchemeHandler internal constructor(
+    private val factory: Call.Factory
+) : SchemeHandler() {
+    override fun handle(raw: String, uri: Uri): ImageItem {
+        val request = Request.Builder().url(raw).tag(raw).build()
 
-    /**
-     * @see #create(OkHttpClient)
-     */
-    @NonNull
-    public static OkHttpNetworkSchemeHandler create() {
-        return create(new OkHttpClient());
-    }
-
-    @NonNull
-    public static OkHttpNetworkSchemeHandler create(@NonNull OkHttpClient client) {
-        // explicit cast, otherwise a recursive call
-        return create((Call.Factory) client);
-    }
-
-    /**
-     * @since 4.0.0
-     */
-    @NonNull
-    public static OkHttpNetworkSchemeHandler create(@NonNull Call.Factory factory) {
-        return new OkHttpNetworkSchemeHandler(factory);
-    }
-
-    private static final String HEADER_CONTENT_TYPE = "Content-Type";
-
-    // @since 4.0.0, previously just OkHttpClient
-    private final Call.Factory factory;
-
-    @SuppressWarnings("WeakerAccess")
-    OkHttpNetworkSchemeHandler(@NonNull Call.Factory factory) {
-        this.factory = factory;
-    }
-
-    @NonNull
-    @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri) {
-
-        final Request request = new Request.Builder()
-                .url(raw)
-                .tag(raw)
-                .build();
-
-        final Response response;
+        val response: Response
         try {
-            response = factory.newCall(request).execute();
-        } catch (Throwable t) {
-            throw new IllegalStateException("Exception obtaining network resource: " + raw, t);
+            response = factory.newCall(request).execute()
+        } catch (t: Throwable) {
+            throw IllegalStateException("Exception obtaining network resource: $raw", t)
         }
 
-        if (response == null) {
-            throw new IllegalStateException("Could not obtain network response: " + raw);
-        }
+        checkNotNull(response) { "Could not obtain network response: $raw" }
 
-        final ResponseBody body = response.body();
-        final InputStream inputStream = body != null
-                ? body.byteStream()
-                : null;
+        val body = response.body
+        val inputStream = body?.byteStream()
 
-        if (inputStream == null) {
-            throw new IllegalStateException("Response does not contain body: " + raw);
-        }
+        checkNotNull(inputStream) { "Response does not contain body: $raw" }
 
         // important to process content-type as it can have encoding specified (which we should remove)
-        final String contentType =
-                NetworkSchemeHandler.contentType(response.header(HEADER_CONTENT_TYPE));
+        val contentType = contentType(response.header(HEADER_CONTENT_TYPE))
 
-        return ImageItem.withDecodingNeeded(contentType, inputStream);
+        return ImageItem.withDecodingNeeded(contentType, inputStream)
     }
 
-    @NonNull
-    @Override
-    public Collection<String> supportedSchemes() {
-        return Arrays.asList(
-                NetworkSchemeHandler.SCHEME_HTTP,
-                NetworkSchemeHandler.SCHEME_HTTPS);
+    override fun supportedSchemes(): MutableCollection<String> {
+        return mutableListOf(
+            NetworkSchemeHandler.SCHEME_HTTP, NetworkSchemeHandler.SCHEME_HTTPS
+        )
+    }
+
+    companion object {
+        /**
+         * @see .create
+         */
+        @JvmOverloads
+        fun create(client: OkHttpClient = OkHttpClient()): OkHttpNetworkSchemeHandler {
+            // explicit cast, otherwise a recursive call
+            return create(client as Call.Factory)
+        }
+
+        /**
+         * @since 4.0.0
+         */
+        fun create(factory: Call.Factory): OkHttpNetworkSchemeHandler {
+            return OkHttpNetworkSchemeHandler(factory)
+        }
+
+        private const val HEADER_CONTENT_TYPE = "Content-Type"
     }
 }

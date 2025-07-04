@@ -1,155 +1,100 @@
-package io.noties.markwon.image;
+package io.noties.markwon.image
 
-import android.graphics.drawable.Drawable;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.io.InputStream;
+import android.graphics.drawable.Drawable
+import io.noties.markwon.image.ImageItem.Companion.withDecodingNeeded
+import io.noties.markwon.image.ImageItem.Companion.withResult
+import java.io.InputStream
 
 /**
  * @since 2.0.0
  */
-public abstract class ImageItem {
+abstract class ImageItem private constructor() {
 
     /**
-     * Create an {@link ImageItem} with result, so no further decoding is required.
+     * Create an [ImageItem] with result, so no further decoding is required.
      *
-     * @see #withDecodingNeeded(String, InputStream)
+     * @see withDecodingNeeded
      * @see WithResult
      * @since 4.0.0
      */
-    @NonNull
-    public static ImageItem withResult(@NonNull Drawable drawable) {
-        return new WithResult(drawable);
-    }
-
-    /**
-     * Create an {@link ImageItem} that requires further decoding of InputStream.
-     *
-     * @see #withResult(Drawable)
-     * @see WithDecodingNeeded
-     * @since 4.0.0
-     */
-    @NonNull
-    public static ImageItem withDecodingNeeded(
-            @Nullable String contentType,
-            @NonNull InputStream inputStream) {
-        return new WithDecodingNeeded(contentType, inputStream);
-    }
-
-
-    private ImageItem() {
-    }
-
-    /**
-     * @since 4.0.0
-     */
-    public abstract boolean hasResult();
-
-    /**
-     * @since 4.0.0
-     */
-    public abstract boolean hasDecodingNeeded();
-
-    /**
-     * @see #hasResult()
-     * @since 4.0.0
-     */
-    @NonNull
-    public abstract WithResult getAsWithResult();
-
-    /**
-     * @see #hasDecodingNeeded()
-     * @since 4.0.0
-     */
-    @NonNull
-    public abstract WithDecodingNeeded getAsWithDecodingNeeded();
-
-    /**
-     * @since 4.0.0
-     */
-    public static class WithResult extends ImageItem {
-
-        private final Drawable result;
-
-        private WithResult(@NonNull Drawable drawable) {
-            result = drawable;
+    companion object {
+        fun withResult(drawable: Drawable): ImageItem {
+            return WithResult(drawable)
         }
 
-        @NonNull
-        public Drawable result() {
-            return result;
-        }
-
-        @Override
-        public boolean hasResult() {
-            return true;
-        }
-
-        @Override
-        public boolean hasDecodingNeeded() {
-            return false;
-        }
-
-        @NonNull
-        @Override
-        public WithResult getAsWithResult() {
-            return this;
-        }
-
-        @NonNull
-        @Override
-        public WithDecodingNeeded getAsWithDecodingNeeded() {
-            throw new IllegalStateException();
+        /**
+         * Create an [ImageItem] that requires further decoding of InputStream.
+         *
+         * @see withResult
+         * @see WithDecodingNeeded
+         * @since 4.0.0
+         */
+        fun withDecodingNeeded(contentType: String?, inputStream: InputStream): ImageItem {
+            return WithDecodingNeeded(contentType, inputStream)
         }
     }
 
     /**
      * @since 4.0.0
      */
-    public static class WithDecodingNeeded extends ImageItem {
+    abstract fun hasResult(): Boolean
 
-        private final String contentType;
-        private final InputStream inputStream;
+    /**
+     * @since 4.0.0
+     */
+    abstract fun hasDecodingNeeded(): Boolean
 
-        private WithDecodingNeeded(
-                @Nullable String contentType,
-                @NonNull InputStream inputStream) {
-            this.contentType = contentType;
-            this.inputStream = inputStream;
+    /**
+     * @see hasResult
+     * @since 4.0.0
+     */
+    abstract fun getAsWithResult(): WithResult
+
+    /**
+     * @see hasDecodingNeeded
+     * @since 4.0.0
+     */
+    abstract fun getAsWithDecodingNeeded(): WithDecodingNeeded
+
+    /**
+     * @since 4.0.0
+     */
+    class WithResult internal constructor(
+        private val result: Drawable
+    ) : ImageItem() {
+
+        fun result(): Drawable = result
+
+        override fun hasResult(): Boolean = true
+
+        override fun hasDecodingNeeded(): Boolean = false
+
+        override fun getAsWithResult(): WithResult = this
+
+        override fun getAsWithDecodingNeeded(): WithDecodingNeeded {
+            throw IllegalStateException()
+        }
+    }
+
+    /**
+     * @since 4.0.0
+     */
+    class WithDecodingNeeded internal constructor(
+        private val contentType: String?, private val inputStream: InputStream
+    ) : ImageItem() {
+
+        fun contentType(): String? = contentType
+
+        fun inputStream(): InputStream = inputStream
+
+        override fun hasResult(): Boolean = false
+
+        override fun hasDecodingNeeded(): Boolean = true
+
+        override fun getAsWithResult(): WithResult {
+            throw IllegalStateException()
         }
 
-        @Nullable
-        public String contentType() {
-            return contentType;
-        }
-
-        @NonNull
-        public InputStream inputStream() {
-            return inputStream;
-        }
-
-        @Override
-        public boolean hasResult() {
-            return false;
-        }
-
-        @Override
-        public boolean hasDecodingNeeded() {
-            return true;
-        }
-
-        @NonNull
-        @Override
-        public WithResult getAsWithResult() {
-            throw new IllegalStateException();
-        }
-
-        @NonNull
-        @Override
-        public WithDecodingNeeded getAsWithDecodingNeeded() {
-            return this;
-        }
+        override fun getAsWithDecodingNeeded(): WithDecodingNeeded = this
     }
 }

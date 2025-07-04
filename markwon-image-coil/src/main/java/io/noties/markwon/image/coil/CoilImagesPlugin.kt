@@ -20,10 +20,6 @@ import io.noties.markwon.image.ImageSpanFactory
 import org.commonmark.node.Image
 import java.util.concurrent.atomic.AtomicBoolean
 
-/**
- * @author Tyler Wong
- * @since 4.2.0
- */
 class CoilImagesPlugin internal constructor(
     coilStore: CoilStore, imageLoader: ImageLoader
 ) : AbstractMarkwonPlugin() {
@@ -55,8 +51,7 @@ class CoilImagesPlugin internal constructor(
     private class CoilAsyncDrawableLoader(
         private val coilStore: CoilStore, private val imageLoader: ImageLoader
     ) : AsyncDrawableLoader() {
-        private val cache: MutableMap<AsyncDrawable, Disposable> =
-            HashMap<AsyncDrawable, Disposable>(2)
+        private val cache: MutableMap<AsyncDrawable, Disposable> = HashMap(2)
 
         override fun load(drawable: AsyncDrawable) {
             val loaded = AtomicBoolean(false)
@@ -86,8 +81,7 @@ class CoilImagesPlugin internal constructor(
         }
 
         private inner class AsyncDrawableTarget(
-            private val drawable: AsyncDrawable,
-            private val loaded: AtomicBoolean
+            private val drawable: AsyncDrawable, private val loaded: AtomicBoolean
         ) : Target {
             override fun onSuccess(result: Drawable) {
                 // @since 4.5.1 check finished flag (result can be delivered _before_ disposable is created)
