@@ -1,34 +1,22 @@
-package io.noties.markwon.image;
+package io.noties.markwon.image
 
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Drawable
+import java.io.InputStream
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.io.InputStream;
-import java.util.Collection;
-
-/**
- * @since 3.0.0
- */
-public abstract class MediaDecoder {
-
+abstract class MediaDecoder {
     /**
      * Changes since 4.0.0:
-     * <ul>
-     * <li>Returns `non-null` drawable</li>
-     * <li>Added `contentType` method parameter</li>
-     * </ul>
+     *
+     *  * Returns `non-null` drawable
+     *  * Added `contentType` method parameter
+     *
      */
-    @NonNull
-    public abstract Drawable decode(
-            @Nullable String contentType,
-            @NonNull InputStream inputStream
-    );
+    abstract fun decode(
+        contentType: String?, inputStream: InputStream
+    ): Drawable
 
     /**
      * @since 4.0.0
      */
-    @NonNull
-    public abstract Collection<String> supportedTypes();
+    abstract fun supportedTypes(): MutableCollection<String>
 }

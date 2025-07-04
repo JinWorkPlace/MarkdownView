@@ -1,43 +1,37 @@
-package io.noties.markwon.image.svg;
+package io.noties.markwon.image.svg
 
-import android.util.Log;
-
-import androidx.annotation.NonNull;
+import android.util.Log
 
 /**
  * @since 4.0.0
  */
-public abstract class SvgSupport {
+object SvgSupport {
+    private val HAS_SVG: Boolean
 
-    private static final boolean HAS_SVG;
-
-    static {
-        boolean result;
+    init {
+        var result: Boolean
         try {
-            Class.forName("com.caverock.androidsvg.SVG");
-            result = true;
-        } catch (Throwable t) {
+            Class.forName("com.caverock.androidsvg.SVG")
+            result = true
+        } catch (t: Throwable) {
             // @since 4.1.1 instead of printing full stacktrace of the exception,
             // just print a warning to the console
-            Log.w("MarkwonImagesPlugin", missingMessage());
-            result = false;
+            Log.w("MarkwonImagesPlugin", missingMessage())
+            result = false
         }
-        HAS_SVG = result;
+        HAS_SVG = result
     }
 
-    public static boolean hasSvgSupport() {
-        return HAS_SVG;
+    @JvmStatic
+    fun hasSvgSupport(): Boolean {
+        return HAS_SVG
     }
 
     /**
      * @since 4.1.1
      */
-    @NonNull
-    static String missingMessage() {
-        return "`com.caverock:androidsvg:*` dependency is missing, " +
-                "please add to your project explicitly if you wish to use SVG media-decoder";
-    }
-
-    private SvgSupport() {
+    @JvmStatic
+    fun missingMessage(): String {
+        return "`com.caverock:androidsvg:*` dependency is missing, " + "please add to your project explicitly if you wish to use SVG media-decoder"
     }
 }
