@@ -43,11 +43,4 @@ dependencies {
     compileOnly(libs.android.gif)
     compileOnly(libs.android.svg)
     compileOnly(libs.okhttp)
-
-    testImplementation(project(":markwon-test-span"))
-    testImplementation(libs.commons.io)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.mockito)
 }
