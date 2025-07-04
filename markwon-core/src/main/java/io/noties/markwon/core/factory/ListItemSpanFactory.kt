@@ -13,21 +13,17 @@ class ListItemSpanFactory : SpanFactory {
         // bullet : level
         // ordered: number
 
-        val spans: Any
-
-        if (CoreProps.ListItemType.BULLET == CoreProps.LIST_ITEM_TYPE.require(props)) {
-            spans = BulletListItemSpan(
+        return if (CoreProps.ListItemType.BULLET == CoreProps.LIST_ITEM_TYPE.require(props)) {
+            BulletListItemSpan(
                 configuration.theme(), CoreProps.BULLET_LIST_ITEM_LEVEL.require(props)
             )
         } else {
             val number =
                 (CoreProps.ORDERED_LIST_ITEM_NUMBER.require(props).toString() + "." + '\u00a0')
 
-            spans = OrderedListItemSpan(
+            OrderedListItemSpan(
                 configuration.theme(), number
             )
         }
-
-        return spans
     }
 }

@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.material)
 
     api(project(":markwon-core"))
+    api(project(":markwon-image"))
     implementation(libs.androidx.core.ktx)
 
     compileOnly(libs.android.gif)
