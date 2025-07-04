@@ -17,7 +17,7 @@ coilVersion = "2.7.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-robolectric = { group = "org.robolectri", name = "robolectric", version = "3.8" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.15.1" }
 mockito = { group = "org.mockito", name = "mockito-core", version = "5.18.0" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -39,7 +39,7 @@ commonmark-table = { group = "com.atlassian.commonmark", name = "commonmark-ext-
 
 android-gif = { group = "pl.droidsonroids.gif", name = "android-gif-drawable", version = "1.2.29" }
 android-svg = { group = "com.caverock", name = "androidsvg", version = "1.4" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "5.0.0" }
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coilVersion" }
 coil-base = { group = "io.coil-kt", name = "coil-base", version = "coilVersion" }
