@@ -14,7 +14,7 @@ import java.util.Locale
  * @since 4.2.0
  */
 abstract class PersistedSpans {
-    interface SpanFactory<T> {
+    fun interface SpanFactory<T> {
         fun create(): T
     }
 

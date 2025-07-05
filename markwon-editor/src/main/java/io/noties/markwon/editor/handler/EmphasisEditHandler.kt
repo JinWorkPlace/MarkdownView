@@ -24,7 +24,7 @@ class EmphasisEditHandler : AbstractEditHandler<EmphasisSpan>() {
         persistedSpans: PersistedSpans,
         editable: Editable,
         input: String,
-        span: Any,
+        span: EmphasisSpan,
         spanStart: Int,
         spanTextLength: Int
     ) {

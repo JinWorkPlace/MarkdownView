@@ -13,7 +13,7 @@ class Prop<T> internal constructor(private val name: String) {
         return name
     }
 
-    fun get(props: RenderProps): T? {
+    fun get(props: RenderProps): T {
         return props.get(this)
     }
 

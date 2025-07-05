@@ -6,7 +6,7 @@ import android.view.View
 import io.noties.markwon.LinkResolver
 import io.noties.markwon.core.MarkwonTheme
 
-class LinkSpan(
+open class LinkSpan(
     private val theme: MarkwonTheme,
     /**
      * @since 4.2.0

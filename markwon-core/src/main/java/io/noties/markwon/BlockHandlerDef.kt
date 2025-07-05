@@ -6,7 +6,7 @@ import org.commonmark.node.Node
 /**
  * @since 4.3.0
  */
-class BlockHandlerDef : BlockHandler {
+open class BlockHandlerDef : BlockHandler {
     override fun blockStart(visitor: MarkwonVisitor, node: Node) {
         visitor.ensureNewLine()
     }

@@ -33,7 +33,7 @@ interface EditHandler<T> {
         persistedSpans: PersistedSpans,
         editable: Editable,
         input: String,
-        span: Any,
+        span: T,
         spanStart: Int,
         spanTextLength: Int
     )
