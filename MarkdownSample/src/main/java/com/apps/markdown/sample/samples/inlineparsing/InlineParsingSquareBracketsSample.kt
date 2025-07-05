@@ -1,114 +1,110 @@
-package com.apps.markdown.sample.samples.inlineparsing;
+package com.apps.markdown.sample.samples.inlineparsing
 
-import android.graphics.Color;
-import android.text.style.ForegroundColorSpan;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.commonmark.node.CustomNode;
-import org.commonmark.node.Node;
-
-import java.util.regex.Pattern;
-
-import io.noties.debug.Debug;
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonSpansFactory;
-import io.noties.markwon.MarkwonVisitor;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.inlineparser.InlineProcessor;
-import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.inlineparser.OpenBracketInlineProcessor;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import android.graphics.Color
+import android.text.style.ForegroundColorSpan
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.MarkwonSpansFactory
+import io.noties.markwon.MarkwonVisitor
+import io.noties.markwon.RenderProps
+import io.noties.markwon.SpanFactory
+import io.noties.markwon.inlineparser.InlineProcessor
+import io.noties.markwon.inlineparser.MarkwonInlineParser.FactoryBuilder
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin.BuilderConfigure
+import io.noties.markwon.inlineparser.OpenBracketInlineProcessor
+import org.commonmark.node.CustomNode
+import org.commonmark.node.Node
 
 @MarkwonSampleInfo(
-  id = "20200819071751",
-  title = "Inline Parsing of square brackets",
-  description = "Disable OpenBracketInlineParser in order " +
-    "to parse own markdown syntax based on `[` character(s). This would disable native " +
-    "markdown [links](#) but not images ![image-alt](#)",
-  artifacts = MarkwonArtifact.INLINE_PARSER,
-  tags = {Tag.parsing}
+    id = "20200819071751",
+    title = "Inline Parsing of square brackets",
+    description = ("Disable OpenBracketInlineParser in order " + "to parse own markdown syntax based on `[` character(s). This would disable native " + "markdown [links](#) but not images ![image-alt](#)"),
+    artifacts = [MarkwonArtifact.INLINE_PARSER],
+    tags = [Tag.PARSING]
 )
-public class InlineParsingSquareBracketsSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final String md = "" +
-      "# Hello\n" +
-      "Hey! [[my text]] here and what to do with it?\n\n" +
-      "[[at the beginning]] of a line with [links](#) disabled";
+class InlineParsingSquareBracketsSample : MarkwonTextViewSample() {
+    override fun render() {
+        val md =
+            "" + "# Hello\n" + "Hey! [[my text]] here and what to do with it?\n\n" + "[[at the beginning]] of a line with [links](#) disabled"
 
-    final Markwon markwon = Markwon.builder(context)
-      .usePlugin(MarkwonInlineParserPlugin.create(factoryBuilder ->
-        factoryBuilder
-          .addInlineProcessor(new MyTextInlineProcessor())
-          .excludeInlineProcessor(OpenBracketInlineProcessor.class)))
-      .usePlugin(new AbstractMarkwonPlugin() {
-        @Override
-        public void configureVisitor(@NonNull MarkwonVisitor.Builder builder) {
-          builder
-            .on(MyTextNode.class, new GenericInlineNodeVisitor())
-            .on(NotMyTextNode.class, new GenericInlineNodeVisitor());
-        }
+        val markwon: Markwon = Markwon.builder(context)
+            .usePlugin(MarkwonInlineParserPlugin.create(object : BuilderConfigure<FactoryBuilder> {
+                override fun configureBuilder(factoryBuilder: FactoryBuilder) {
+                    factoryBuilder.addInlineProcessor(MyTextInlineProcessor())
+                        .excludeInlineProcessor(OpenBracketInlineProcessor::class.java)
+                }
+            })).usePlugin(object : AbstractMarkwonPlugin() {
+                override fun configureVisitor(builder: MarkwonVisitor.Builder) {
+                    builder.on(MyTextNode::class.java, GenericInlineNodeVisitor()).on(
+                        NotMyTextNode::class.java, GenericInlineNodeVisitor()
+                    )
+                }
 
-        @Override
-        public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
-          builder
-            .setFactory(MyTextNode.class, (configuration, props) -> new ForegroundColorSpan(Color.RED))
-            .setFactory(NotMyTextNode.class, (configuration, props) -> new ForegroundColorSpan(Color.GREEN));
-        }
-      })
-      .build();
+                override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
+                    builder.setFactory(
+                        MyTextNode::class.java, object : SpanFactory {
+                            override fun getSpans(
+                                configuration: MarkwonConfiguration, props: RenderProps
+                            ): Any {
+                                return ForegroundColorSpan(Color.RED)
+                            }
+                        }).setFactory(
+                        NotMyTextNode::class.java, object : SpanFactory {
+                            override fun getSpans(
+                                configuration: MarkwonConfiguration, props: RenderProps
+                            ): Any {
+                                return ForegroundColorSpan(Color.GREEN)
+                            }
+                        })
+                }
+            }).build()
 
-    markwon.setMarkdown(textView, md);
-  }
-
-  private static class GenericInlineNodeVisitor implements MarkwonVisitor.NodeVisitor<Node> {
-    @Override
-    public void visit(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
-      final int length = visitor.length();
-      visitor.visitChildren(node);
-      visitor.setSpansForNodeOptional(node, length);
-    }
-  }
-
-  private static class MyTextInlineProcessor extends InlineProcessor {
-
-    private static final Pattern RE = Pattern.compile("\\[\\[(.+?)\\]\\]");
-
-    @Override
-    public char specialCharacter() {
-      return '[';
+        markwon.setMarkdown(textView, md)
     }
 
-    @Nullable
-    @Override
-    protected Node parse() {
-      final String match = match(RE);
-      Debug.i(match);
-      if (match != null) {
-        // consume syntax
-        final String text = match.substring(2, match.length() - 2);
-        final Node node;
-        // for example some condition checking
-        if (text.equals("my text")) {
-          node = new MyTextNode();
-        } else {
-          node = new NotMyTextNode();
+    private class GenericInlineNodeVisitor : MarkwonVisitor.NodeVisitor<Node> {
+        override fun visit(visitor: MarkwonVisitor, node: Node) {
+            val length: Int = visitor.length()
+            visitor.visitChildren(node)
+            visitor.setSpansForNodeOptional(node, length)
         }
-        node.appendChild(text(text));
-        return node;
-      }
-      return null;
     }
-  }
 
-  private static class MyTextNode extends CustomNode {
-  }
+    private class MyTextInlineProcessor : InlineProcessor() {
+        override fun specialCharacter(): Char {
+            return '['
+        }
 
-  private static class NotMyTextNode extends CustomNode {
-  }
+        override fun parse(): Node? {
+            val match = match(RE)
+            if (match != null) {
+                // consume syntax
+                val text = match.substring(2, match.length - 2)
+                // for example some condition checking
+                val node = if (text == "my text") {
+                    MyTextNode()
+                } else {
+                    NotMyTextNode()
+                }
+                node.appendChild(text(text))
+                return node
+            }
+            return null
+        }
+
+        companion object {
+            private val RE: java.util.regex.Pattern =
+                java.util.regex.Pattern.compile("\\[\\[(.+?)]]")
+        }
+    }
+
+    private class MyTextNode : CustomNode()
+
+    private class NotMyTextNode : CustomNode()
 }

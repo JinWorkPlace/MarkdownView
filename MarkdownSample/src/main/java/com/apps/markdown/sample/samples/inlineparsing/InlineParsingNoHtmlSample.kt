@@ -1,59 +1,49 @@
-package com.apps.markdown.sample.samples.inlineparsing;
+package com.apps.markdown.sample.samples.inlineparsing
 
-import androidx.annotation.NonNull;
-
-import org.commonmark.node.Block;
-import org.commonmark.node.HtmlBlock;
-import org.commonmark.parser.Parser;
-
-import java.util.Set;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.core.CorePlugin;
-import io.noties.markwon.inlineparser.HtmlInlineProcessor;
-import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.core.CorePlugin
+import io.noties.markwon.inlineparser.HtmlInlineProcessor
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
+import org.commonmark.node.Block
+import org.commonmark.node.HtmlBlock
+import org.commonmark.parser.Parser
 
 @MarkwonSampleInfo(
-  id = "20200630171239",
-  title = "Inline parsing exclude HTML",
-  artifacts = MarkwonArtifact.INLINE_PARSER,
-  tags = {Tag.parsing, Tag.inline, Tag.block}
+    id = "20200630171239",
+    title = "Inline parsing exclude HTML",
+    artifacts = [MarkwonArtifact.INLINE_PARSER],
+    tags = [Tag.PARSING, Tag.INLINE, Tag.BLOCK]
 )
-public class InlineParsingNoHtmlSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final String md = "# Html <b>disabled</b>\n\n" +
-      "<em>emphasis <strong>strong</strong>\n\n" +
-      "<p>paragraph <img src='hey.jpg' /></p>\n\n" +
-      "<test></test>\n\n" +
-      "<test>";
+class InlineParsingNoHtmlSample : MarkwonTextViewSample() {
+    override fun render() {
+        val md =
+            "# Html <b>disabled</b>\n\n" + "<em>emphasis <strong>strong</strong>\n\n" + "<p>paragraph <img src='hey.jpg' /></p>\n\n" + "<test></test>\n\n" + "<test>"
 
-    final Markwon markwon = Markwon.builder(context)
-      .usePlugin(MarkwonInlineParserPlugin.create())
-      .usePlugin(new AbstractMarkwonPlugin() {
-        @Override
-        public void configure(@NonNull Registry registry) {
-          registry.require(MarkwonInlineParserPlugin.class, plugin -> {
-            plugin.factoryBuilder()
-              .excludeInlineProcessor(HtmlInlineProcessor.class);
-          });
-        }
+        val markwon: Markwon =
+            Markwon.builder(context).usePlugin(MarkwonInlineParserPlugin.create())
+                .usePlugin(object : AbstractMarkwonPlugin() {
+                    override fun configure(registry: io.noties.markwon.MarkwonPlugin.Registry) {
+                        registry.require(
+                            MarkwonInlineParserPlugin::class.java,
+                            io.noties.markwon.MarkwonPlugin.Action { plugin: MarkwonInlineParserPlugin ->
+                                plugin.factoryBuilder()
+                                    .excludeInlineProcessor(HtmlInlineProcessor::class.java)
+                            })
+                    }
 
-        @Override
-        public void configureParser(@NonNull Parser.Builder builder) {
-          final Set<Class<? extends Block>> blocks = CorePlugin.enabledBlockTypes();
-          blocks.remove(HtmlBlock.class);
+                    override fun configureParser(builder: Parser.Builder) {
+                        val blocks: MutableSet<Class<out Block>> = CorePlugin.enabledBlockTypes()
+                        blocks.remove(HtmlBlock::class.java)
 
-          builder.enabledBlockTypes(blocks);
-        }
-      })
-      .build();
+                        builder.enabledBlockTypes(blocks)
+                    }
+                }).build()
 
-    markwon.setMarkdown(textView, md);
-  }
+        markwon.setMarkdown(textView, md)
+    }
 }

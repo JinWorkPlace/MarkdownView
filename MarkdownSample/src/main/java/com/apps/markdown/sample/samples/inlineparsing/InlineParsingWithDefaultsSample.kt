@@ -1,45 +1,40 @@
-package com.apps.markdown.sample.samples.inlineparsing;
+package com.apps.markdown.sample.samples.inlineparsing
 
-import androidx.annotation.NonNull;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.inlineparser.OpenBracketInlineProcessor;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
+import io.noties.markwon.inlineparser.OpenBracketInlineProcessor
 
 @MarkwonSampleInfo(
-  id = "20200630170723",
-  title = "Inline parsing with defaults",
-  description = "Parsing with all defaults except links",
-  artifacts = MarkwonArtifact.INLINE_PARSER,
-  tags = {Tag.inline, Tag.parsing}
+    id = "20200630170723",
+    title = "Inline parsing with defaults",
+    description = "Parsing with all defaults except links",
+    artifacts = [MarkwonArtifact.INLINE_PARSER],
+    tags = [Tag.INLINE, Tag.PARSING]
 )
-public class InlineParsingWithDefaultsSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    // a plugin with defaults registered
+class InlineParsingWithDefaultsSample : MarkwonTextViewSample() {
+    override fun render() {
+        // a plugin with defaults registered
 
-    final String md = "no [links](#) for **you** `code`!";
+        val md = "no [links](#) for **you** `code`!"
 
-    final Markwon markwon = Markwon.builder(context)
-      .usePlugin(MarkwonInlineParserPlugin.create())
-      // the same as:
-//       .usePlugin(MarkwonInlineParserPlugin.create(MarkwonInlineParser.factoryBuilder()))
-      .usePlugin(new AbstractMarkwonPlugin() {
-        @Override
-        public void configure(@NonNull Registry registry) {
-          registry.require(MarkwonInlineParserPlugin.class, plugin -> {
-            plugin.factoryBuilder()
-              .excludeInlineProcessor(OpenBracketInlineProcessor.class);
-          });
-        }
-      })
-      .build();
+        val markwon: Markwon =
+            Markwon.builder(context).usePlugin(MarkwonInlineParserPlugin.create()) // the same as:
+                .usePlugin(object : AbstractMarkwonPlugin() {
+                    override fun configure(registry: io.noties.markwon.MarkwonPlugin.Registry) {
+                        registry.require(
+                            MarkwonInlineParserPlugin::class.java,
+                            io.noties.markwon.MarkwonPlugin.Action { plugin: MarkwonInlineParserPlugin ->
+                                plugin.factoryBuilder()
+                                    .excludeInlineProcessor(OpenBracketInlineProcessor::class.java)
+                            })
+                    }
+                }).build()
 
-    markwon.setMarkdown(textView, md);
-  }
+        markwon.setMarkdown(textView, md)
+    }
 }
