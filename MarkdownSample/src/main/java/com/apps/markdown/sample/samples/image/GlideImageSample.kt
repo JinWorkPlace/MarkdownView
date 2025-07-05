@@ -14,7 +14,7 @@ import io.noties.markwon.image.glide.GlideImagesPlugin
     tags = [Tag.IMAGE]
 )
 class GlideImageSample : MarkwonTextViewSample() {
-    public override fun render() {
+    override fun render() {
         val md =
             "[![undefined](https://img.youtube.com/vi/gs1I8_m4AOM/0.jpg)](https://www.youtube.com/watch?v=gs1I8_m4AOM)"
 

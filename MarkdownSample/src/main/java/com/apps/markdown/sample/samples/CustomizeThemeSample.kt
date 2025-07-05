@@ -1,41 +1,30 @@
-package com.apps.markdown.sample.samples;
+package com.apps.markdown.sample.samples
 
-import android.graphics.Color;
-
-import androidx.annotation.NonNull;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.core.MarkwonTheme;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
 
 @MarkwonSampleInfo(
-  id = "20200629123617",
-  title = "Customize theme",
-  description = "Customize `MarkwonTheme` styling",
-  artifacts = MarkwonArtifact.CORE,
-  tags = {Tag.style, Tag.theme, Tag.plugin}
+    id = "20200629123617",
+    title = "Customize theme",
+    description = "Customize `MarkwonTheme` styling",
+    artifacts = [MarkwonArtifact.CORE],
+    tags = [Tag.STYLE, Tag.THEME, Tag.PLUGIN]
 )
-public class CustomizeThemeSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
+class CustomizeThemeSample : MarkwonTextViewSample() {
+    override fun render() {
+        val md = "`A code` that is rendered differently\n\n```\nHello!\n```"
 
-    final String md = "`A code` that is rendered differently\n\n```\nHello!\n```";
+        val markwon: Markwon = Markwon.builder(context).usePlugin(object : AbstractMarkwonPlugin() {
+            override fun configureTheme(builder: io.noties.markwon.core.MarkwonTheme.Builder) {
+                builder.codeBackgroundColor(android.graphics.Color.BLACK)
+                    .codeTextColor(android.graphics.Color.RED)
+            }
+        }).build()
 
-    final Markwon markwon = Markwon.builder(context)
-      .usePlugin(new AbstractMarkwonPlugin() {
-        @Override
-        public void configureTheme(@NonNull MarkwonTheme.Builder builder) {
-          builder
-            .codeBackgroundColor(Color.BLACK)
-            .codeTextColor(Color.RED);
-        }
-      })
-      .build();
-
-    markwon.setMarkdown(textView, md);
-  }
+        markwon.setMarkdown(textView, md)
+    }
 }

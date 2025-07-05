@@ -1,49 +1,36 @@
-package com.apps.markdown.sample.samples;
+package com.apps.markdown.sample.samples
 
-import androidx.annotation.NonNull;
-
-import org.commonmark.parser.Parser;
-
-import java.util.Collections;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.inlineparser.MarkwonInlineParser;
-import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.inlineparser.MarkwonInlineParser
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
+import org.commonmark.node.Block
+import org.commonmark.parser.Parser
 
 @MarkwonSampleInfo(
-  id = "20200629171212",
-  title = "No parsing",
-  description = "All commonmark parsing is disabled (both inlines and blocks)",
-  artifacts = MarkwonArtifact.CORE,
-  tags = {Tag.parsing, Tag.rendering}
+    id = "20200629171212",
+    title = "No parsing",
+    description = "All commonmark parsing is disabled (both inlines and blocks)",
+    artifacts = [MarkwonArtifact.CORE],
+    tags = [Tag.PARSING, Tag.RENDERING]
 )
-public class NoParsingSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final String md = "" +
-      "# Heading\n" +
-      "[link](#) was _here_ and `then` and it was:\n" +
-      "> a quote\n" +
-      "```java\n" +
-      "final int someJavaCode = 0;\n" +
-      "```\n";
+class NoParsingSample : MarkwonTextViewSample() {
+    override fun render() {
+        val md =
+            "" + "# Heading\n" + "[link](#) was _here_ and `then` and it was:\n" + "> a quote\n" + "```java\n" + "final int someJavaCode = 0;\n" + "```\n"
 
-    final Markwon markwon = Markwon.builder(context)
-      // disable inline parsing
-      .usePlugin(MarkwonInlineParserPlugin.create(MarkwonInlineParser.factoryBuilderNoDefaults()))
-      .usePlugin(new AbstractMarkwonPlugin() {
-        @Override
-        public void configureParser(@NonNull Parser.Builder builder) {
-          builder.enabledBlockTypes(Collections.emptySet());
-        }
-      })
-      .build();
+        val markwon: Markwon = Markwon.builder(context) // disable inline parsing
+            .usePlugin(MarkwonInlineParserPlugin.create(MarkwonInlineParser.factoryBuilderNoDefaults()))
+            .usePlugin(object : AbstractMarkwonPlugin() {
+                override fun configureParser(builder: Parser.Builder) {
+                    builder.enabledBlockTypes(kotlin.collections.mutableSetOf<Class<out Block>>())
+                }
+            }).build()
 
-    markwon.setMarkdown(textView, md);
-  }
+        markwon.setMarkdown(textView, md)
+    }
 }

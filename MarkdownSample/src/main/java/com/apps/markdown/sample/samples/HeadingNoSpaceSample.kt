@@ -1,64 +1,51 @@
-package com.apps.markdown.sample.samples;
+package com.apps.markdown.sample.samples
 
-import androidx.annotation.NonNull;
-
-import org.commonmark.node.Heading;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonVisitor;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.core.CoreProps;
-import io.noties.markwon.core.MarkwonTheme;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonVisitor
+import io.noties.markwon.core.CoreProps
+import io.noties.markwon.core.MarkwonTheme
+import org.commonmark.node.Heading
 
 @MarkwonSampleInfo(
-  id = "20200629125622",
-  title = "Heading no padding",
-  description = "Do not add a new line after heading node",
-  artifacts = MarkwonArtifact.CORE,
-  tags = {Tag.spacing, Tag.padding, Tag.spacing, Tag.rendering}
+    id = "20200629125622",
+    title = "Heading no padding",
+    description = "Do not add a new line after heading node",
+    artifacts = [MarkwonArtifact.CORE],
+    tags = [Tag.SPACING, Tag.PADDING, Tag.SPACING, Tag.RENDERING]
 )
-public class HeadingNoSpaceSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final String md = "" +
-      "# Title title title title title title title title title title" +
-      "\n\ntext text text text" +
-      "";
+class HeadingNoSpaceSample : MarkwonTextViewSample() {
+    override fun render() {
+        val md =
+            "" + "# Title title title title title title title title title title" + "\n\ntext text text text" + ""
 
-    final Markwon markwon = Markwon.builder(context)
-      .usePlugin(new AbstractMarkwonPlugin() {
-        @Override
-        public void configureTheme(@NonNull MarkwonTheme.Builder builder) {
-          builder.headingBreakHeight(0);
-        }
-
-        @Override
-        public void configureVisitor(@NonNull MarkwonVisitor.Builder builder) {
-          builder.on(Heading.class, (visitor, heading) -> {
-
-            visitor.ensureNewLine();
-
-            final int length = visitor.length();
-            visitor.visitChildren(heading);
-
-            CoreProps.HEADING_LEVEL.set(visitor.renderProps(), heading.getLevel());
-
-            visitor.setSpansForNodeOptional(heading, length);
-
-            if (visitor.hasNext(heading)) {
-              visitor.ensureNewLine();
-              // by default Markwon adds a new line here
-//              visitor.forceNewLine();
+        val markwon: Markwon = Markwon.builder(context).usePlugin(object : AbstractMarkwonPlugin() {
+            override fun configureTheme(builder: MarkwonTheme.Builder) {
+                builder.headingBreakHeight(0)
             }
-          });
-        }
-      })
-      .build();
 
-    markwon.setMarkdown(textView, md);
-  }
+            override fun configureVisitor(builder: MarkwonVisitor.Builder) {
+                builder.on(
+                    Heading::class.java,
+                    MarkwonVisitor.NodeVisitor { visitor: MarkwonVisitor, heading: Heading ->
+                        visitor.ensureNewLine()
+                        val length: Int = visitor.length()
+                        visitor.visitChildren(heading)
+
+                        CoreProps.HEADING_LEVEL.set(visitor.renderProps(), heading.level)
+
+                        visitor.setSpansForNodeOptional(heading, length)
+                        if (visitor.hasNext(heading)) {
+                            visitor.ensureNewLine()
+                        }
+                    })
+            }
+        }).build()
+
+        markwon.setMarkdown(textView, md)
+    }
 }

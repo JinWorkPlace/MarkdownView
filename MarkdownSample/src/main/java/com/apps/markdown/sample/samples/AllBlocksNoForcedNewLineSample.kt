@@ -24,7 +24,7 @@ class AllBlocksNoForcedNewLineSample : MarkwonTextViewSample() {
 
         // extend default block handler
         val blockHandler: MarkwonVisitor.BlockHandler = object : BlockHandlerDef() {
-            public override fun blockEnd(visitor: MarkwonVisitor, node: Node) {
+            override fun blockEnd(visitor: MarkwonVisitor, node: Node) {
                 if (visitor.hasNext(node)) {
                     visitor.ensureNewLine()
                 }

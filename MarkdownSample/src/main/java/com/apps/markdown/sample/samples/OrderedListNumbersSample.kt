@@ -1,48 +1,23 @@
-package com.apps.markdown.sample.samples;
+package com.apps.markdown.sample.samples
 
-import io.noties.markwon.Markwon;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.Markwon
 
 @MarkwonSampleInfo(
-  id = "20201203221806",
-  title = "Ordered list numbers",
-  artifacts = MarkwonArtifact.CORE,
-  tags = Tag.rendering
+    id = "20201203221806",
+    title = "Ordered list numbers",
+    artifacts = [MarkwonArtifact.CORE],
+    tags = [Tag.RENDERING]
 )
-public class OrderedListNumbersSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final String md = "# Ordered lists\n\n" +
-      "1. hello there\n" +
-      "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" +
-      "1. okay, np\n" +
-      "1. hello there\n" +
-      "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" +
-      "1. okay, np\n" +
-      "1. hello there\n" +
-      "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" +
-      "1. okay, np\n" +
-      "1. hello there\n" +
-      "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" +
-      "1. okay, np\n" +
-      "1. hello there\n" +
-      "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" +
-      "1. okay, np\n" +
-      "1. hello there\n" +
-      "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" +
-      "1. okay, np\n" +
-      "1. hello there\n" +
-      "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" +
-      "1. okay, np\n" +
-      "1. hello there\n" +
-      "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" +
-      "1. okay, np\n" +
-      "";
+class OrderedListNumbersSample : MarkwonTextViewSample() {
+    public override fun render() {
+        val md =
+            "# Ordered lists\n\n" + "1. hello there\n" + "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" + "1. okay, np\n" + "1. hello there\n" + "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" + "1. okay, np\n" + "1. hello there\n" + "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" + "1. okay, np\n" + "1. hello there\n" + "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" + "1. okay, np\n" + "1. hello there\n" + "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" + "1. okay, np\n" + "1. hello there\n" + "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" + "1. okay, np\n" + "1. hello there\n" + "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" + "1. okay, np\n" + "1. hello there\n" + "1. hello there and much much more, this text just goes and goes, and should it stop, we' know it\n" + "1. okay, np\n" + ""
 
-    final Markwon markwon = Markwon.create(context);
-    markwon.setMarkdown(textView, md);
-  }
+        val markwon: Markwon = Markwon.create(context)
+        markwon.setMarkdown(textView, md)
+    }
 }

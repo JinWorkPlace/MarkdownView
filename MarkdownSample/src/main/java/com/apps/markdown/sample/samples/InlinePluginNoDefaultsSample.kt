@@ -1,35 +1,30 @@
-package com.apps.markdown.sample.samples;
+package com.apps.markdown.sample.samples
 
-import io.noties.markwon.Markwon;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.inlineparser.MarkwonInlineParser;
-import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.Markwon
+import io.noties.markwon.Markwon.Companion.builder
+import io.noties.markwon.inlineparser.MarkwonInlineParser
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
+
 
 @MarkwonSampleInfo(
-  id = "20200629170857",
-  title = "Inline parsing without defaults",
-  description = "Configure inline parser plugin to **not** have any **inline** parsing",
-  artifacts = {MarkwonArtifact.INLINE_PARSER},
-  tags = {Tag.parsing}
+    id = "20200629170857",
+    title = "Inline parsing without defaults",
+    description = "Configure inline parser plugin to **not** have any **inline** parsing",
+    artifacts = [MarkwonArtifact.INLINE_PARSER],
+    tags = [Tag.PARSING]
 )
-public class InlinePluginNoDefaultsSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final String md = "" +
-      "# Heading\n" +
-      "`code` inlined and **bold** here";
+class InlinePluginNoDefaultsSample : MarkwonTextViewSample() {
+    override fun render() {
+        val md = "" + "# Heading\n" + "`code` inlined and **bold** here"
 
-    final Markwon markwon = Markwon.builder(context)
-      .usePlugin(MarkwonInlineParserPlugin.create(MarkwonInlineParser.factoryBuilderNoDefaults()))
-//                .usePlugin(MarkwonInlineParserPlugin.create(MarkwonInlineParser.factoryBuilderNoDefaults(), factoryBuilder -> {
-//                    // if anything, they can be included here
-////                    factoryBuilder.includeDefaults()
-//                }))
-      .build();
+        val markwon: Markwon =
+            builder(context).usePlugin(MarkwonInlineParserPlugin.create(MarkwonInlineParser.factoryBuilderNoDefaults()))
+                .build()
 
-    markwon.setMarkdown(textView, md);
-  }
+        markwon.setMarkdown(textView, md)
+    }
 }
