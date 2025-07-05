@@ -15,15 +15,21 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["deeplink_scheme"] = "markwon"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+        }
+
+        debug {
+            buildConfigField("String", "GIT_REPOSITORY", "\"https://github.com/noties/Markwon\"")
+            buildConfigField("String", "DEEPLINK_SCHEME", "\"markwon\"")
         }
     }
     compileOptions {
@@ -32,6 +38,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -65,7 +75,7 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)

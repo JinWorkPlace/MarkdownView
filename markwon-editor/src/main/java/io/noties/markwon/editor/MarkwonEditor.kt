@@ -112,28 +112,29 @@ abstract class MarkwonEditor {
         }
     }
 
-    internal interface SpansHandler {
+    internal interface SpansHandler<T> {
         fun handle(
             spans: PersistedSpans,
             editable: Editable,
             input: String,
-            span: Any,
+            span: T,
             spanStart: Int,
             spanTextLength: Int
         )
     }
 
-    internal class SpansHandlerImpl(private val spanHandlers: MutableMap<Class<*>, EditHandler<*>>) :
-        SpansHandler {
+    internal class SpansHandlerImpl<T>(
+        private val spanHandlers: MutableMap<Class<T>, EditHandler<T>>
+    ) : SpansHandler<T> {
         override fun handle(
             spans: PersistedSpans,
             editable: Editable,
             input: String,
-            span: Any,
+            span: T,
             spanStart: Int,
             spanTextLength: Int
         ) {
-            val handler = spanHandlers[span.javaClass]
+            val handler: EditHandler<T>? = spanHandlers[span]
             handler?.handleMarkdownSpan(
                 spans, editable, input, span, spanStart, spanTextLength
             )

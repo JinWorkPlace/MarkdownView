@@ -76,10 +76,10 @@ class Attribute(key: String, `val`: String?, parent: Attributes?) :
         return oldVal
     }
 
-    override fun equals(o: Any?): Boolean { // note parent not considered
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val attribute = o as Attribute
+    override fun equals(other: Any?): Boolean { // note parent not considered
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val attribute = other as Attribute
         if (if (key != null) (key != attribute.key) else attribute.key != null) return false
         return if (this.value != null) (this.value == attribute.value) else attribute.value == null
     }

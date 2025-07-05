@@ -34,13 +34,13 @@ open class App : Application() {
             return
         }
 
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            Intent.setComponent = ComponentName(this@App, ReadMeActivity::class.java)
-        }
+//        val intent = Intent(Intent.ACTION_VIEW).apply {
+//            Intent.setComponent = ComponentName(this@App, ReadMeActivity::class.java)
+//        }
 
-        val shortcut =
-            ShortcutInfo.Builder(this, "readme").setShortLabel("README").setIntent(intent).build()
-        manager.addDynamicShortcuts(mutableListOf(shortcut))
+//        val shortcut =
+//            ShortcutInfo.Builder(this, "readme").setShortLabel("README").setIntent(intent).build()
+//        manager.addDynamicShortcuts(mutableListOf(shortcut))
     }
 
     companion object {

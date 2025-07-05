@@ -26,7 +26,7 @@ class StrongEmphasisEditHandler : AbstractEditHandler<StrongEmphasisSpan>() {
         persistedSpans: PersistedSpans,
         editable: Editable,
         input: String,
-        span: Any,
+        span: StrongEmphasisSpan,
         spanStart: Int,
         spanTextLength: Int
     ) {
