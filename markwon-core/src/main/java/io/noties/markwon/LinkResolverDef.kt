@@ -9,7 +9,7 @@ import android.util.Log
 import android.view.View
 import androidx.core.net.toUri
 
-class LinkResolverDef : LinkResolver {
+open class LinkResolverDef : LinkResolver {
     override fun resolve(view: View, link: String) {
         val uri: Uri = parseLink(link)
         val context = view.context
@@ -18,7 +18,7 @@ class LinkResolverDef : LinkResolver {
         try {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            Log.w("LinkResolverDef", "Actvity was not found for the link: '$link'")
+            Log.w("LinkResolverDef", "Activity was not found for the link: '$link'")
             Log.e("LinkResolverDef", e.message, e)
         }
     }
