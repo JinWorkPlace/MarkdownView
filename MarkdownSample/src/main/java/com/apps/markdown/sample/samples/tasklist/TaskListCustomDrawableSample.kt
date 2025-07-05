@@ -1,37 +1,30 @@
-package com.apps.markdown.sample.samples.tasklist;
+package com.apps.markdown.sample.samples.tasklist
 
-import android.graphics.drawable.Drawable;
-
-import androidx.core.content.ContextCompat;
-
-import java.util.Objects;
-
-import io.noties.markwon.Markwon;
-import io.noties.markwon.app.R;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.ext.tasklist.TaskListPlugin;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
-
-import static io.noties.markwon.app.samples.tasklist.shared.TaskListHolder.MD;
+import androidx.core.content.ContextCompat
+import com.apps.markdown.sample.R
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import com.apps.markdown.sample.samples.tasklist.shared.TaskListHolder
+import io.noties.markwon.Markwon
+import io.noties.markwon.ext.tasklist.TaskListPlugin
 
 @MarkwonSampleInfo(
-  id = "20200702140749",
-  title = "GFM task list custom drawable",
-  artifacts = MarkwonArtifact.EXT_TASKLIST,
-  tags = Tag.plugin
+    id = "20200702140749",
+    title = "GFM task list custom drawable",
+    artifacts = [MarkwonArtifact.EXT_TASKLIST],
+    tags = [Tag.PLUGIN]
 )
-public class TaskListCustomDrawableSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final Drawable drawable = Objects.requireNonNull(
-      ContextCompat.getDrawable(context, R.drawable.custom_task_list));
+class TaskListCustomDrawableSample : MarkwonTextViewSample() {
+    public override fun render() {
+        val drawable = java.util.Objects.requireNonNull<android.graphics.drawable.Drawable>(
+            ContextCompat.getDrawable(context, R.drawable.custom_task_list)
+        )
 
-    final Markwon markwon = Markwon.builder(context)
-      .usePlugin(TaskListPlugin.create(drawable))
-      .build();
+        val markwon: Markwon =
+            Markwon.builder(context).usePlugin(TaskListPlugin.create(drawable)).build()
 
-    markwon.setMarkdown(textView, MD);
-  }
+        markwon.setMarkdown(textView, TaskListHolder.MD)
+    }
 }

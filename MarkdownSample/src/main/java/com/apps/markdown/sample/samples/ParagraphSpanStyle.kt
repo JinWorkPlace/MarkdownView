@@ -1,43 +1,45 @@
-package com.apps.markdown.sample.samples;
+package com.apps.markdown.sample.samples
 
-import android.graphics.Color;
-import android.text.style.ForegroundColorSpan;
+import android.graphics.Color
+import android.text.style.ForegroundColorSpan
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.MarkwonSpansFactory
+import io.noties.markwon.RenderProps
+import io.noties.markwon.SpanFactory
 
-import androidx.annotation.NonNull;
-
-import org.commonmark.node.Paragraph;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonSpansFactory;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import org.commonmark.node.Paragraph
 
 @MarkwonSampleInfo(
-  id = "20200629122647",
-  title = "Paragraph style",
-  description = "Apply a style (via span) to a paragraph",
-  artifacts = {MarkwonArtifact.CORE},
-  tags = {Tag.paragraph, Tag.style, Tag.span}
+    id = "20200629122647",
+    title = "Paragraph style",
+    description = "Apply a style (via span) to a paragraph",
+    artifacts = [MarkwonArtifact.CORE],
+    tags = [Tag.PARAGRAPH, Tag.STYLE, Tag.SPAN]
 )
-public class ParagraphSpanStyle extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final String md = "# Hello!\n\nA paragraph?\n\nIt should be!";
+class ParagraphSpanStyle : MarkwonTextViewSample() {
+    override fun render() {
+        val md = "# Hello!\n\nA paragraph?\n\nIt should be!"
 
-    final Markwon markwon = Markwon.builder(context)
-      .usePlugin(new AbstractMarkwonPlugin() {
-        @Override
-        public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
-          // apply a span to a Paragraph
-          builder.setFactory(Paragraph.class, (configuration, props) ->
-            new ForegroundColorSpan(Color.GREEN));
-        }
-      })
-      .build();
+        val markwon: Markwon = Markwon.builder(context).usePlugin(object : AbstractMarkwonPlugin() {
+            override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
+                // apply a span to a Paragraph
+                builder.setFactory<Paragraph>(
+                    Paragraph::class.java, object : SpanFactory {
+                        override fun getSpans(
+                            configuration: MarkwonConfiguration, props: RenderProps
+                        ): Any {
+                            return ForegroundColorSpan(Color.GREEN)
+                        }
+                    })
+            }
+        }).build()
 
-    markwon.setMarkdown(textView, md);
-  }
+        markwon.setMarkdown(textView, md)
+    }
 }

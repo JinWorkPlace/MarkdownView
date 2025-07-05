@@ -1,29 +1,26 @@
-package com.apps.markdown.sample.samples;
+package com.apps.markdown.sample.samples
 
-import io.noties.markwon.Markwon;
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
-import io.noties.markwon.sample.annotations.MarkwonArtifact;
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo;
-import io.noties.markwon.sample.annotations.Tag;
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import io.noties.markwon.Markwon
 
 @MarkwonSampleInfo(
-  id = "20200826122247",
-  title = "Deeplinks",
-  description = "Handling of deeplinks (app handles https scheme to deep link into content)",
-  artifacts = MarkwonArtifact.CORE,
-  tags = Tag.links
+    id = "20200826122247",
+    title = "Deeplinks",
+    description = "Handling of deeplinks (app handles https scheme to deep link into content)",
+    artifacts = [MarkwonArtifact.CORE],
+    tags = [Tag.LINKS]
 )
-public class DeeplinksSample extends MarkwonTextViewSample {
-  @Override
-  public void render() {
-    final String md = "" +
-      "# Deeplinks\n\n" +
-      "The [link](https://noties.io/Markwon/app/sample/20200826122247) to self";
+class DeeplinksSample : MarkwonTextViewSample() {
+    public override fun render() {
+        val md =
+            "" + "# Deeplinks\n\n" + "The [link](https://noties.io/Markwon/app/sample/20200826122247) to self"
 
-    // nothing special is required
-    final Markwon markwon = Markwon.builder(context)
-      .build();
+        // nothing special is required
+        val markwon: Markwon = Markwon.builder(context).build()
 
-    markwon.setMarkdown(textView, md);
-  }
+        markwon.setMarkdown(textView, md)
+    }
 }

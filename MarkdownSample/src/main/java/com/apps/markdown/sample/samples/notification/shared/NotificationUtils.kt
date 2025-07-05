@@ -1,85 +1,73 @@
-package com.apps.markdown.sample.samples.notification.shared;
+package com.apps.markdown.sample.samples.notification.shared
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.os.Build;
-import android.widget.RemoteViews;
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.widget.RemoteViews
+import com.apps.markdown.sample.R
 
-import androidx.annotation.NonNull;
+object NotificationUtils {
+    private const val ID = 2
+    private const val CHANNEL_ID = "2"
 
-import io.noties.markwon.app.R;
+    fun display(context: android.content.Context, cs: CharSequence) {
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager ?: return
 
-public abstract class NotificationUtils {
+        ensureChannel(
+            manager, CHANNEL_ID
+        )
 
-  private static final int ID = 2;
-  private static final String CHANNEL_ID = "2";
+        val builder: android.app.Notification.Builder =
+            android.app.Notification.Builder(context).setSmallIcon(R.drawable.ic_stat_name)
+                .setContentTitle(context.getString(R.string.app_name)).setContentText(cs)
+                .setStyle(android.app.Notification.BigTextStyle().bigText(cs))
 
-  public static void display(@NonNull Context context, @NonNull CharSequence cs) {
-    final NotificationManager manager = context.getSystemService(NotificationManager.class);
-    if (manager == null) {
-      return;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            builder.setChannelId(CHANNEL_ID)
+        }
+
+        manager.notify(
+            ID, builder.build()
+        )
     }
 
-    ensureChannel(manager, CHANNEL_ID);
+    fun display(context: android.content.Context, remoteViews: RemoteViews) {
+        val manager = context.getSystemService(NotificationManager::class.java)
+        if (manager == null) {
+            return
+        }
 
-    final Notification.Builder builder = new Notification.Builder(context)
-      .setSmallIcon(R.drawable.ic_stat_name)
-      .setContentTitle(context.getString(R.string.app_name))
-      .setContentText(cs)
-      .setStyle(new Notification.BigTextStyle().bigText(cs));
+        ensureChannel(
+            manager, CHANNEL_ID
+        )
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      builder.setChannelId(CHANNEL_ID);
+        val builder: android.app.Notification.Builder =
+            android.app.Notification.Builder(context).setSmallIcon(R.drawable.ic_stat_name)
+                .setContentTitle(context.getString(R.string.app_name))
+
+        builder.setCustomContentView(remoteViews).setCustomBigContentView(remoteViews)
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            builder.setChannelId(CHANNEL_ID)
+        }
+
+        manager.notify(
+            ID, builder.build()
+        )
     }
 
-    manager.notify(ID, builder.build());
-  }
+    private fun ensureChannel(manager: NotificationManager, channelId: String) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O) {
+            return
+        }
 
-  public static void display(@NonNull Context context, @NonNull RemoteViews remoteViews) {
-    final NotificationManager manager = context.getSystemService(NotificationManager.class);
-    if (manager == null) {
-      return;
+        val channel: NotificationChannel? = manager.getNotificationChannel(channelId)
+        if (channel == null) {
+            manager.createNotificationChannel(
+                NotificationChannel(
+                    channelId, channelId, NotificationManager.IMPORTANCE_DEFAULT
+                )
+            )
+        }
     }
-
-    ensureChannel(manager, CHANNEL_ID);
-
-    final Notification.Builder builder = new Notification.Builder(context)
-      .setSmallIcon(R.drawable.ic_stat_name)
-      .setContentTitle(context.getString(R.string.app_name));
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      builder
-        .setCustomContentView(remoteViews)
-        .setCustomBigContentView(remoteViews);
-    } else {
-      builder.setContent(remoteViews);
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      builder.setChannelId(CHANNEL_ID);
-    }
-
-    manager.notify(ID, builder.build());
-  }
-
-  @SuppressWarnings("SameParameterValue")
-  private static void ensureChannel(@NonNull NotificationManager manager, @NonNull String channelId) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-      return;
-    }
-
-    final NotificationChannel channel = manager.getNotificationChannel(channelId);
-    if (channel == null) {
-      manager.createNotificationChannel(new NotificationChannel(
-        channelId,
-        channelId,
-        NotificationManager.IMPORTANCE_DEFAULT
-      ));
-    }
-  }
-
-  private NotificationUtils() {
-  }
 }
