@@ -2,26 +2,25 @@ package com.apps.markdown.sample.samples.parser
 
 import android.text.TextPaint
 import android.text.style.MetricAffectingSpan
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonConfiguration
 import io.noties.markwon.RenderProps
-import io.noties.markwon.app.sample.ui.MarkwonTextViewSample
 import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.html.HtmlPlugin.HtmlConfigure
 import io.noties.markwon.html.HtmlTag
 import io.noties.markwon.html.tag.SimpleTagHandler
-import io.noties.markwon.sample.annotations.MarkwonArtifact
-import io.noties.markwon.sample.annotations.MarkwonSampleInfo
-import io.noties.markwon.sample.annotations.Tag.html
-import io.noties.markwon.sample.annotations.Tag.reddit
 import java.util.regex.Pattern
 
 @MarkwonSampleInfo(
     id = "20210224091506",
     title = "Reddit superscript",
     artifacts = [MarkwonArtifact.HTML],
-    tags = [html, reddit]
+    tags = [Tag.HTML, Tag.REDDIT]
 )
 class RedditSuperscriptSample : MarkwonTextViewSample() {
     override fun render() {
@@ -40,7 +39,7 @@ class RedditSuperscriptSample : MarkwonTextViewSample() {
 
     object ProcessRedditSuperscript : AbstractMarkwonPlugin() {
 
-        val re = Pattern.compile("(?:\\^\\((.+?)\\))|(?:\\^(\\S+))")
+        val re: Pattern = Pattern.compile("\\^\\((.+?)\\)|\\^(\\S+)")
 
         override fun processMarkdown(markdown: String): String {
             val builder = StringBuilder()
