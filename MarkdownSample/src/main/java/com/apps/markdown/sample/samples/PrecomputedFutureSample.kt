@@ -7,6 +7,7 @@ import com.apps.markdown.sample.annotations.MarkwonSampleInfo
 import com.apps.markdown.sample.annotations.Tag
 import com.apps.markdown.sample.readme.GithubImageDestinationProcessor
 import com.apps.markdown.sample.sample.ui.MarkwonRecyclerViewSample
+import com.apps.markdown.sample.utils.loadReadMe
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.PrecomputedFutureTextSetterCompat
@@ -32,7 +33,7 @@ class PrecomputedFutureSample : MarkwonRecyclerViewSample() {
             return
         }
 
-        val md: String = SampleUtilsKtKt.loadReadMe(context)
+        val md: String = loadReadMe(context)
 
         val markwon: Markwon =
             Markwon.builder(context).textSetter(PrecomputedFutureTextSetterCompat.create())

@@ -1,6 +1,7 @@
 package com.apps.markdown.sample.utils
 
 import androidx.recyclerview.widget.RecyclerView
+import io.noties.adapt.Adapt
 
 val Adapt.recyclerView: RecyclerView?
     get() {
@@ -8,7 +9,6 @@ val Adapt.recyclerView: RecyclerView?
         return try {
             recyclerView()
         } catch (t: Throwable) {
-            Debug.e(t)
             null
         }
     }

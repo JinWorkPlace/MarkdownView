@@ -6,6 +6,7 @@ import com.apps.markdown.sample.annotations.MarkwonSampleInfo
 import com.apps.markdown.sample.annotations.Tag
 import com.apps.markdown.sample.readme.GithubImageDestinationProcessor
 import com.apps.markdown.sample.sample.ui.MarkwonRecyclerViewSample
+import com.apps.markdown.sample.utils.loadReadMe
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonVisitor
@@ -29,7 +30,7 @@ import org.commonmark.node.FencedCodeBlock
 )
 class RecyclerSample : MarkwonRecyclerViewSample() {
     override fun render() {
-        val md: String = SampleUtilsKtKt.loadReadMe(context)
+        val md: String = loadReadMe(context)
 
         val markwon: Markwon = Markwon.builder(context).usePlugin(ImagesPlugin.create())
             .usePlugin(TableEntryPlugin.create(context)).usePlugin(HtmlPlugin.create())

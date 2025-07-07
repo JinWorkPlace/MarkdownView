@@ -12,6 +12,7 @@ import com.apps.markdown.sample.utils.displayName
 import com.apps.markdown.sample.utils.hidden
 import com.apps.markdown.sample.utils.tagDisplayName
 import com.apps.markdown.sample.widget.FlowLayout
+import io.noties.adapt.Item
 import io.noties.markwon.Markwon
 import io.noties.markwon.utils.NoCopySpannableFactory
 
@@ -85,9 +86,7 @@ class SampleItem(
 
         other as SampleItem
 
-        if (sample != other.sample) return false
-
-        return true
+        return sample == other.sample
     }
 
     override fun hashCode(): Int {

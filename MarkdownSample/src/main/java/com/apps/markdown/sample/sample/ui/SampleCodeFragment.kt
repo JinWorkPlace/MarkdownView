@@ -38,24 +38,24 @@ class SampleCodeFragment : Fragment() {
     }
 
     private fun load() {
-        App.executorService.submit {
-            val code = sample.readCode(requireContext())
-            val prism = Prism4j(GrammarLocatorSourceCode())
-            val highlight = Prism4jSyntaxHighlight.create(prism, Prism4jThemeDefault.create(0))
-            val language = when (code.language) {
-                Sample.Language.KOTLIN -> "kotlin"
-                Sample.Language.JAVA -> "java"
-            }
-            val text = highlight.highlight(language, code.sourceCode)
-
-            textView.post {
-                //attached
-                if (context != null) {
-                    progressBar.hidden = true
-                    textView.text = text
-                }
-            }
-        }
+//        App.executorService.submit {
+//            val code = sample.readCode(requireContext())
+//            val prism = Prism4j(GrammarLocatorSourceCode())
+//            val highlight = Prism4jSyntaxHighlight.create(prism, Prism4jThemeDefault.create(0))
+//            val language = when (code.language) {
+//                Sample.Language.KOTLIN -> "kotlin"
+//                Sample.Language.JAVA -> "java"
+//            }
+//            val text = highlight.highlight(language, code.sourceCode)
+//
+//            textView.post {
+//                //attached
+//                if (context != null) {
+//                    progressBar.hidden = true
+//                    textView.text = text
+//                }
+//            }
+//        }
     }
 
     private val sample: Sample by lazy(LazyThreadSafetyMode.NONE) {

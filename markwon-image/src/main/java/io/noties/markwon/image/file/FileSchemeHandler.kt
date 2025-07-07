@@ -60,7 +60,7 @@ class FileSchemeHandler internal constructor(
                 )
             }
         } else {
-            val path = uri.path
+            val path = uri.path ?: ""
             check(!TextUtils.isEmpty(path)) { "Invalid file path: $raw, $path" }
 
             try {

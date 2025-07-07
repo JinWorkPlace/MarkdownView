@@ -55,6 +55,8 @@ dependencies {
 
     implementation(libs.coil)
     implementation(libs.glide)
+    implementation(libs.commonmark)
+    implementation(libs.commonmark.strikethrough)
 
     implementation(project(":markwon-core"))
     implementation(project(":markwon-editor"))
@@ -76,6 +78,10 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.13.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation("io.noties:prism4j:2.0.0")
+    implementation("io.noties:adapt:2.2.0")
+    implementation("io.noties:debug:5.1.0")
 
     testImplementation(libs.junit)
 

@@ -1,9 +1,6 @@
 package com.apps.markdown.sample.sample.ui
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
@@ -13,21 +10,30 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isNotEmpty
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.apps.markdown.sample.App
-import com.apps.markdown.sample.BuildConfig
 import com.apps.markdown.sample.R
 import com.apps.markdown.sample.annotations.MarkwonArtifact
 import com.apps.markdown.sample.readme.ReadMeActivity
 import com.apps.markdown.sample.sample.Sample
 import com.apps.markdown.sample.sample.SampleManager
 import com.apps.markdown.sample.sample.SampleSearch
+import com.apps.markdown.sample.sample.ui.adapt.CheckForUpdateItem
+import com.apps.markdown.sample.sample.ui.adapt.SampleItem
 import com.apps.markdown.sample.utils.Cancellable
+import com.apps.markdown.sample.utils.displayName
 import com.apps.markdown.sample.utils.hidden
+import com.apps.markdown.sample.utils.onPreDraw
+import com.apps.markdown.sample.utils.recyclerView
+import com.apps.markdown.sample.utils.tagDisplayName
 import com.apps.markdown.sample.widget.SearchBar
+import io.noties.adapt.Adapt
+import io.noties.adapt.DiffUtilDataSetChanged
+import io.noties.adapt.Item
 import io.noties.markwon.Markwon
 import io.noties.markwon.movement.MovementMethodPlugin
 import kotlinx.parcelize.Parcelize
@@ -88,7 +94,7 @@ class SampleListFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.itemAnimator = DefaultItemAnimator()
         recyclerView.setHasFixedSize(true)
-        recyclerView.adapter = adapt
+//        recyclerView.adapter = adapt
 
 //        // additional padding for RecyclerView
         // greatly complicates state restoration (items jump and a lot of times state cannot be
@@ -201,7 +207,7 @@ class SampleListFragment : Fragment() {
                 val list: List<Item<*>> = it
                 list.toMutableList().apply {
                     add(0, CheckForUpdateItem(this@SampleListFragment::checkForUpdate))
-                    add(0, versionItem)
+//                    add(0, versionItem)
                 }
             } else {
                 it
@@ -213,8 +219,6 @@ class SampleListFragment : Fragment() {
         val recyclerView = adapt.recyclerView ?: return
 
         val scrollPosition = pendingRecyclerScrollPosition
-
-        Debug.i(scrollPosition)
 
         if (scrollPosition != null) {
             pendingRecyclerScrollPosition = null
@@ -237,61 +241,8 @@ class SampleListFragment : Fragment() {
         }
 
         progressBar.hidden = false
-        checkForUpdateCancellable = UpdateUtils.checkForUpdate { result ->
-            progressBar.post {
-                processUpdateResult(result)
-            }
-        }
     }
 
-    private fun processUpdateResult(result: UpdateUtils.Result) {
-        val context = context ?: return
-
-        progressBar.hidden = true
-
-        val builder = AlertDialog.Builder(context)
-
-        when (result) {
-            is UpdateUtils.Result.UpdateAvailable -> {
-                val md = """
-                    ## Update available
-                    
-                    ${BuildConfig.GIT_SHA} -&gt; **${result.revision}**
-                    
-                    Would you like to download it?
-                """.trimIndent()
-                builder.setMessage(markwon.toMarkdown(md))
-                builder.setNegativeButton(R.string.cancel, null)
-                builder.setPositiveButton("Download") { _, _ ->
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.url))
-                    startActivity(Intent.createChooser(intent, null))
-                }
-            }
-
-            is UpdateUtils.Result.NoUpdate -> {
-                val md = """
-                    ## No update
-                    You are using latest version (**${BuildConfig.GIT_SHA}**)
-                """.trimIndent()
-                builder.setMessage(markwon.toMarkdown(md))
-                builder.setPositiveButton(R.string.ok, null)
-            }
-
-            is UpdateUtils.Result.Error -> {
-                // trimIndent is confused by tabs in stack trace
-                val md = """
-## Error
-```
-${result.throwable.stackTraceString()}
-```
-"""
-                builder.setMessage(markwon.toMarkdown(md))
-                builder.setPositiveButton(R.string.ok, null)
-            }
-        }
-
-        builder.show()
-    }
 
     private fun openArtifact(artifact: MarkwonArtifact) {
         openResultFragment(init(artifact))
@@ -373,6 +324,7 @@ ${result.throwable.stackTraceString()}
                 when (search) {
                     is SampleSearch.Artifact -> putString(ARG_ARTIFACT, search.artifact.name)
                     is SampleSearch.Tag -> putString(ARG_TAG, search.tag)
+                    is SampleSearch.All -> {}
                 }
 
                 val query = search.text
@@ -411,14 +363,14 @@ ${result.throwable.stackTraceString()}
     private val RecyclerView.scrollPosition: RecyclerScrollPosition?
         get() {
             val holder = findFirstVisibleViewHolder() ?: return null
-            val position = holder.adapterPosition
+            val position = holder.bindingAdapterPosition
             val offset = holder.itemView.top
             return RecyclerScrollPosition(position, offset)
         }
 
     // because findViewHolderForLayoutPosition doesn't work :'(
     private fun RecyclerView.findFirstVisibleViewHolder(): RecyclerView.ViewHolder? {
-        if (childCount > 0) {
+        if (isNotEmpty()) {
             val child = getChildAt(0)
             return findContainingViewHolder(child)
         }

@@ -20,6 +20,7 @@ import io.noties.markwon.MarkwonSpansFactory
 import io.noties.markwon.RenderProps
 import io.noties.markwon.SpanFactory
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
+import org.commonmark.ext.gfm.strikethrough.Strikethrough
 import org.commonmark.node.BlockQuote
 import org.commonmark.node.Code
 import org.commonmark.node.Emphasis
@@ -84,29 +85,34 @@ class NotificationSample : MarkwonTextViewSample() {
 
 
                 override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
-                    builder.setFactory<Emphasis>(
+                    builder.setFactory(
                         node = Emphasis::class.java, factory = emphasisFactory
-                    ).setFactory<StrongEmphasis>(
+                    ).setFactory(
                         StrongEmphasis::class.java, factory = strongEmphasisFactory
-                    ).setFactory<BlockQuote>(
+                    ).setFactory(
                         node = BlockQuote::class.java, factory = blockQuoteFactory
-                    ).setFactory<Strikethrough>(
-                        Strikethrough::class.java, object : SpanFactory {
+                    ).setFactory(
+                        Strikethrough::class.java,
+                        object : SpanFactory {
                             override fun getSpans(
                                 configuration: MarkwonConfiguration, props: RenderProps
                             ): Any {
                                 return StrikethroughSpan()
                             }
-                        }.setFactory<Code>(
-                            Code::class.java,
-                            io.noties.markwon.SpanFactory { configuration: MarkwonConfiguration?, props: RenderProps? ->
-                                arrayOf<Any>(
+                        },
+                    ).setFactory(
+                        Code::class.java,
+                        object : SpanFactory {
+                            override fun getSpans(
+                                configuration: MarkwonConfiguration, props: RenderProps
+                            ): Any {
+                                return arrayOf<Any>(
                                     BackgroundColorSpan(Color.GRAY), TypefaceSpan("monospace")
                                 )
-                            }) // NB! both ordered and bullet list items
-                            .setFactory<ListItem>(
-                                ListItem::class.java, bulletSpanFactory
-                            )
+                            }
+                        },
+                    ).setFactory(
+                        ListItem::class.java, bulletSpanFactory
                     )
                 }
             }).build()

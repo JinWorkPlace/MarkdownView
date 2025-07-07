@@ -15,6 +15,7 @@ import com.apps.markdown.sample.utils.ReadMeUtils
 import com.apps.markdown.sample.utils.hidden
 import com.apps.markdown.sample.utils.loadReadMe
 import com.apps.markdown.sample.utils.textOrHide
+import io.noties.debug.Debug
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonConfiguration
@@ -26,6 +27,7 @@ import io.noties.markwon.image.ImagesPlugin
 import io.noties.markwon.recycler.MarkwonAdapter
 import io.noties.markwon.recycler.SimpleEntry
 import io.noties.markwon.recycler.table.TableEntry
+import io.noties.markwon.recycler.table.TableEntry.BuilderConfigure
 import io.noties.markwon.recycler.table.TableEntryPlugin
 import io.noties.markwon.syntax.Prism4jThemeDefault
 import io.noties.markwon.syntax.SyntaxHighlightPlugin
@@ -59,11 +61,13 @@ class ReadMeActivity : Activity() {
 
     private val markwon: Markwon
         get() = Markwon.builder(this).usePlugin(ImagesPlugin.create())
-            .usePlugin(HtmlPlugin.create()).usePlugin(TableEntryPlugin.create(this)).usePlugin(
-                SyntaxHighlightPlugin.create(
-                    Prism4j(GrammarLocatorDef()), Prism4jThemeDefault.create(0)
-                )
-            ).usePlugin(TaskListPlugin.create(this)).usePlugin(StrikethroughPlugin.create())
+            .usePlugin(HtmlPlugin.create()).usePlugin(TableEntryPlugin.create(this))
+//            .usePlugin(
+//                SyntaxHighlightPlugin.create(
+//                    Prism4j(GrammarLocatorDef()), Prism4jThemeDefault.create(0)
+//                )
+//            )
+            .usePlugin(TaskListPlugin.create(this)).usePlugin(StrikethroughPlugin.create())
             .usePlugin(ReadMeImageDestinationPlugin(intent.data))
             .usePlugin(object : AbstractMarkwonPlugin() {
                 override fun configureVisitor(builder: MarkwonVisitor.Builder) {
@@ -102,10 +106,12 @@ class ReadMeActivity : Activity() {
         val adapter = MarkwonAdapter.builder(R.layout.adapter_node, R.id.text_view).include(
             FencedCodeBlock::class.java,
             SimpleEntry.create(R.layout.adapter_node_code_block, R.id.text_view)
-        ).include(TableBlock::class.java, TableEntry.create {
-            it.tableLayout(R.layout.adapter_node_table_block, R.id.table_layout)
-                .textLayoutIsRoot(R.layout.view_table_entry_cell)
-        }).build()
+        ).include(TableBlock::class.java, TableEntry.create(object : BuilderConfigure {
+            override fun configure(builder: TableEntry.Builder) {
+                builder.tableLayout(R.layout.adapter_node_table_block, R.id.table_layout)
+                    .textLayoutIsRoot(R.layout.view_table_entry_cell)
+            }
+        })).build()
 
         val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)

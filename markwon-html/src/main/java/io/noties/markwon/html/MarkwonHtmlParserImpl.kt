@@ -2,6 +2,7 @@ package io.noties.markwon.html
 
 import androidx.annotation.VisibleForTesting
 import io.noties.markwon.html.AppendableUtils.appendQuietly
+import io.noties.markwon.html.HtmlTagImpl.BlockImpl
 import io.noties.markwon.html.HtmlTagImpl.BlockImpl.Companion.root
 import io.noties.markwon.html.HtmlTagImpl.InlineImpl
 import io.noties.markwon.html.jsoup.parser.CharacterReader
@@ -19,7 +20,7 @@ open class MarkwonHtmlParserImpl internal constructor(
 ) : MarkwonHtmlParser() {
     private val inlineTags: MutableList<InlineImpl> = ArrayList(0)
 
-    private var currentBlock: HtmlTagImpl.BlockImpl? = root()
+    private var currentBlock: BlockImpl? = root()
 
     private var isInsidePreTag = false
 
@@ -180,15 +181,15 @@ open class MarkwonHtmlParserImpl internal constructor(
         // block tags (all that are NOT inline -> blocks
         // there is only one strong rule -> paragraph cannot contain anything
         // except inline tags
-        if (TAG_PARAGRAPH == currentBlock!!.name) {
+        if (TAG_PARAGRAPH == currentBlock?.name) {
             // it must be closed here not matter what we are as here we _assume_
             // that it's a block tag
-            currentBlock!!.closeAt(output!!.length)
-            appendQuietly(output, '\n')
+            currentBlock?.closeAt(output!!.length)
+            appendQuietly(output!!, '\n')
             currentBlock = currentBlock!!.parent
         } else if (TAG_LIST_ITEM == name && TAG_LIST_ITEM == currentBlock!!.name) {
             // close previous list item if in the same parent
-            currentBlock!!.closeAt(output!!.length)
+            currentBlock?.closeAt(output!!.length)
             currentBlock = currentBlock!!.parent
         }
 
