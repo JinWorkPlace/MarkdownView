@@ -36,7 +36,7 @@ dependencies {
     implementation(project(":markwon-core"))
     implementation(libs.coil.base)
 
-    compileOnly(libs.coil)
+    implementation(libs.coil)
 
     implementation(libs.androidx.core.ktx)
 }

@@ -9,23 +9,23 @@ import com.apps.markdown.sample.R
 import com.apps.markdown.sample.annotations.MarkwonArtifact
 import com.apps.markdown.sample.annotations.MarkwonSampleInfo
 import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonRecyclerViewSample
 import io.noties.markwon.Markwon
-import io.noties.markwon.app.sample.ui.MarkwonRecyclerViewSample
 import io.noties.markwon.image.AsyncDrawable
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.recycler.MarkwonAdapter
 
 
 @MarkwonSampleInfo(
-  id = "20200803132053",
-  title = "Coil inside RecyclerView",
-  description = "Display images via Coil plugin in `RecyclerView`",
-  artifacts = [MarkwonArtifact.IMAGE_COIL, MarkwonArtifact.RECYCLER],
-  tags = [Tag.RENDERING, Tag.RECYCLE_VIEW, Tag.IMAGE]
+    id = "20200803132053",
+    title = "Coil inside RecyclerView",
+    description = "Display images via Coil plugin in `RecyclerView`",
+    artifacts = [MarkwonArtifact.IMAGE_COIL, MarkwonArtifact.RECYCLER],
+    tags = [Tag.RENDERING, Tag.RECYCLE_VIEW, Tag.IMAGE]
 )
 class CoilRecyclerViewSample : MarkwonRecyclerViewSample() {
-  override fun render() {
-    val md = """
+    override fun render() {
+        val md = """
       # H1
       ## H2
       ### H3
@@ -49,32 +49,29 @@ class CoilRecyclerViewSample : MarkwonRecyclerViewSample() {
       ![img](https://picsum.photos/id/237/1024/800)
     """.trimIndent()
 
-    val markwon = Markwon.builder(context)
-      .usePlugin(CoilImagesPlugin.create(
-        object : CoilImagesPlugin.CoilStore {
-          override fun load(drawable: AsyncDrawable): ImageRequest {
-            return ImageRequest.Builder(context)
-              .transformations(
-                RoundedCornersTransformation(14F)
-              )
-              .data(drawable.destination)
-              .placeholder(R.drawable.ic_image_gray_24dp)
-              .build()
-          }
+        val markwon = Markwon.builder(context).usePlugin(
+            CoilImagesPlugin.create(
+                object : CoilImagesPlugin.CoilStore {
+                    override fun load(drawable: AsyncDrawable): ImageRequest {
+                        return ImageRequest.Builder(context).transformations(
+                            RoundedCornersTransformation(14F)
+                        ).data(drawable.destination)
+                            .placeholder(R.drawable.ic_image_gray_24dp).build()
+                    }
 
-          override fun cancel(disposable: Disposable) {
-            disposable.dispose()
-          }
-        },
-        Coil.imageLoader(context)))
-      .build()
+                    override fun cancel(disposable: Disposable) {
+                        disposable.dispose()
+                    }
+                }, Coil.imageLoader(context)
+            )
+        ).build()
 
-    val adapter = MarkwonAdapter.createTextViewIsRoot(R.layout.adapter_node)
+        val adapter = MarkwonAdapter.createTextViewIsRoot(R.layout.adapter_node)
 
-    recyclerView.layoutManager = LinearLayoutManager(context)
-    recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = adapter
 
-    adapter.setMarkdown(markwon, md)
-    adapter.notifyDataSetChanged()
-  }
+        adapter.setMarkdown(markwon, md)
+        adapter.notifyDataSetChanged()
+    }
 }

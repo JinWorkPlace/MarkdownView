@@ -1,6 +1,7 @@
 package com.apps.markdown.sample.sample
 
 import android.net.Uri
+import com.apps.markdown.sample.BuildConfig
 import com.apps.markdown.sample.annotations.MarkwonArtifact
 
 sealed class Deeplink {
@@ -9,7 +10,6 @@ sealed class Deeplink {
 
     companion object {
         fun parse(data: Uri?): Deeplink? {
-            Debug.i(data)
             @Suppress("NAME_SHADOWING") val data = data ?: return null
             return when (data.scheme) {
                 // local deeplink with custom scheme (`markwon://`)
@@ -38,7 +38,6 @@ sealed class Deeplink {
 
                 else -> null
             }.also {
-                Debug.i("parsed: $it")
             }
         }
 
@@ -48,8 +47,6 @@ sealed class Deeplink {
         }
 
         private fun parseSearch(query: String?): Search? {
-            Debug.i("query: '$query'")
-
             val params = query?.let {
                 // `https:.*` has query with `search?a=core`
                 val index = it.indexOf('?')
@@ -63,13 +60,9 @@ sealed class Deeplink {
                 Pair(k, v)
             } ?: return null
 
-            Debug.i("params: $params")
-
             val artifact = params["a"]
             val tag = params["t"]
             val search = params["q"]
-
-            Debug.i("artifact: '$artifact', tag: '$tag', search: '$search'")
 
             val sampleSearch: SampleSearch? = if (artifact != null) {
                 val encodedArtifact = MarkwonArtifact.entries.firstOrNull {

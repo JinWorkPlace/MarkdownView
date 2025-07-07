@@ -1,9 +1,9 @@
-package io.noties.markwon.app.sample.ui
+package com.apps.markdown.sample.sample.ui
 
 import android.content.Context
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import io.noties.markwon.app.R
+import com.apps.markdown.sample.R
 
 abstract class MarkwonRecyclerViewSample : MarkwonSample() {
 

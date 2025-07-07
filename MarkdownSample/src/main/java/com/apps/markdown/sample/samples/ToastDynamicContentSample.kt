@@ -4,6 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import com.apps.markdown.sample.BuildConfig
 import com.apps.markdown.sample.annotations.MarkwonArtifact
 import com.apps.markdown.sample.annotations.MarkwonSampleInfo
 import com.apps.markdown.sample.annotations.Tag

@@ -5,6 +5,7 @@ import com.apps.markdown.sample.annotations.MarkwonArtifact
 import com.apps.markdown.sample.annotations.MarkwonSampleInfo
 import com.apps.markdown.sample.annotations.Tag
 import com.apps.markdown.sample.readme.GithubImageDestinationProcessor
+import com.apps.markdown.sample.sample.ui.MarkwonRecyclerViewSample
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonVisitor

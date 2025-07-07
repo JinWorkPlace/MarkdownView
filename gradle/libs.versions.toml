@@ -49,4 +49,5 @@ glide = { group = "com.github.bumptech.glide", name = "glide", version = "4.16.0
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.2.0" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version = "2.2.0" }
 

@@ -208,7 +208,7 @@ class Attributes : Iterable<Attribute>, Cloneable {
 
         for (attr in incoming) {
             // todo - should this be case insensitive?
-            put(attr!!)
+            put(attr)
         }
     }
 
@@ -291,14 +291,14 @@ class Attributes : Iterable<Attribute>, Cloneable {
     /**
      * Checks if these attributes are equal to another set of attributes, by comparing the two sets
      *
-     * @param o attributes to compare with
+     * @param other attributes to compare with
      * @return if both sets of attributes have the same content
      */
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
 
-        val that = o as Attributes
+        val that = other as Attributes
 
         if (size != that.size) return false
         if (!keys.contentEquals(that.keys)) return false
@@ -406,7 +406,7 @@ class Attributes : Iterable<Attribute>, Cloneable {
         // manages the key/val arrays
         private const val GrowthFactor = 2
         private val Empty = arrayOf<String?>()
-        val NotFound: Int = -1
+        const val NotFound: Int = -1
         private const val EmptyString = ""
 
         // simple implementation of Arrays.copy, for support of Android API 8.
@@ -418,7 +418,7 @@ class Attributes : Iterable<Attribute>, Cloneable {
 
         // we track boolean attributes as null in values - they're just keys. so returns empty for consumers
         fun checkNotNull(`val`: String?): String {
-            return if (`val` == null) EmptyString else `val`
+            return `val` ?: EmptyString
         }
     }
 }

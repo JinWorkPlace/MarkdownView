@@ -1,16 +1,17 @@
-package io.noties.markwon.app.sample.ui
+package com.apps.markdown.sample.sample.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.apps.markdown.sample.sample.ui.MarkwonSample
-import io.noties.markwon.app.sample.Sample
+import com.apps.markdown.sample.sample.Sample
 
 class SamplePreviewFragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
         return markwonSample.createView(inflater, container)
     }
 

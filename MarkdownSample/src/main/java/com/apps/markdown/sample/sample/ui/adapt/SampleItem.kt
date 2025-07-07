@@ -5,7 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.apps.markdown.sample.R
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.sample.Sample
+import com.apps.markdown.sample.utils.displayName
+import com.apps.markdown.sample.utils.hidden
+import com.apps.markdown.sample.utils.tagDisplayName
+import com.apps.markdown.sample.widget.FlowLayout
 import io.noties.markwon.Markwon
+import io.noties.markwon.utils.NoCopySpannableFactory
 
 class SampleItem(
     private val markwon: Markwon,

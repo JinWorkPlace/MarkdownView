@@ -18,12 +18,18 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.apps.markdown.sample.App
+import com.apps.markdown.sample.R
+import com.apps.markdown.sample.annotations.MarkwonArtifact
 import com.apps.markdown.sample.readme.ReadMeActivity
 import com.apps.markdown.sample.sample.Sample
+import com.apps.markdown.sample.sample.SampleManager
 import com.apps.markdown.sample.sample.SampleSearch
-import com.apps.markdown.sample.sample.ui.SampleListFragment.Companion.init
 import com.apps.markdown.sample.utils.Cancellable
+import com.apps.markdown.sample.utils.hidden
+import com.apps.markdown.sample.widget.SearchBar
 import io.noties.markwon.Markwon
+import io.noties.markwon.movement.MovementMethodPlugin
+import kotlinx.parcelize.Parcelize
 
 
 class SampleListFragment : Fragment() {
@@ -44,10 +50,6 @@ class SampleListFragment : Fragment() {
     private var checkForUpdateCancellable: Cancellable? = null
 
     private lateinit var progressBar: View
-
-    private val versionItem: VersionItem by lazy(LazyThreadSafetyMode.NONE) {
-        VersionItem()
-    }
 
     private val sampleManager: SampleManager
         get() = App.sampleManager
@@ -105,8 +107,6 @@ class SampleListFragment : Fragment() {
         // clear it anyway
         arguments?.remove(ARG_SEARCH)
 
-        Debug.i(state, initialSearch)
-
         pendingRecyclerScrollPosition = state?.recyclerScrollPosition
 
         val search = listOf(state?.search, initialSearch).firstOrNull { it != null }
@@ -123,7 +123,6 @@ class SampleListFragment : Fragment() {
         val state = State(
             search, adapt.recyclerView?.scrollPosition
         )
-        Debug.i(state)
         arguments?.putParcelable(STATE, state)
 
         val cancellable = this.cancellable
@@ -190,23 +189,23 @@ class SampleListFragment : Fragment() {
     private fun bindSamples(samples: List<Sample>, addVersion: Boolean) {
 
         val items: List<Item<*>> = samples.map {
-                SampleItem(
-                    markwon,
-                    it,
-                    { artifact -> openArtifact(artifact) },
-                    { tag -> openTag(tag) },
-                    { sample -> openSample(sample) })
-            }.let {
-                if (addVersion) {
-                    val list: List<Item<*>> = it
-                    list.toMutableList().apply {
-                        add(0, CheckForUpdateItem(this@SampleListFragment::checkForUpdate))
-                        add(0, versionItem)
-                    }
-                } else {
-                    it
+            SampleItem(
+                markwon,
+                it,
+                { artifact -> openArtifact(artifact) },
+                { tag -> openTag(tag) },
+                { sample -> openSample(sample) })
+        }.let {
+            if (addVersion) {
+                val list: List<Item<*>> = it
+                list.toMutableList().apply {
+                    add(0, CheckForUpdateItem(this@SampleListFragment::checkForUpdate))
+                    add(0, versionItem)
                 }
+            } else {
+                it
             }
+        }
 
         adapt.setItems(items)
 
@@ -220,9 +219,8 @@ class SampleListFragment : Fragment() {
             pendingRecyclerScrollPosition = null
             recyclerView.onPreDraw {
                 (recyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(
-                        scrollPosition.position,
-                        scrollPosition.offset
-                    )
+                    scrollPosition.position, scrollPosition.offset
+                )
             }
         } else {
             recyclerView.onPreDraw {
@@ -295,12 +293,10 @@ ${result.throwable.stackTraceString()}
     }
 
     private fun openArtifact(artifact: MarkwonArtifact) {
-        Debug.i(artifact)
         openResultFragment(init(artifact))
     }
 
     private fun openTag(tag: String) {
-        Debug.i(tag)
         openResultFragment(init(tag))
     }
 
@@ -313,9 +309,9 @@ ${result.throwable.stackTraceString()}
     }
 
     private fun openFragment(fragment: Fragment) {
-        fragmentManager!!.beginTransaction().setCustomAnimations(
-                R.anim.screen_in, R.anim.screen_out, R.anim.screen_in_pop, R.anim.screen_out_pop
-            ).replace(Window.ID_ANDROID_CONTENT, fragment).addToBackStack(null)
+        requireFragmentManager().beginTransaction().setCustomAnimations(
+            R.anim.screen_in, R.anim.screen_out, R.anim.screen_in_pop, R.anim.screen_out_pop
+        ).replace(Window.ID_ANDROID_CONTENT, fragment).addToBackStack(null)
             .commitAllowingStateLoss()
     }
 
@@ -326,8 +322,6 @@ ${result.throwable.stackTraceString()}
             is Type.Tag -> SampleSearch.Tag(search, type.tag)
             else -> SampleSearch.All(search)
         }
-
-        Debug.i(sampleSearch)
 
         // clear current
         cancellable?.let {

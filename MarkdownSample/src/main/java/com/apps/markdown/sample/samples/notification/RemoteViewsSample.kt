@@ -32,7 +32,7 @@ import org.commonmark.ext.gfm.strikethrough.Strikethrough
     title = "RemoteViews in notification",
     description = "Display markdown with platform (system) spans in notification via `RemoteViews`",
     artifacts = [MarkwonArtifact.CORE],
-    tags = [Tag.hack]
+    tags = [Tag.HACK]
 )
 class RemoteViewsSample : MarkwonTextViewSample() {
     override fun render() {

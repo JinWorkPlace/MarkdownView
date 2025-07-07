@@ -1,9 +1,9 @@
 package com.apps.markdown.sample.utils
 
 import android.content.Context
+import com.apps.markdown.sample.sample.Sample
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import io.noties.markwon.app.sample.Sample
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader

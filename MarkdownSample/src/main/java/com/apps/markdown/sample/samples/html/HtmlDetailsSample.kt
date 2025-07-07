@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.apps.markdown.sample.BuildConfig
 import com.apps.markdown.sample.R
 import com.apps.markdown.sample.annotations.MarkwonArtifact
 import com.apps.markdown.sample.annotations.MarkwonSampleInfo

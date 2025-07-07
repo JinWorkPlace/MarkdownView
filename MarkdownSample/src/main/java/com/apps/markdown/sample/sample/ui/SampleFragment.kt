@@ -8,9 +8,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.apps.markdown.sample.R
+import com.apps.markdown.sample.sample.Sample
 import com.apps.markdown.sample.utils.active
-import io.noties.markwon.app.sample.Sample
-import io.noties.markwon.app.sample.ui.SamplePreviewFragment
 
 class SampleFragment : Fragment() {
 

@@ -6,10 +6,10 @@ import com.apps.markdown.sample.annotations.MarkwonArtifact
 import com.apps.markdown.sample.annotations.MarkwonSampleInfo
 import com.apps.markdown.sample.annotations.Tag
 import com.apps.markdown.sample.readme.GithubImageDestinationProcessor
+import com.apps.markdown.sample.sample.ui.MarkwonRecyclerViewSample
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.PrecomputedFutureTextSetterCompat
-import io.noties.markwon.app.sample.ui.MarkwonRecyclerViewSample
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.ext.tasklist.TaskListPlugin
