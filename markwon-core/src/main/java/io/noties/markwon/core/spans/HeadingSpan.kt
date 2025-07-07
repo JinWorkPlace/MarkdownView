@@ -11,7 +11,7 @@ import androidx.annotation.IntRange
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.utils.LeadingMarginUtils
 
-data class HeadingSpan(
+open class HeadingSpan(
     private val theme: MarkwonTheme,
     /**
      * @since 4.2.0

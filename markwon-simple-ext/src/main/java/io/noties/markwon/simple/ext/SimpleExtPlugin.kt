@@ -22,10 +22,7 @@ class SimpleExtPlugin internal constructor() : AbstractMarkwonPlugin() {
     }
 
     fun addExtension(
-        length: Int,
-        openingCharacter: Char,
-        closingCharacter: Char,
-        spanFactory: SpanFactory
+        length: Int, openingCharacter: Char, closingCharacter: Char, spanFactory: SpanFactory
     ): SimpleExtPlugin {
         builder.addExtension(length, openingCharacter, closingCharacter, spanFactory)
         return this
@@ -39,8 +36,7 @@ class SimpleExtPlugin internal constructor() : AbstractMarkwonPlugin() {
 
     override fun configureVisitor(builder: MarkwonVisitor.Builder) {
         builder.on(
-            SimpleExtNode::class.java,
-            MarkwonVisitor.NodeVisitor { visitor, simpleExtNode ->
+            SimpleExtNode::class.java, MarkwonVisitor.NodeVisitor { visitor, simpleExtNode ->
                 val length = visitor.length()
 
                 visitor.visitChildren(simpleExtNode)

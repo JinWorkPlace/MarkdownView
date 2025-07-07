@@ -91,7 +91,7 @@ abstract class Token protected constructor(@JvmField val type: TokenType) {
                         if (hasPendingAttributeValue) if (pendingAttributeValue.isNotEmpty()) pendingAttributeValue.toString() else pendingAttributeValueS
                         else if (hasEmptyAttributeValue) ""
                         else null
-                    attributes!!.put(pendingAttributeName, value)
+                    attributes!!.put(pendingAttributeName!!, value)
                 }
             }
             pendingAttributeName = null

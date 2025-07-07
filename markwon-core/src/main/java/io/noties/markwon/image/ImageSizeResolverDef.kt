@@ -62,7 +62,7 @@ open class ImageSizeResolverDef : ImageSizeResolver() {
         return rect
     }
 
-    protected fun resolveAbsolute(
+    protected open fun resolveAbsolute(
         dimension: ImageSize.Dimension, original: Int, textSize: Float
     ): Int {
         val out: Int = if (UNIT_EM == dimension.unit) {

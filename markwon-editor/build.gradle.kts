@@ -42,4 +42,6 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
     testImplementation(libs.mockito)
+
+    implementation("com.google.code.gson:gson:2.13.1")
 }

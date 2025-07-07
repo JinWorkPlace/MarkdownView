@@ -1,0 +1,111 @@
+package com.apps.markdown.sample.samples.notification
+
+import android.graphics.Color
+import android.graphics.Typeface
+import android.text.style.BackgroundColorSpan
+import android.text.style.QuoteSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.text.style.TypefaceSpan
+import android.widget.RemoteViews
+import com.apps.markdown.sample.R
+import com.apps.markdown.sample.annotations.MarkwonArtifact
+import com.apps.markdown.sample.annotations.MarkwonSampleInfo
+import com.apps.markdown.sample.annotations.Tag
+import com.apps.markdown.sample.sample.ui.MarkwonTextViewSample
+import com.apps.markdown.sample.samples.notification.shared.NotificationUtils
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.MarkwonSpansFactory
+import io.noties.markwon.RenderProps
+import io.noties.markwon.SpanFactory
+import io.noties.markwon.core.CoreProps
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
+import org.commonmark.node.BlockQuote
+import org.commonmark.node.Heading
+import org.commonmark.node.StrongEmphasis
+import org.commonmark.ext.gfm.strikethrough.Strikethrough
+
+@MarkwonSampleInfo(
+    id = "20200702090140",
+    title = "RemoteViews in notification",
+    description = "Display markdown with platform (system) spans in notification via `RemoteViews`",
+    artifacts = [MarkwonArtifact.CORE],
+    tags = [Tag.hack]
+)
+class RemoteViewsSample : MarkwonTextViewSample() {
+    override fun render() {
+        val md = "" + "# Heading 1\n" +  //      "## Heading 2\n" +
+                //      "### Heading 3\n" +
+                //      "#### Heading 4\n" +
+                //      "##### Heading 5\n" +
+                //      "###### Heading 6\n" +
+                "**bold _italic_ bold** `code` [link](#) ~~strike~~\n" + "* Bullet 1\n" + "* * Bullet 2\n" + "  * Bullet 3\n" + "> A quote **here**"
+
+        val headingSizes = floatArrayOf(
+            2f, 1.5f, 1.17f, 1f, .83f, .67f,
+        )
+
+        val bulletGapWidth = (8 * context.resources.displayMetrics.density + 0.5f).toInt()
+
+        val markwon: Markwon = Markwon.builder(context).usePlugin(StrikethroughPlugin.create())
+            .usePlugin(object : AbstractMarkwonPlugin() {
+                val headingFactory = object : SpanFactory {
+                    override fun getSpans(
+                        configuration: MarkwonConfiguration, props: RenderProps
+                    ): Any {
+                        return arrayOf<Any>(
+                            StyleSpan(Typeface.BOLD), RelativeSizeSpan(
+                                headingSizes[CoreProps.HEADING_LEVEL.require(
+                                    props
+                                ) - 1]
+                            )
+                        )
+                    }
+                }
+                val blockQuoteFactory = object : SpanFactory {
+                    override fun getSpans(
+                        configuration: MarkwonConfiguration, props: RenderProps
+                    ): Any {
+                        return QuoteSpan()
+                    }
+                }
+
+                override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
+                    builder.setFactory<Heading>(
+                        Heading::class.java, headingFactory
+                    ).setFactory<StrongEmphasis>(
+                        StrongEmphasis::class.java,
+                        io.noties.markwon.SpanFactory { configuration: MarkwonConfiguration?, props: RenderProps? ->
+                            StyleSpan(Typeface.BOLD)
+                        }).setFactory<org.commonmark.node.Emphasis>(
+                        org.commonmark.node.Emphasis::class.java,
+                        io.noties.markwon.SpanFactory { configuration: MarkwonConfiguration?, props: RenderProps? ->
+                            StyleSpan(Typeface.ITALIC)
+                        }).setFactory<org.commonmark.node.Code>(
+                        org.commonmark.node.Code::class.java,
+                        io.noties.markwon.SpanFactory { configuration: MarkwonConfiguration?, props: RenderProps? ->
+                            arrayOf<Any>(
+                                BackgroundColorSpan(Color.GRAY),
+                                TypefaceSpan("monospace")
+                            )
+                        }).setFactory<N>(
+                        Strikethrough::class.java,
+                        io.noties.markwon.SpanFactory { configuration: MarkwonConfiguration?, props: RenderProps? -> StrikethroughSpan() })
+                        .setFactory<org.commonmark.node.ListItem>(
+                            org.commonmark.node.ListItem::class.java,
+                            io.noties.markwon.SpanFactory { configuration: MarkwonConfiguration?, props: RenderProps? ->
+                                BulletSpan(bulletGapWidth)
+                            }).setFactory<BlockQuote>(
+                            BlockQuote::class.java, blockQuoteFactory
+                        )
+                }
+            }).build()
+
+        val remoteViews = RemoteViews(context.packageName, R.layout.sample_remote_view)
+        remoteViews.setTextViewText(R.id.text_view, markwon.toMarkdown(md))
+
+        NotificationUtils.display(context, remoteViews)
+    }
+}

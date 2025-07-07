@@ -1,0 +1,6 @@
+package com.apps.markdown.sample.samples.tasklist.shared
+
+object TaskListHolder {
+    val MD: String =
+        "" + "- [ ] Not done here!\n" + "- [x] and done\n" + "- [X] and again!\n" + "* [ ] **and** syntax _included_ `code`\n" + "- [ ] [link](#)\n" + "- [ ] [a check box](https://examp.le)\n" + "- [x] [test]()\n" + "- [List](https://examp.le) 3"
+}
