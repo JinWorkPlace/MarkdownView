@@ -7,11 +7,11 @@ import android.text.Spanned
 import io.noties.markwon.Markwon
 import io.noties.markwon.editor.diff_match_patch.diff_main
 
-internal class MarkwonEditorImpl(
+internal class MarkwonEditorImpl<T>(
     private val markwon: Markwon,
     private val persistedSpansProvider: PersistedSpans.Provider,
     private val punctuationSpanType: Class<*>,
-    private val spansHandler: SpansHandler?
+    private val spansHandler: SpansHandler<T>?
 ) : MarkwonEditor() {
     override fun process(editable: Editable) {
         val input = editable.toString()
@@ -61,7 +61,7 @@ internal class MarkwonEditorImpl(
                                             persistedSpans,
                                             editable,
                                             input,
-                                            span,
+                                            span as T,
                                             start,
                                             renderedMarkdown.getSpanEnd(span) - markdownLength
                                         )
@@ -106,7 +106,7 @@ internal class MarkwonEditorImpl(
                                                 persistedSpans,
                                                 editable,
                                                 input,
-                                                span,  // shift span to input position (can be different from the text itself)
+                                                span as T,  // shift span to input position (can be different from the text itself)
                                                 inputStart + (spanStart - markdownStart),
                                                 end - spanStart
                                             )

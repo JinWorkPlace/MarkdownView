@@ -9,7 +9,7 @@ import io.noties.markwon.html.jsoup.helper.Validate.notNull
 class Attribute(key: String, `val`: String?, parent: Attributes?) :
     MutableMap.MutableEntry<String?, String?>, Cloneable {
     override var key: String?
-
+        private set
     /**
      * Get the attribute value.
      *

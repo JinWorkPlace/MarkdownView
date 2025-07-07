@@ -1,6 +1,7 @@
 package io.noties.markwon.editor
 
 import android.text.Editable
+import com.google.gson.reflect.TypeToken
 import io.noties.markwon.Markwon
 
 /**
@@ -103,8 +104,8 @@ abstract class MarkwonEditor {
                 handler.configurePersistedSpans(persistedSpansProvider)
             }
 
-            val spansHandler: SpansHandler? = if (editHandlers.isEmpty()) null
-            else SpansHandlerImpl(editHandlers)
+            val spansHandler: SpansHandler<*>? = if (editHandlers.isEmpty()) null
+            else SpansHandlerImpl(editHandlers as MutableMap<Class<Any>, EditHandler<Any>>)
 
             return MarkwonEditorImpl(
                 markwon, persistedSpansProvider, punctuationSpanType!!, spansHandler
@@ -134,7 +135,7 @@ abstract class MarkwonEditor {
             spanStart: Int,
             spanTextLength: Int
         ) {
-            val handler: EditHandler<T>? = spanHandlers[span]
+            val handler: EditHandler<T>? = spanHandlers[object : TypeToken<T>() {}.type]
             handler?.handleMarkdownSpan(
                 spans, editable, input, span, spanStart, spanTextLength
             )
