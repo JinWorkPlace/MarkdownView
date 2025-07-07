@@ -9,7 +9,6 @@ import com.apps.markdown.sample.sample.ui.SampleFragment
 import com.apps.markdown.sample.sample.ui.SampleListFragment
 
 class MainActivity : FragmentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

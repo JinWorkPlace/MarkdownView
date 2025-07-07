@@ -42,8 +42,16 @@ android {
     }
 
     buildFeatures {
+        viewBinding = true
         buildConfig = true
     }
+}
+
+configurations.all {
+    exclude(
+        group = "org.jetbrains",
+        module = "annotations-java5"
+    )
 }
 
 dependencies {

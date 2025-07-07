@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:background="#fff"
     tools:gravity="center_vertical"
@@ -36,7 +37,7 @@
             android:contentDescription="@null"
             android:scaleType="centerInside"
             android:src="@drawable/ic_search_white_24dp"
-            android:tint="@color/gray" />
+            app:tint="@color/gray" />
 
         <ImageView
             android:id="@+id/clear"
@@ -47,11 +48,11 @@
             android:contentDescription="@null"
             android:scaleType="centerInside"
             android:src="@drawable/ic_close_white_24dp"
-            android:tint="@color/gray"
             android:visibility="gone"
+            app:tint="@color/gray"
             tools:visibility="visible" />
 
-        <io.noties.markwon.app.widget.TextField
+        <com.apps.markdown.sample.widget.TextField
             android:id="@+id/text_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

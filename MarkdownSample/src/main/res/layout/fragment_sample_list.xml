@@ -64,7 +64,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <io.noties.markwon.app.widget.SearchBar
+        <com.apps.markdown.sample.widget.SearchBar
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

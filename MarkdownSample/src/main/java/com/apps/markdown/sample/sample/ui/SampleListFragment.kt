@@ -34,6 +34,7 @@ import com.apps.markdown.sample.widget.SearchBar
 import io.noties.adapt.Adapt
 import io.noties.adapt.DiffUtilDataSetChanged
 import io.noties.adapt.Item
+import io.noties.debug.Debug
 import io.noties.markwon.Markwon
 import io.noties.markwon.movement.MovementMethodPlugin
 import kotlinx.parcelize.Parcelize
@@ -94,19 +95,19 @@ class SampleListFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.itemAnimator = DefaultItemAnimator()
         recyclerView.setHasFixedSize(true)
-//        recyclerView.adapter = adapt
+        recyclerView.adapter = adapt
 
 //        // additional padding for RecyclerView
-        // greatly complicates state restoration (items jump and a lot of times state cannot be
-        //  even restored (layout manager scrolls to top item and that's it)
-//        searchBar.onPreDraw {
-//            recyclerView.setPadding(
-//                    recyclerView.paddingLeft,
-//                    recyclerView.paddingTop + searchBar.height,
-//                    recyclerView.paddingRight,
-//                    recyclerView.paddingBottom
-//            )
-//        }
+//         greatly complicates state restoration (items jump and a lot of times state cannot be
+//          even restored (layout manager scrolls to top item and that's it)
+        searchBar.onPreDraw {
+            recyclerView.setPadding(
+                recyclerView.paddingLeft,
+                recyclerView.paddingTop + searchBar.height,
+                recyclerView.paddingRight,
+                recyclerView.paddingBottom
+            )
+        }
 
         val state: State? = arguments?.getParcelable(STATE)
         val initialSearch = arguments?.getString(ARG_SEARCH)
@@ -141,16 +142,15 @@ class SampleListFragment : Fragment() {
     }
 
     // not called? yeah, whatever
-//    override fun onSaveInstanceState(outState: Bundle) {
-//        super.onSaveInstanceState(outState)
-//
-//        val state = State(
-//                search,
-//                adapt.recyclerView?.scrollPosition
-//        )
-//        Debug.i(state)
-//        outState.putParcelable(STATE, state)
-//    }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        val state = State(
+            search, adapt.recyclerView?.scrollPosition
+        )
+        Debug.i(state)
+        outState.putParcelable(STATE, state)
+    }
 
     private fun initAppBar(view: View) {
         val appBar = view.findViewById<View>(R.id.app_bar)

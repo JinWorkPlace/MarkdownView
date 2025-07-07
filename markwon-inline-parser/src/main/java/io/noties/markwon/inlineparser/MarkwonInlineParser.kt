@@ -543,7 +543,6 @@ class MarkwonInlineParser(
         }
     }
 
-    @JvmRecord
     private data class DelimiterData(val count: Int, val canOpen: Boolean, val canClose: Boolean)
 
     internal class FactoryBuilderImpl : FactoryBuilder, FactoryBuilderNoDefaults {

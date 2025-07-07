@@ -20,5 +20,4 @@
             tools:text="Hello there" />
 
     </FrameLayout>
-
 </ScrollView>
