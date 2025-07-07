@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.apps.markdown.sample.App
+import com.apps.markdown.sample.BuildConfig
 import com.apps.markdown.sample.R
 import com.apps.markdown.sample.annotations.MarkwonArtifact
 import com.apps.markdown.sample.readme.ReadMeActivity

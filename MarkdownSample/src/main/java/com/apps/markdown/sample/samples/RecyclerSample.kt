@@ -9,7 +9,6 @@ import com.apps.markdown.sample.sample.ui.MarkwonRecyclerViewSample
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonVisitor
-import io.noties.markwon.app.sample.ui.MarkwonRecyclerViewSample
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tasklist.TaskListPlugin
 import io.noties.markwon.html.HtmlPlugin
